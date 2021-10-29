@@ -1,0 +1,163 @@
+%-------------------------
+% Resume in Latex
+% Author : Xing Liu
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,12pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item{
+    {\normalsize #1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{\large #1} & {\large #2} \\
+      \textit{\large #3} & \textit{\large #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\normalsize #1} & \textit{\normalsize #2} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubItem}[2]{
+  \item{
+    \textbf{\normalsize #1}{\normalsize : #2 \vspace{-4pt}}
+  }
+}
+
+\renewcommand{\labelitemii}{$\circ$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  Resume STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{\href{https://www.linkedin.com/in/xingliu14/}{\huge Xing Liu}} & {\large Website:} \href{https://xingliu14.github.io/}{\large https://xingliu14.github.io/} \\
+  {\large Email:} \href{mailto:xingliu14@gmail.com}{\large xingliu14@gmail.com} & {\large Mobile: +1-346-221-9933} \\
+\end{tabular*}
+
+
+%-----------EDUCATION-----------------
+\section{\Large Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Rice University}{Houston, TX}
+      {Master of Computer Science}{Aug. 2017 -- Dec. 2018}
+    \resumeSubheading
+      {Tsinghua University}{Beijing, China}
+      {Bachelor of Engineering in Microelectronics}{Aug. 2012 -- July 2016}
+  \resumeSubHeadingListEnd
+
+
+%-----------EXPERIENCE-----------------
+\section{\Large Professional Experience}
+  \resumeSubHeadingListStart
+  
+    \resumeSubheading
+      {Google}{Sunnyvale, CA}
+      {Software Engineer}{Sept. 2021 - present}
+      \resumeItemListStart
+        \resumeItem{Maintained personal search engine which let multiple Google internal clients to generate data which compliance with the privacy policy}
+        \resumeItem{Implemented API and frontend which significantly improved the usability}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Yahoo!}{Sunnyvale, CA}
+      {Software Engineer}{Mar. 2019 - Sept. 2021}
+      \resumeItemListStart
+        \resumeItem{Comm Channel Reputation Datasets: Implemented a data mining pipeline to generate reputation scores for 1.8B comm channels (email addresses/phone numbers), aggregated comm channel reputation data to produce comm channel groups reputation (email domains/phone carriers), built heuristics set and machine learning model for the pipeline}
+        \resumeItem{Baltar: Improved and maintained a classifier on Verizon Media accounts platform to identify malicious users using machine learning models with Hive, PySpark, Oozie and HDFS}
+        \resumeItem{Developed dashboards to display realtime performance metrics for each model and heuristic, enable engineers to monitor and compare differences in performance easily}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Yahoo!}{Sunnyvale, CA}
+      {Software Engineering Intern}{May 2018 - Oct. 2018}
+      \resumeItemListStart
+        \resumeItem{MTA-STS: Implemented RFC ‘SMTP MTA Strict Transport Security' with Java, integrated the library into Yahoo! mail outbound client and made Yahoo! the second mail service provider to support this mail security protocol}
+        \resumeItem{Developed alternative dependency service for JIRA with Go, AWS, Ansible and DynamoDB, which significantly improved team pipeline's stability and speed}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+
+%-----------PROJECTS-----------------
+\section{\Large Projects}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Social Network Web Application}
+      {Built frontend with Angular and webpack, built backend with Node.js and using MongoDB as database, used Fetch API to send REST request to Express/Node.js backend server, used Cloudinary to handle image uploading and PassportJS for OAuth authentication}
+    \resumeSubItem{Reliable Transfer Protocol and Intra Domain Routing}
+      {Designed and wrote a reliable file transfer protocol based on UDP with C, implemented link state routing protocol and poison reverse variant of distance vector protocol in C++}
+    \resumeSubItem{Robotics System}
+      {Developed image recognition algorithm for assembly high-density microwires}
+  \resumeSubHeadingListEnd
+
+
+%--------PROGRAMMING SKILLS------------
+\section{\Large Skills}
+ \resumeSubHeadingListStart
+    \resumeSubItem{Programming}
+      {Java, Go, Python, Unix Shell, SQL, C++, JavaScript, HTML/CSS, Typescript}
+    \resumeSubItem{Frameworks and Tools}
+      {Hive, PySpark, Oozie, Angular, Git, AWS}
+ \resumeSubHeadingListEnd
+
+
+%-------------------------------------------
+\end{document}
