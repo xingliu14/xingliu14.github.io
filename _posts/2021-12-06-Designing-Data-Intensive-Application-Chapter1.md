@@ -12,4 +12,4 @@ Many applications are data-intensive instead of compute-intensive, for example:
 
 When building an application, we need to figure out which tools and which approaches are the most appropriate for the task at hand.
 
-### Thinking About Data Systems
+## Thinking About Data Systems
