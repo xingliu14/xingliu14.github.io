@@ -18,7 +18,8 @@ longer neatly fit into traditional categories. For example, *Redis* are datastor
 are message queues with database-like durability guarantees.
 
 We will focus on 3 concerns that are important in most software systems:
-**Reliability**： The system should continue to work *correctly* (performing the correct function at the desired level of performance)
+
+**Reliability**: The system should continue to work *correctly* (performing the correct function at the desired level of performance)
 even in the face of *adversity* (hardware or software faults, and even human error).
 
 **Scalability**: As the system *grows* (in data volume, traffic volume, or complexity), there should be reasonable ways of dealing with
