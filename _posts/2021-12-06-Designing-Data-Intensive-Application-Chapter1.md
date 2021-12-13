@@ -21,7 +21,7 @@ We will focus on 3 concerns that are important in most software systems:
 **Reliability**： The system should continue to work *correctly* (performing the correct function at the desired level of performance)
 even in the face of *adversity* (hardware or software faults, and even human error).
 
-**Scalability**: As the system *grows* (in data volumn, traffic volume, or complexity), there should be reasonable ways of dealing with
+**Scalability**: As the system *grows* (in data volume, traffic volume, or complexity), there should be reasonable ways of dealing with
 that growth.
 
 **Maintainability**: Over time, many different people will work on the system (engineering and operations, both maintaining current
