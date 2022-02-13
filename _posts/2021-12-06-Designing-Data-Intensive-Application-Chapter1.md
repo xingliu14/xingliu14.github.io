@@ -27,3 +27,12 @@ that growth.
 
 **Maintainability**: Over time, many different people will work on the system (engineering and operations, both maintaining current
 behavior and adapting the system to new use cases), and they should all be able to work on it *productively*.
+
+# Reliability
+Reliability means "continuing to work correctly, even when things go wrong".
+
+The things that can go wrong are called *faults*, and systems that anticipate faults and can cope with them are called *fault-tolerant* or
+*resilient*.
+
+Note that a fault is different than a failure. It is impossible to reduce the probability of a fault to zero; therefore it is usually best to
+design fault-tolerance mechanisms that prevent faults from causing failures.
