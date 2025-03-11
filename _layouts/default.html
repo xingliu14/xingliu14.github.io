@@ -1,33 +1,178 @@
 {% include header.html %}
 
-{% if site.layout == 'stacked' %}
-  <div class="container-lg py-6 p-responsive text-center">
-    {% include masthead.html metadata=false %}
+<div class="default-container {% if site.style == 'dark' %}theme-dark{% endif %}" data-layout="{{ site.layout }}">
+  {% if site.layout == 'stacked' %}
+    <div class="container-lg py-6 p-responsive">
+      <div class="content-wrapper animate-fade-in">
+        {% include masthead.html metadata=false %}
 
-    <div class="container-md f4 text-left border rounded-2 bg-white p-3 p-sm-5 mt-6">
-      <p class="f5"><a href="/" class="d-flex flex-items-center">{% octicon chevron-left height:16 class:"mr-2 v-align-middle" fill:#0366d6 aria-label:Home %}Home</a></p>
-      <h1 class="f00-light lh-condensed mb-5">{{ page.title }}</h1>
-      {{ content }}
-    </div>
-  </div>
-{% else %}
-  <div class="d-md-flex min-height-full {% unless site.style == 'dark' %}border-md-bottom{% endunless %}">
-    <div class="flex-self-stretch {% if site.style == 'dark' %}bg-gray-dark{% else %}border-md-right border-gray-light bg-white{% endif %} col-md-5 col-lg-4 col-xl-3 px-4 px-md-6 px-lg-7 py-6">
-      {% include masthead.html metadata=true %}
-    </div>
-
-    <div class="col-md-7 col-lg-8 col-xl-9 px-4 py-6 px-lg-7 border-top border-md-top-0 bg-gray-light" {% if site.style == 'dark' %}style="background-color: #2f363d !important"{% endif %}>
-      <div class="mx-auto" style="max-width: 900px;">
-        <div class="f4 {% if site.style == 'dark' %}text-white{% endif %} mb-6">
-          <div class="f4 {% if site.style == 'dark' %}text-white{% endif %}">
-            <p class="f5"><a href="{{ site.url }}{{ site.baseurl | append:'/' }}" class="d-flex flex-items-center {% if site.style == 'dark' %}text-white{% endif %}">{% octicon chevron-left height:16 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:Home %}Home</a></p>
-            <h1 class="f00-light lh-condensed mb-5">{{ page.title }}</h1>
+        <article class="content-card">
+          <div class="content-nav">
+            <a href="/" class="nav-link">
+              {% octicon chevron-left height:16 class:"nav-icon" fill:var(--color-accent, #0366d6) aria-label:Home %}
+              <span>Home</span>
+            </a>
+          </div>
+          
+          <h1 class="page-title">{{ page.title }}</h1>
+          <div class="page-content">
             {{ content }}
           </div>
-        </div>
+        </article>
       </div>
     </div>
-  </div>
-{% endif %}
+  {% else %}
+    <div class="split-layout">
+      <aside class="sidebar {% if site.style == 'dark' %}bg-gray-dark{% endif %}">
+        {% include masthead.html metadata=true %}
+      </aside>
+
+      <main class="main-content {% if site.style == 'dark' %}theme-dark{% endif %}">
+        <div class="content-wrapper animate-fade-in">
+          <article class="content-card">
+            <div class="content-nav">
+              <a href="{{ site.url }}{{ site.baseurl | append:'/' }}" class="nav-link {% if site.style == 'dark' %}text-white{% endif %}">
+                {% octicon chevron-left height:16 class:"nav-icon" fill:var(--color-accent, #0366d6) aria-label:Home %}
+                <span>Home</span>
+              </a>
+            </div>
+
+            <h1 class="page-title">{{ page.title }}</h1>
+            <div class="page-content">
+              {{ content }}
+            </div>
+          </article>
+        </div>
+      </main>
+    </div>
+  {% endif %}
+</div>
 
 {% include footer.html %}
+
+<style>
+.default-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in;
+}
+
+.content-card {
+  background: var(--color-bg-primary, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  margin-top: 2rem;
+  transition: transform 0.2s ease;
+}
+
+.content-card:hover {
+  transform: translateY(-2px);
+}
+
+.content-nav {
+  margin-bottom: 2rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-accent, #0366d6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+.nav-icon {
+  margin-right: 0.5rem;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+}
+
+.page-content {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.split-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 2rem;
+  width: 300px;
+  border-right: 1px solid var(--color-border);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background: var(--color-bg-secondary, #f6f8fa);
+}
+
+.theme-dark {
+  --color-bg-primary: #2d333b;
+  --color-bg-secondary: #22272e;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.9);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: #58a6ff;
+}
+
+.theme-dark .content-card {
+  background: var(--color-bg-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .split-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  
+  .content-card {
+    margin: 1rem 0;
+    padding: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+}
+</style>
