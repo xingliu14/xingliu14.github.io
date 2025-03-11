@@ -3,68 +3,338 @@
 {% capture post_body %}
   {% if site.social_media %}
     {% assign shareable_social_media = '' | split: ',' %}
-
     {% for account in site.social_media %}
       {% assign service_shortname = account[0] %}
       {% assign service = site.data.social_media[service_shortname] %}
-
       {% if service.share_url_prefix %}
         {% assign shareable_social_media = shareable_social_media | push: service %}
       {% endif %}
     {% endfor %}
 
     {% assign total_shareable_services = shareable_social_media | size %}
+  {% endif %}
 
+  <div class="article-content">
     {% if total_shareable_services > 0 %}
-      <div class="col-sm-4 col-lg-3 d-flex flex-wrap flex-items-center d-sm-block float-sm-right border rounded-2 bg-white p-3 mb-5 ml-md-5">
-        <h3 class="text-gray-dark mr-3 mr-sm-0">Share</h3>
-        <ul class="d-flex d-sm-block list-style-none">
+      <div class="share-widget">
+        <div class="share-header">
+          <span class="share-icon">{% octicon share height:16 %}</span>
+          <h3>Share</h3>
+        </div>
+        <ul class="share-links">
           {% for service in shareable_social_media %}
-            <li class="mt-sm-3">
-              <a href="{{ service.share_url_prefix }}{{ page.url | prepend: site.url | prepend: site.baseurl | url_encode }}" title="Share on {{ service.name }}" class="d-flex flex-items-center">
-                <div style="width:32px">{{ service.icon_svg }}</div><span class="d-none d-sm-inline-block text-gray-light">{{ service.name }}</span>
+            <li>
+              <a href="{{ service.share_url_prefix }}{{ page.url | prepend: site.url | prepend: site.baseurl | url_encode }}" 
+                 title="Share on {{ service.name }}"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="share-link">
+                <div class="share-icon">{{ service.icon_svg }}</div>
+                <span class="share-name">{{ service.name }}</span>
               </a>
             </li>
           {% endfor %}
         </ul>
       </div>
     {% endif %}
-  {% endif %}
-  <div class="article">
-    {{ content }}
+
+    <div class="article">
+      {{ content }}
+    </div>
   </div>
 {% endcapture %}
 
-{% if site.layout == 'stacked' %}
-  <div class="container-lg py-6 p-responsive text-center">
-    {% include masthead.html metadata=false %}
+<div class="post-container {% if site.style == 'dark' %}theme-dark{% endif %}" data-layout="{{ site.layout }}">
+  {% if site.layout == 'stacked' %}
+    <div class="container-lg py-6 p-responsive">
+      <div class="content-wrapper animate-fade-in">
+        {% include masthead.html metadata=false %}
 
-    <div class="container-md f4 text-left border rounded-2 bg-white p-3 p-sm-5 mt-6">
-      <p class="f5"><a href="/" class="d-flex flex-items-center">{% octicon chevron-left height:16 class:"mr-2 v-align-middle" fill:#0366d6 aria-label:Home %}Home</a></p>
-      <h1 class="f00-light lh-condensed">{{ page.title }}</h1>
-      <p class="{% if site.style == 'dark' %}text-white{% else %}text-gray{% endif %} mb-5">Published {{ page.date | date: "%b %d, %Y"}}</p>
-      {{ post_body }}
-    </div>
-  </div>
-{% else %}
-  <div class="d-md-flex min-height-full {% unless site.style == 'dark' %}border-md-bottom{% endunless %}">
-    <div class="flex-self-stretch bg-gray-dark col-md-5 col-lg-4 col-xl-3 px-4 px-md-6 px-lg-7 py-6">
-      {% include masthead.html metadata=true %}
-    </div>
-
-    <div class="col-md-7 col-lg-8 col-xl-9 px-4 py-6 px-lg-7 border-top border-md-top-0 bg-gray-light" {% if site.style == 'dark' %}style="background-color: #2f363d !important"{% endif %}>
-      <div class="mx-auto" style="max-width: 900px;">
-        <div class="f4 {% if site.style == 'dark' %}text-white{% endif %} mb-6">
-          <div class="f4 {% if site.style == 'dark' %}text-white{% endif %}">
-            <p class="f5"><a href="{{ site.url }}{{ site.baseurl | append:'/' }}" class="d-flex flex-items-center {% if site.style == 'dark' %}text-white{% endif %}">{% octicon chevron-left height:16 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:Home %}Home</a></p>
-            <h1 class="f00-light lh-condensed">{{ page.title }}</h1>
-            <p class="{% if site.style == 'dark' %}text-white{% else %}text-gray{% endif %} mb-5">Published {{ page.date | date: "%b %d, %Y"}}</p>
-            {{ post_body }}
+        <article class="post-card">
+          <div class="content-nav">
+            <a href="/" class="nav-link">
+              {% octicon chevron-left height:16 class:"nav-icon" fill:var(--color-accent, #0366d6) aria-label:Home %}
+              <span>Home</span>
+            </a>
           </div>
-        </div>
+
+          <header class="post-header">
+            <h1 class="post-title">{{ page.title }}</h1>
+            <div class="post-meta">
+              <time datetime="{{ page.date | date_to_xmlschema }}">
+                {% octicon calendar height:16 class:"meta-icon" %}
+                {{ page.date | date: "%b %d, %Y"}}
+              </time>
+            </div>
+          </header>
+
+          {{ post_body }}
+        </article>
       </div>
     </div>
-  </div>
-{% endif %}
+  {% else %}
+    <div class="split-layout">
+      <aside class="sidebar {% if site.style == 'dark' %}bg-gray-dark{% endif %}">
+        {% include masthead.html metadata=true %}
+      </aside>
+
+      <main class="main-content {% if site.style == 'dark' %}theme-dark{% endif %}">
+        <div class="content-wrapper animate-fade-in">
+          <article class="post-card">
+            <div class="content-nav">
+              <a href="{{ site.url }}{{ site.baseurl | append:'/' }}" class="nav-link {% if site.style == 'dark' %}text-white{% endif %}">
+                {% octicon chevron-left height:16 class:"nav-icon" fill:var(--color-accent, #0366d6) aria-label:Home %}
+                <span>Home</span>
+              </a>
+            </div>
+
+            <header class="post-header">
+              <h1 class="post-title">{{ page.title }}</h1>
+              <div class="post-meta">
+                <time datetime="{{ page.date | date_to_xmlschema }}">
+                  {% octicon calendar height:16 class:"meta-icon" %}
+                  {{ page.date | date: "%b %d, %Y"}}
+                </time>
+              </div>
+            </header>
+
+            {{ post_body }}
+          </article>
+        </div>
+      </main>
+    </div>
+  {% endif %}
+</div>
 
 {% include footer.html %}
+
+<style>
+.post-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in;
+}
+
+.post-card {
+  background: var(--color-bg-primary, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  margin-top: 2rem;
+  transition: all 0.3s ease;
+}
+
+.content-nav {
+  margin-bottom: 2rem;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-accent, #0366d6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+.nav-icon {
+  margin-right: 0.5rem;
+}
+
+.post-header {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border, rgba(0,0,0,0.1));
+}
+
+.post-title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
+.meta-icon {
+  margin-right: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.article-content {
+  position: relative;
+}
+
+.share-widget {
+  position: sticky;
+  top: 2rem;
+  float: right;
+  margin-left: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--color-bg-secondary, #f6f8fa);
+  border-radius: 8px;
+  width: 220px;
+}
+
+.share-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+}
+
+.share-header h3 {
+  margin: 0;
+  margin-left: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.share-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.share-link {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.share-link:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.share-icon {
+  width: 24px;
+  margin-right: 0.75rem;
+}
+
+.share-name {
+  font-size: 0.9rem;
+}
+
+.article {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+}
+
+.article h2 {
+  font-size: 1.8rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-text-primary);
+}
+
+.article p {
+  margin-bottom: 1.5rem;
+}
+
+.split-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 2rem;
+  width: 300px;
+  border-right: 1px solid var(--color-border);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background: var(--color-bg-secondary, #f6f8fa);
+}
+
+.theme-dark {
+  --color-bg-primary: #2d333b;
+  --color-bg-secondary: #22272e;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.9);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: #58a6ff;
+}
+
+.theme-dark .post-card {
+  background: var(--color-bg-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.theme-dark .share-widget {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .split-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  
+  .post-card {
+    margin: 1rem 0;
+    padding: 1.5rem;
+  }
+  
+  .post-title {
+    font-size: 2rem;
+  }
+  
+  .share-widget {
+    float: none;
+    width: 100%;
+    margin: 0 0 2rem 0;
+    position: relative;
+    top: 0;
+  }
+  
+  .share-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .share-link {
+    padding: 0.5rem;
+  }
+}
+</style>
