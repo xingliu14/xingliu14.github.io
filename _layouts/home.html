@@ -11,21 +11,15 @@
         </div>
 
         <div class="sections-grid">
-          <section class="section-block projects-section">
-            {% include projects.html %}
-          </section>
-
-          {% if site.topics %}
-          <section class="section-block interests-section">
-            {% include interests.html %}
-          </section>
-          {% endif %}
-
           {% unless posts_total == 0 %}
           <section class="section-block thoughts-section">
             {% include thoughts.html %}
           </section>
           {% endunless %}
+
+          <section class="section-block projects-section">
+            {% include projects.html %}
+          </section>
         </div>
       </div>
     </div>
@@ -46,12 +40,11 @@
           {% include about.html %}
 
           <div class="sections-grid">
-            {% include projects.html %}
-            {% include interests.html %}
-            
             {% unless posts_total == 0 %}
               {% include thoughts.html %}
             {% endunless %}
+            
+            {% include projects.html %}
           </div>
         </div>
       </main>
