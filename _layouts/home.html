@@ -1,55 +1,145 @@
 {% include header.html %}
 
-{% if site.layout == 'stacked' %}
-  <div class="container-lg py-6 p-responsive text-center">
-    {% include masthead.html metadata=true %}
+<div class="home-container {% if site.style == 'dark' %}theme-dark{% endif %}" data-layout="{{ site.layout }}">
+  {% if site.layout == 'stacked' %}
+    <div class="container-lg py-6 p-responsive">
+      <div class="content-wrapper animate-fade-in">
+        {% include masthead.html metadata=true %}
 
-    <div {% if site.style == 'dark' %}class="text-white"{% endif %}>
-      {{ content }}
-    </div>
+        <div class="main-content {% if site.style == 'dark' %}text-white{% endif %}">
+          {{ content }}
+        </div>
 
-    <div class="my-6">
-      {% include projects.html %}
-    </div>
+        <div class="sections-grid">
+          <section class="section-block projects-section">
+            {% include projects.html %}
+          </section>
 
-    {% if site.topics %}
-      <div class="my-6">
-        {% include interests.html %}
+          {% if site.topics %}
+          <section class="section-block interests-section">
+            {% include interests.html %}
+          </section>
+          {% endif %}
+
+          {% unless posts_total == 0 %}
+          <section class="section-block thoughts-section">
+            {% include thoughts.html %}
+          </section>
+          {% endunless %}
+        </div>
       </div>
-    {% endif %}
-
-    {% unless posts_total == 0 %}
-      <div class="my-6">
-        {% include thoughts.html %}
-      </div>
-    {% endunless %}
-  </div>
-{% else %}
-  <div class="d-md-flex min-height-full {% unless site.style == 'dark' %}border-md-bottom{% endunless %}">
-    <div class="flex-self-stretch bg-gray-dark col-md-5 col-lg-4 col-xl-3 px-4 px-md-6 px-lg-7 py-6">
-      {% include masthead.html metadata=true %}
     </div>
+  {% else %}
+    <div class="split-layout">
+      <aside class="sidebar bg-gray-dark {% if site.style == 'dark' %}theme-dark{% endif %}">
+        {% include masthead.html metadata=true %}
+      </aside>
 
-    <div class="col-md-7 col-lg-8 col-xl-9 px-4 py-6 px-lg-7 border-top border-md-top-0 bg-gray-light" {% if site.style == 'dark' %}style="background-color: #7b7d7d !important"{% endif %}>
-      <div class="mx-auto" style="max-width: 900px;">
-        {% unless content == ""  %}
-          <div class="f4 {% if site.style == 'dark' %}text-white{% endif %} mb-6">
-            {{ content }}
+      <main class="main-content {% if site.style == 'dark' %}theme-dark{% endif %}">
+        <div class="content-wrapper">
+          {% unless content == "" %}
+            <div class="introduction">
+              {{ content }}
+            </div>
+          {% endunless %}
+
+          {% include about.html %}
+
+          <div class="sections-grid">
+            {% include projects.html %}
+            {% include interests.html %}
+            
+            {% unless posts_total == 0 %}
+              {% include thoughts.html %}
+            {% endunless %}
           </div>
-        {% endunless %}
-
-        {% include about.html %}
-
-        <!-- {% include projects.html %} -->
-
-        <!-- {% include interests.html %} -->
-
-        {% unless posts_total == 0 %}
-          {% include thoughts.html %}
-        {% endunless %}
-      </div>
+        </div>
+      </main>
     </div>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
 
 {% include footer.html %}
+
+<style>
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in;
+}
+
+.sections-grid {
+  display: grid;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.section-block {
+  background: var(--color-bg-secondary, #f6f8fa);
+  border-radius: 8px;
+  padding: 2rem;
+  transition: transform 0.2s ease;
+}
+
+.section-block:hover {
+  transform: translateY(-2px);
+}
+
+.split-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 2rem;
+  width: 300px;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.theme-dark {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.theme-dark .section-block {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .split-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  
+  .sections-grid {
+    gap: 1rem;
+  }
+}
+</style>
