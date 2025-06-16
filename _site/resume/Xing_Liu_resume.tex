@@ -93,6 +93,40 @@
 \end{tabular*}
 
 
+%-----------EXPERIENCE-----------------
+\section{\Large Professional Experience}
+  \resumeSubHeadingListStart
+  
+    \resumeSubheading
+      {Google}{Mountain View, CA}
+      {Software Engineer}{Sept. 2021 - present}
+      \resumeItemListStart
+        \resumeItem{Google Shopping LLM Fleet Serving and Optimization: engaged with, created, and managed Gemini serving configurations for 20+ clients within Google Shopping. Applied various optimizations, including EEVEE MTP, sharding tuning, KV Cache quantization, and XLA flag tuning, to achieve fleet-wide 2000+ TPU savings}
+        \resumeItem{Gemini 2.0 Flash Quantization: applied int4 weight quantization to FFW layers and int8 weight quantization to ATTN layers to Gemini 2.0 Flash decode serving workload, with sub-channel config, achieved neutral quality and 1.1x speedup}
+        \resumeItem{StableHLO Quantizer: Lead the design and implementation of a neural network \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/compiler/mlir/quantization}{Quantizer (open-source)} at StableHLO level. This is a compiler-level quantizer that provides robust cross-framework quantization capabilities with hardware optionality}
+        \resumeItem{Maintained personal search engine which let multiple Google internal clients to generate data which compliance with the privacy policy}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Yahoo}{Sunnyvale, CA}
+      {Software Engineer}{Mar. 2019 - Sept. 2021}
+      \resumeItemListStart
+        \resumeItem{Comm Channel Reputation Datasets: Implemented a data mining pipeline to generate reputation scores for 1.8B comm channels (email addresses/phone numbers), aggregated comm channel reputation data to produce comm channel groups reputation (email domains/phone carriers), built heuristics set and machine learning model for the pipeline}
+        \resumeItem{Baltar: Improved and maintained a classifier on Verizon Media accounts platform to identify malicious users using machine learning models with Hive, PySpark, Oozie and HDFS}
+        \resumeItem{Developed dashboards to display realtime performance metrics for each model and heuristic, enable engineers to monitor and compare differences in performance easily}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {Yahoo}{Sunnyvale, CA}
+      {Software Engineering Intern}{May 2018 - Oct. 2018}
+      \resumeItemListStart
+        \resumeItem{MTA-STS: Implemented RFC ‘SMTP MTA Strict Transport Security' with Java, integrated the library into Yahoo! mail outbound client and made Yahoo! the second mail service provider to support this mail security protocol}
+        \resumeItem{Developed alternative dependency service for JIRA with Go, AWS, Ansible and DynamoDB, which significantly improved team pipeline's stability and speed}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+
 %-----------EDUCATION-----------------
 \section{\Large Education}
   \resumeSubHeadingListStart
@@ -105,56 +139,13 @@
   \resumeSubHeadingListEnd
 
 
-%-----------EXPERIENCE-----------------
-\section{\Large Professional Experience}
-  \resumeSubHeadingListStart
-
-    \resumeSubheading
-      {Verizon Media/Yahoo!}{Sunnyvale, CA}
-      {Software Engineer}{Mar. 2019 - present}
-      \resumeItemListStart
-        \resumeItem{Comm Channel Reputation Datasets: Implemented a data mining pipeline to generate reputation scores for 1.8B comm channels (email addresses/phone numbers), aggregated comm channel reputation data to produce comm channel groups reputation (email domains/phone carriers), built heuristics set and machine learning model for the pipeline}
-        \resumeItem{Baltar: Improved and maintained a classifier on Verizon Media accounts platform to identify malicious users using machine learning models with Hive, PySpark, Oozie and HDFS}
-        \resumeItem{Developed dashboards to display realtime performance metrics for each model and heuristic, enable engineers to monitor and compare differences in performance easily}
-      \resumeItemListEnd
-
-    \resumeSubheading
-      {Oath/Yahoo!}{Sunnyvale, CA}
-      {Software Engineering Intern}{May 2018 - Oct. 2018}
-      \resumeItemListStart
-        \resumeItem{MTA-STS: Implemented RFC ‘SMTP MTA Strict Transport Security' with Java, integrated the library into Yahoo! mail outbound client and made Yahoo! the second mail service provider to support this mail security protocol}
-        \resumeItem{Developed alternative dependency service for JIRA with Go, AWS, Ansible and DynamoDB, which significantly improved team pipeline's stability and speed}
-      \resumeItemListEnd
-
-    \resumeSubheading
-      {Douban}{Beijing, China}
-      {Software Engineering Intern}{July 2016 - Jan. 2017}
-      \resumeItemListStart
-        \resumeItem{Improved the recommender system of ‘DoubanFM’, applied Factorization Machine model to 200 millions records dataset so as to achieve better performance than previously used model: reduced Root-Mean-Square of prediction from 1.62 to 1.37 (15.4\%) }
-      \resumeItemListEnd
-
-  \resumeSubHeadingListEnd
-
-
-%-----------PROJECTS-----------------
-\section{\Large Projects}
-  \resumeSubHeadingListStart
-    \resumeSubItem{Social Network Web Application}
-      {Built frontend with Angular and webpack, built backend with Node.js and using MongoDB as database, used Fetch API to send REST request to Express/Node.js backend server, used Cloudinary to handle image uploading and PassportJS for OAuth authentication}
-    \resumeSubItem{Reliable Transfer Protocol and Intra Domain Routing}
-      {Designed and wrote a reliable file transfer protocol based on UDP with C, implemented link state routing protocol and poison reverse variant of distance vector protocol in C++}
-    \resumeSubItem{Robotics System}
-      {Developed image recognition algorithm for assembly high-density microwires}
-  \resumeSubHeadingListEnd
-
-
 %--------PROGRAMMING SKILLS------------
 \section{\Large Skills}
  \resumeSubHeadingListStart
     \resumeSubItem{Programming}
-      {Java, Go, Python, Unix Shell, SQL, C++, JavaScript, HTML/CSS, Typescript}
+      {C++, Java, Go, Python, Unix Shell, SQL, JavaScript, HTML/CSS, Typescript}
     \resumeSubItem{Frameworks and Tools}
-      {Hive, PySpark, Oozie, Angular, Git, AWS}
+      {MLIR, Hive, PySpark, Oozie, Angular, Git}
  \resumeSubHeadingListEnd
 
 
