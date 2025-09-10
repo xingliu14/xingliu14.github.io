@@ -62,8 +62,9 @@
 }
 
 \newcommand{\resumeSubSubheading}[2]{
+  \vspace{-1pt}\item
     \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
-      \textit{\normalsize #1} & \textit{\normalsize #2} \\
+      \textbf{\large #1} & {\large #2} \\
     \end{tabular*}\vspace{-5pt}
 }
 
@@ -101,10 +102,10 @@
       {Google}{Mountain View, CA}
       {Software Engineer}{Sept. 2021 - present}
       \resumeItemListStart
-        \resumeItem{Google Shopping LLM Fleet Serving and Optimization: engaged with, created, and managed Gemini serving configurations for 20+ clients within Google Shopping. Applied various optimizations, including EEVEE MTP, sharding tuning, KV Cache quantization, and XLA flag tuning, to achieve fleet-wide 2000+ TPU savings}
-        \resumeItem{Gemini 2.0 Flash Quantization: applied int4 weight quantization to FFW layers and int8 weight quantization to ATTN layers to Gemini 2.0 Flash decode serving workload, with sub-channel config, achieved neutral quality and 1.1x speedup}
-        \resumeItem{StableHLO Quantizer: Lead the design and implementation of a neural network \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/compiler/mlir/quantization}{Quantizer (open-source)} at StableHLO level. This is a compiler-level quantizer that provides robust cross-framework quantization capabilities with hardware optionality}
-        \resumeItem{Maintained personal search engine which let multiple Google internal clients to generate data which compliance with the privacy policy}
+        \resumeItem{Led large-scale LLM optimization projects for Google Shopping, a role that involved creating and managing Gemini serving configurations for a portfolio of over 20 clients. Delivered a 2,000+ TPU reduction in resource consumption by applying sophisticated techniques like EEVEE MTP and KV Cache quantization, directly contributing to faster online inference and higher offline processing throughput}
+        \resumeItem{Gemini 2.0 Flash Quantization: implemented and applied int4 weight quantization to FFW layers and int8 weight quantization to ATTN layers to Gemini 2.0 Flash decode serving workload at the TPU HLO layer, with sub-channel config, achieved neutral quality and 1.1x speedup}
+        \resumeItem{StableHLO Quantizer: Lead the design and implementation of a neural network \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/compiler/mlir/quantization}{Quantizer (open-sourced)} at StableHLO level. This is a compiler-level quantizer that provides robust cross-framework quantization capabilities with hardware optionality}
+        \resumeItem{Developed and optimized a core server infrastructure for Google Shopping LLM services, enabling advanced features like real-time streaming and a sophisticated caching mechanism. Engineered the system to perform configurable TnS checks, ensuring secure and compliant service delivery}
       \resumeItemListEnd
 
     \resumeSubheading
@@ -113,15 +114,20 @@
       \resumeItemListStart
         \resumeItem{Comm Channel Reputation Datasets: Implemented a data mining pipeline to generate reputation scores for 1.8B comm channels (email addresses/phone numbers), aggregated comm channel reputation data to produce comm channel groups reputation (email domains/phone carriers), built heuristics set and machine learning model for the pipeline}
         \resumeItem{Baltar: Improved and maintained a classifier on Verizon Media accounts platform to identify malicious users using machine learning models with Hive, PySpark, Oozie and HDFS}
-        \resumeItem{Developed dashboards to display realtime performance metrics for each model and heuristic, enable engineers to monitor and compare differences in performance easily}
       \resumeItemListEnd
 
-    \resumeSubheading
-      {Yahoo}{Sunnyvale, CA}
-      {Software Engineering Intern}{May 2018 - Oct. 2018}
+  \resumeSubHeadingListEnd
+
+
+%-----------EXPERIENCE-----------------
+\section{\Large Personal Project}
+  \resumeSubHeadingListStart
+  
+    \resumeSubSubheading
+      {AI-Powered B2B Hotel Booking Platform}{Dec. 2024 - present}
       \resumeItemListStart
-        \resumeItem{MTA-STS: Implemented RFC ‘SMTP MTA Strict Transport Security' with Java, integrated the library into Yahoo! mail outbound client and made Yahoo! the second mail service provider to support this mail security protocol}
-        \resumeItem{Developed alternative dependency service for JIRA with Go, AWS, Ansible and DynamoDB, which significantly improved team pipeline's stability and speed}
+        \resumeItem{Architected and deployed a business travel booking platform that currently serves over 10 companies, supporting 1,000+ MAU and an extensive inventory of thousands of hotels}
+        \resumeItem{Engineered an AI agent utilizing agentic workflows and RAG pipelines to automate and streamline hotel booking, trip planning, and inquiry responses directly within a chat application}
       \resumeItemListEnd
 
   \resumeSubHeadingListEnd
@@ -140,12 +146,12 @@
 
 
 %--------PROGRAMMING SKILLS------------
-\section{\Large Skills}
+\section{\Large Awards and Skills}
  \resumeSubHeadingListStart
-    \resumeSubItem{Programming}
-      {C++, Java, Go, Python, Unix Shell, SQL, JavaScript, HTML/CSS, Typescript}
-    \resumeSubItem{Frameworks and Tools}
-      {MLIR, Hive, PySpark, Oozie, Angular, Git}
+    \resumeSubItem{Awards}
+        {Achieved top 100 national ranking in the 2011 Chinese Physics Olympiad}
+    \resumeSubItem{Programming and Frameworks}
+      {C++, Java, Python, MLIR, Go, SQL}
  \resumeSubHeadingListEnd
 
 
