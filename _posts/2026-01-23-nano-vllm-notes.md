@@ -18,3 +18,7 @@ I've been recently studying the nano-vLLM codebase and writing this article to d
 - kvcache_block_size: The size of each block in the key-value cache. Must be multiple of 256.
 - num_kvcache_blocks: likely the total number of KV-cache blocks to allocate.
 
+### sampling_params.py
+- temperature
+- max_tokens
+- ignore_eos
