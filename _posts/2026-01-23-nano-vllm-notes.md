@@ -22,3 +22,21 @@ I've been recently studying the nano-vLLM codebase and writing this article to d
 - temperature
 - max_tokens
 - ignore_eos
+
+### bench.py
+The script generates random token sequences, feeds them to a language model, and measures throughput.
+
+### engine/sequence.py
+This file implements a Sequence class that represents a single request/prompt being processed by the inference engine.
+
+Attributes:
+- seq_id: Unique id.
+- status: waiting, running, finished.
+- token_ids: full list of tokens.
+- rest of the token ids, sampling params.
+
+Properties:
+- Multiple token ids, block counts.
+
+### engine/block_manager.py
+
