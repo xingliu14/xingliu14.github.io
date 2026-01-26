@@ -39,4 +39,25 @@ Properties:
 - Multiple token ids, block counts.
 
 ### engine/block_manager.py
+Block class for a single block:
+- block_id
+- ref_count: int
+- hash: int
+- token_ids: list[int]
 
+BlockManager class for orchestration and prefix caching:  
+Attributes:
+- block_size: int
+- blocks: list[Block]
+- hash_to_block_id: dict[int, int]
+- free_block_ids: deque[int]
+- used_block_ids: deque[int]
+- allocate: 
+
+Methods:  
+- allocate
+- deallocate
+- can_allocate
+- can_append
+- may_append
+- compute_hash
