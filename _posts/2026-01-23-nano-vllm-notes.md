@@ -61,3 +61,19 @@ Methods:
 - can_append
 - may_append
 - compute_hash
+
+### utils/context.py
+Context to share globle state info across different part of the inference engine.
+
+Attributes:
+- is_prefill: whether it's in prefill phase
+- cu_seqlens_q: Cumulative sequence lengths for queries for FlashAttention
+- cu_seqlens_k: Cumulative sequence lengths for keys for FlashAttention
+- max_seqlen_q: Maximum query sequence length in the current batch
+- max_seqlen_k: Maximum key sequence length in the current batch
+- slot_mapping: token to physical KV cache slots mapping
+- context_lens: Number of cached tokens for each sequence
+- block_tables: Maps each sequence to its allocated memory blocks
+
+Glable Context instance, set and reset.
+
