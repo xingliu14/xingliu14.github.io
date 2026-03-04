@@ -41,8 +41,8 @@ Properties:
 ### engine/block_manager.py
 Block class for a single block:
 - block_id
-- ref_count: int
-- hash: int
+- ref_count: int (for prefix caching)
+- hash: int (for prefix caching)
 - token_ids: list[int]
 
 BlockManager class for orchestration and prefix caching:  
@@ -76,4 +76,18 @@ Attributes:
 - block_tables: Maps each sequence to its allocated memory blocks
 
 Glable Context instance, set and reset.
+
+
+### engine/scheduler.py
+The brain of continuous batching. It maintains queues for waiting and running sequences. It decides how many sequences from the waiting queue can be processed in the "prefill" phase, and which running sequences can proceed in the "decode" phase without exceeding the GPU's KV cache capacity. It also handles "preemption" (pausing a sequence if the engine runs out of memory)
+
+Methods:
+- is_finished(): Returns True if both queues are empty, meaning the engine has no more work to do.
+- add(seq: Sequence): Accepts a new incoming request (Sequence) and puts it at the back of the waiting queue.
+- Schedule(): This method is called before every forward pass of the model. It decides what the model will compute next. It returns a tuple containing the list of sequences to process and a boolean indicating if it's doing a Prefill (True) or Decode (False).
+- preempt(): When a sequence is preempted due to lack of memory.
+- postprocess(): After the model generates the next tokens (token_ids), this method applies them to the sequences.
+
+Notes:  
+- max_num_seqs limits how many requests (sequences) can be scheduled in one iteration, while max_num_batched_tokens limits total prompt tokens during prefill. Prefill is batched: in one scheduling step, it can schedule multiple waiting requests together, stopping when it hits sequence limit, token limit, or KV-cache allocation limit. Decode also schedules multiple running sequences (typically one token each), and is constrained by max_num_seqs plus KV-cache append capacity rather than max_num_batched_tokens.
 
