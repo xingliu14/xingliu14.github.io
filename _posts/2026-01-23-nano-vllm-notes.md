@@ -163,3 +163,23 @@ Creates worst-case dummy sequences (maximum length, maximum batch) and runs a fu
 #### CUDA Graph Capture
 
 
+### layers/attention.py  
+This file implements the attention layer for a minimal vLLM-style inference engine. It has three components:
+- A Triton GPU kernel for writing KV data into a paged KV cache
+- A Python wrapper that launches that kernel
+- An Attention module that orchestrates KV caching and dispatches to FlashAttention for both prefill and decode phases
+
+#### The Triton Kernel
+A GPU kernel written in Triton that copies newly computed key/value vectors into the paged KV cache.
+
+#### The Python Wrapper
+- Shape extraction: key has shape [N, num_heads, head_dim] where N = total tokens in the batch.
+- Stride assertions: Verifies the tensors are contiguous in the expected layout — the last dimension (head_dim) must be contiguous (stride 1), and the num_heads dimension must have stride head_dim. This ensures the kernel can treat num_heads × head_dim as a single flat vector of size D.
+- Launch: [(N,)] launches N thread blocks — one per token.
+
+#### The Attention Module
+- Stores attention hyperparameters
+- self.k_cache and self.v_cache are initialized as empty tensors. They get replaced later by the ModelRunner with properly sized paged cache buffers allocated by the block manager.
+
+
+
