@@ -91,3 +91,37 @@ Methods:
 Notes:  
 - max_num_seqs limits how many requests (sequences) can be scheduled in one iteration, while max_num_batched_tokens limits total prompt tokens during prefill. Prefill is batched: in one scheduling step, it can schedule multiple waiting requests together, stopping when it hits sequence limit, token limit, or KV-cache allocation limit. Decode also schedules multiple running sequences (typically one token each), and is constrained by max_num_seqs plus KV-cache append capacity rather than max_num_batched_tokens.
 
+
+### engine/llm_engine.py
+It defines the LLMEngine class — the central orchestrator of the nano-vllm inference engine. It ties together model execution, scheduling, tokenization, and multi-process tensor parallelism into a unified interface for running LLM inference.  
+
+#### Engine Initialization
+- Config construction: Filters kwargs to only pass recognized fields to the Config dataclass
+- Tensor parallelism setup: Rank0 has its own ModelRunner, worker processes created for rank 1 and above.
+- Tokenizer
+- Scheduler
+
+#### exit
+Sends an "exit" command to the model runner (which propagates to all worker processes), then waits for all child processes to terminate with join().
+
+#### add_request
+- Accepts a prompt as either a string (which gets tokenized) or pre-tokenized token IDs.
+- Wraps it in a Sequence object (which tracks state like generated tokens, finish status, etc.).
+- Adds it to the scheduler's queue.
+
+#### step
+- scheduler.schedule(): Selects a batch of sequences to run and determines whether this is a prefill or decode
+- execute forward pass with model runner
+- scheduler.postprocess(): Updates sequences with the newly generated tokens and marks finished sequences.
+- Return: completed sequences and a throughput metric: positive for prefill, negative for decode.
+
+#### generate
+This is the user-facing method that runs end-to-end generation.  
+- Input normalization: If a single SamplingParams is provided, it's broadcast to all prompts.
+- Enqueuing: All prompts are added to the scheduler via add_request.
+- Main loop: Repeatedly calls step() until all sequences finish.
+- Throughput tracking (with tqdm)
+- Output assembly
+
+
+
