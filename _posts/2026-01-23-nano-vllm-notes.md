@@ -124,4 +124,42 @@ This is the user-facing method that runs end-to-end generation.
 - Output assembly
 
 
+### engine/model_runner.py
+ModelRunner is the workhorse that actually runs the LLM on a GPU. It handles model loading, KV cache allocation, input preparation for both prefill and decode phases, CUDA graph capture for decode acceleration, and tensor-parallel coordination across multiple GPUs via NCCL and shared memory.
+
+#### Initialization
+- NCCL init: establishes GPU-to-GPU communication
+- Device binding
+- Model creation: Instantiates model with the HuggingFace config, then loads pretrained weights via load_model()
+- Sampler creation: Creates a Sampler that converts logits → token IDs using temperature-scaled softmax + Gumbel sampling.
+- Warmup: Runs a dummy forward pass to trigger all lazy CUDA/Triton kernel compilation
+- KV cache allocation: allocate_kv_cache() — uses the peak memory measurement to compute how many KV cache blocks fit in remaining GPU memory
+- CUDA graph capture
+- Tensor parallel setup: If world_size > 1, rank 0 creates a 1 MB shared memory segment (SharedMemory)
+
+#### Tensor Parallel Communication
+- The multi-GPU design uses a leader-follower pattern with shared memory + multiprocessing Events
+- `write_shm`: Serializes a method name + arguments with pickle, writes a 4-byte length header + payload into shared memory, then signals all follower processes via their Events.
+- `read_shm`: Blocks until signaled, deserializes the command, then clears the event.
+- `call`: When rank 0 calls call("run", seqs, is_prefill), it first broadcasts the command to followers, then executes locally. Followers receive the command in loop() and execute the same method. This ensures all ranks execute the same operations in lock-step.
+- `loop`: Non-zero ranks sit in this infinite loop, only breaking on an "exit" command.
+
+#### Model Warmup  
+Creates worst-case dummy sequences (maximum length, maximum batch) and runs a full prefill forward pass.  
+- Triggers all lazy CUDA kernel compilation
+- Records peak memory usage so allocate_kv_cache knows how much memory the model needs
+
+#### KV Cache Allocation
+
+#### Input Preparation
+- prepare_prefill: This builds inputs compatible with Flash Attention's variable-length API
+- prepare_decode: All tensors are created with pin_memory=True and transferred with .cuda(non_blocking=True) for overlapped CPU→GPU transfers.
+- prepare_sample: Collects per-sequence temperature values into a tensor for the sampler.
+
+#### Model Execution
+- Prefill or eager or batch > 512: Eager execution
+- Decode with batch ≤ 512: CUDA graph replay
+
+#### CUDA Graph Capture
+
 
