@@ -5,7 +5,7 @@ published: true
 
 I've been recently studying the nano-vLLM codebase and writing this article to document my notes and learnings for future reference.
 
-### config.py
+# config.py
 - model: path to the model weight and config files.
 - max_num_batched_tokens: The maximum total number of tokens that can be processed in a **single batch across all sequences**.
 - max_num_seqs: The maximum number of sequences (requests) that can be processed simultaneously in a batch.
@@ -18,15 +18,15 @@ I've been recently studying the nano-vLLM codebase and writing this article to d
 - kvcache_block_size: The size of each block in the key-value cache. Must be multiple of 256.
 - num_kvcache_blocks: likely the total number of KV-cache blocks to allocate.
 
-### sampling_params.py
+# sampling_params.py
 - temperature
 - max_tokens
 - ignore_eos
 
-### bench.py
+# bench.py
 The script generates random token sequences, feeds them to a language model, and measures throughput.
 
-### engine/sequence.py
+# engine/sequence.py
 This file implements a Sequence class that represents a single request/prompt being processed by the inference engine.
 
 Attributes:
@@ -38,7 +38,7 @@ Attributes:
 Properties:
 - Multiple token ids, block counts.
 
-### engine/block_manager.py
+# engine/block_manager.py
 Block class for a single block:
 - block_id
 - ref_count: int (for prefix caching)
@@ -62,7 +62,7 @@ Methods:
 - may_append
 - compute_hash
 
-### utils/context.py
+# utils/context.py
 Context to share globle state info across different part of the inference engine.
 
 Attributes:
@@ -78,7 +78,7 @@ Attributes:
 Glable Context instance, set and reset.
 
 
-### engine/scheduler.py
+# engine/scheduler.py
 The brain of continuous batching. It maintains queues for waiting and running sequences. It decides how many sequences from the waiting queue can be processed in the "prefill" phase, and which running sequences can proceed in the "decode" phase without exceeding the GPU's KV cache capacity. It also handles "preemption" (pausing a sequence if the engine runs out of memory)
 
 Methods:
@@ -92,30 +92,30 @@ Notes:
 - max_num_seqs limits how many requests (sequences) can be scheduled in one iteration, while max_num_batched_tokens limits total prompt tokens during prefill. Prefill is batched: in one scheduling step, it can schedule multiple waiting requests together, stopping when it hits sequence limit, token limit, or KV-cache allocation limit. Decode also schedules multiple running sequences (typically one token each), and is constrained by max_num_seqs plus KV-cache append capacity rather than max_num_batched_tokens.
 
 
-### engine/llm_engine.py
+# engine/llm_engine.py
 It defines the LLMEngine class — the central orchestrator of the nano-vllm inference engine. It ties together model execution, scheduling, tokenization, and multi-process tensor parallelism into a unified interface for running LLM inference.  
 
-#### Engine Initialization
+## Engine Initialization
 - Config construction: Filters kwargs to only pass recognized fields to the Config dataclass
 - Tensor parallelism setup: Rank0 has its own ModelRunner, worker processes created for rank 1 and above.
 - Tokenizer
 - Scheduler
 
-#### exit
+## exit
 Sends an "exit" command to the model runner (which propagates to all worker processes), then waits for all child processes to terminate with join().
 
-#### add_request
+## add_request
 - Accepts a prompt as either a string (which gets tokenized) or pre-tokenized token IDs.
 - Wraps it in a Sequence object (which tracks state like generated tokens, finish status, etc.).
 - Adds it to the scheduler's queue.
 
-#### step
+## step
 - scheduler.schedule(): Selects a batch of sequences to run and determines whether this is a prefill or decode
 - execute forward pass with model runner
 - scheduler.postprocess(): Updates sequences with the newly generated tokens and marks finished sequences.
 - Return: completed sequences and a throughput metric: positive for prefill, negative for decode.
 
-#### generate
+## generate
 This is the user-facing method that runs end-to-end generation.  
 - Input normalization: If a single SamplingParams is provided, it's broadcast to all prompts.
 - Enqueuing: All prompts are added to the scheduler via add_request.
@@ -124,10 +124,10 @@ This is the user-facing method that runs end-to-end generation.
 - Output assembly
 
 
-### engine/model_runner.py
+# engine/model_runner.py
 ModelRunner is the workhorse that actually runs the LLM on a GPU. It handles model loading, KV cache allocation, input preparation for both prefill and decode phases, CUDA graph capture for decode acceleration, and tensor-parallel coordination across multiple GPUs via NCCL and shared memory.
 
-#### Initialization
+## Initialization
 - NCCL init: establishes GPU-to-GPU communication
 - Device binding
 - Model creation: Instantiates model with the HuggingFace config, then loads pretrained weights via load_model()
@@ -137,55 +137,55 @@ ModelRunner is the workhorse that actually runs the LLM on a GPU. It handles mod
 - CUDA graph capture
 - Tensor parallel setup: If world_size > 1, rank 0 creates a 1 MB shared memory segment (SharedMemory)
 
-#### Tensor Parallel Communication
+## Tensor Parallel Communication
 - The multi-GPU design uses a leader-follower pattern with shared memory + multiprocessing Events
 - `write_shm`: Serializes a method name + arguments with pickle, writes a 4-byte length header + payload into shared memory, then signals all follower processes via their Events.
 - `read_shm`: Blocks until signaled, deserializes the command, then clears the event.
 - `call`: When rank 0 calls call("run", seqs, is_prefill), it first broadcasts the command to followers, then executes locally. Followers receive the command in loop() and execute the same method. This ensures all ranks execute the same operations in lock-step.
 - `loop`: Non-zero ranks sit in this infinite loop, only breaking on an "exit" command.
 
-#### Model Warmup  
+## Model Warmup  
 Creates worst-case dummy sequences (maximum length, maximum batch) and runs a full prefill forward pass.  
 - Triggers all lazy CUDA kernel compilation
 - Records peak memory usage so allocate_kv_cache knows how much memory the model needs
 
-#### KV Cache Allocation
+## KV Cache Allocation
 
-#### Input Preparation
+## Input Preparation
 - prepare_prefill: This builds inputs compatible with Flash Attention's variable-length API
 - prepare_decode: All tensors are created with pin_memory=True and transferred with .cuda(non_blocking=True) for overlapped CPU→GPU transfers.
 - prepare_sample: Collects per-sequence temperature values into a tensor for the sampler.
 
-#### Model Execution
+## Model Execution
 - Prefill or eager or batch > 512: Eager execution
 - Decode with batch ≤ 512: CUDA graph replay
 
-#### CUDA Graph Capture
+## CUDA Graph Capture
 
 
-### layers/attention.py  
+# layers/attention.py  
 This file implements the attention layer for a minimal vLLM-style inference engine. It has three components:
 - A Triton GPU kernel for writing KV data into a paged KV cache
 - A Python wrapper that launches that kernel
 - An Attention module that orchestrates KV caching and dispatches to FlashAttention for both prefill and decode phases
 
-#### The Triton Kernel
+## The Triton Kernel
 A GPU kernel written in Triton that copies newly computed key/value vectors into the paged KV cache.
 
-#### The Python Wrapper
+## The Python Wrapper
 - Shape extraction: key has shape [N, num_heads, head_dim] where N = total tokens in the batch.
 - Stride assertions: Verifies the tensors are contiguous in the expected layout — the last dimension (head_dim) must be contiguous (stride 1), and the num_heads dimension must have stride head_dim. This ensures the kernel can treat num_heads × head_dim as a single flat vector of size D.
 - Launch: [(N,)] launches N thread blocks — one per token.
 
-#### The Attention Module
+## The Attention Module
 - Stores attention hyperparameters
 - self.k_cache and self.v_cache are initialized as empty tensors. They get replaced later by the ModelRunner with properly sized paged cache buffers allocated by the block manager.
 
 
-### layers/linear.py & layers/embed_head.py
+# layers/linear.py & layers/embed_head.py
 Tensor Parallelism in nano-vllm
 
-#### Overview
+## Overview
 
 These two files implement **Megatron-LM style tensor parallelism (TP)**, splitting model weights across GPUs to serve large language models. The core pattern is:
 
@@ -195,7 +195,7 @@ Each transformer sub-block (attention, MLP) requires only **one all-reduce**, mi
 
 ---
 
-#### Linear Layers (`linear.py`)
+## Linear Layers (`linear.py`)
 
 | Class | Sharding | Communication | Use Case |
 |---|---|---|---|
@@ -205,13 +205,13 @@ Each transformer sub-block (attention, MLP) requires only **one all-reduce**, mi
 | `QKVParallelLinear` | Output dim (Q/K/V merged) | None | Fused QKV with GQA support |
 | `RowParallelLinear` | Input dim (`dim=1`) | `all_reduce` | Second projection (o_proj, down_proj) |
 
-##### Key Mechanisms
+### Key Mechanisms
 
 - **`weight_loader` hook**: Attached to each parameter; called during checkpoint loading to extract the correct shard per GPU via `.narrow()` / `.chunk()`.
 - **Column-parallel**: Splits output dim → each GPU produces a slice of the output, no communication needed.
 - **Row-parallel**: Splits input dim → each GPU computes a partial result, summed via `all_reduce`. Bias added only on rank 0 to avoid double-counting.
 
-##### QKV Weight Layout (per GPU)
+### QKV Weight Layout (per GPU)
 
 For GQA (e.g., 8 Q heads, 2 KV heads, tp_size=2):
 
@@ -223,21 +223,21 @@ Loaded via `loaded_shard_id ∈ {"q", "k", "v"}` with computed offsets.
 
 ---
 
-#### Embedding & LM Head (`embed_head.py`)
+## Embedding & LM Head (`embed_head.py`)
 
 | Class | Sharding | Communication | Purpose |
 |---|---|---|---|
 | `VocabParallelEmbedding` | Vocab rows | `all_reduce` | Input token embeddings |
 | `ParallelLMHead` | Vocab rows | `gather` to rank 0 | Output logits for sampling |
 
-##### Embedding Forward
+### Embedding Forward
 
 1. **Mask** tokens outside this rank's vocab range.
 2. **Remap** global token IDs to local indices.
 3. **Lookup** embeddings, zero out masked positions.
 4. **All-reduce** to combine (each token is non-zero on exactly one rank).
 
-##### LM Head Forward
+### LM Head Forward
 
 1. **Prefill optimization**: Extract only the last token per sequence (only those need logits).
 2. **Linear projection** with this rank's vocab shard → partial logits.
@@ -245,7 +245,7 @@ Loaded via `loaded_shard_id ∈ {"q", "k", "v"}` with computed offsets.
 
 ---
 
-#### End-to-End Transformer Layer Flow
+## End-to-End Transformer Layer Flow
 
 ```
 Input (identical on all GPUs)
@@ -263,14 +263,14 @@ Input (identical on all GPUs)
 
 ---
 
-#### Design Principles
+## Design Principles
 
 1. **Minimize communication**: Column + Row pairing ensures only one `all_reduce` per sub-block.
 2. **Decoupled loading**: `weight_loader` hooks let each GPU extract its shard from full checkpoint weights independently.
 3. **Asymmetric head output**: Embedding uses `all_reduce` (all GPUs need embeddings), LM head uses `gather` (only rank 0 samples), saving memory.
 
 
-### models/qwen3.py
+# models/qwen3.py
 Implementation of the Qwen3 causal language model for the nano-vllm inference engine, with tensor parallelism (TP) and KV caching support.
 
 ## Architecture
@@ -283,9 +283,9 @@ Qwen3ForCausalLM              # top-level entry point
             └─ Qwen3MLP       # gated SiLU (SwiGLU) FFN
 ```
 
-#### Classes
+## Classes
 
-##### `Qwen3Attention`
+### `Qwen3Attention`
 
 Multi-head attention with **Grouped-Query Attention (GQA)** — fewer KV heads than Q heads to reduce memory.
 
@@ -295,7 +295,7 @@ Multi-head attention with **Grouped-Query Attention (GQA)** — fewer KV heads t
 - **`attn`** (`Attention`): FlashAttention with KV cache — uses `flash_attn_varlen_func` for prefill and `flash_attn_with_kvcache` for decode.
 - **`q_norm` / `k_norm`** (`RMSNorm`): Per-head QK normalization, active only when `qkv_bias=False` (Qwen3 default).
 
-##### `Qwen3MLP`
+### `Qwen3MLP`
 
 Gated SiLU (SwiGLU) feed-forward network.
 
@@ -303,14 +303,14 @@ Gated SiLU (SwiGLU) feed-forward network.
 - **`down_proj`** (`RowParallelLinear`): Down projection, row-sharded with `all_reduce`.
 - **`act_fn`** (`SiluAndMul`): Splits output in half, applies `SiLU(gate) * up`.
 
-##### `Qwen3DecoderLayer`
+### `Qwen3DecoderLayer`
 
 Single transformer block with **Pre-RMSNorm** and a **fused residual add** optimization.
 
 - The `RMSNorm.add_rms_forward` method fuses `residual = x + old_residual` and `x = RMSNorm(residual)` into one compiled pass, reducing memory overhead.
 - The residual tensor is passed between layers as a separate stream.
 
-##### `Qwen3Model`
+### `Qwen3Model`
 
 Transformer backbone.
 
@@ -318,7 +318,7 @@ Transformer backbone.
 - **`layers`**: Stack of `Qwen3DecoderLayer` modules.
 - **`norm`**: Final RMSNorm that folds in the last residual.
 
-##### `Qwen3ForCausalLM`
+### `Qwen3ForCausalLM`
 
 Top-level model class.
 
@@ -326,7 +326,7 @@ Top-level model class.
 - **`lm_head`** (`ParallelLMHead`): Projects hidden states to vocab logits; gathers across TP ranks.
 - Supports **weight tying** between embedding and LM head.
 
-#### Key Design Patterns
+## Key Design Patterns
 
 | Pattern | Details |
 |---|---|
