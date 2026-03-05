@@ -183,9 +183,9 @@ A GPU kernel written in Triton that copies newly computed key/value vectors into
 
 
 ### layers/linear.py & layers/embed_head.py
-# Tensor Parallelism in nano-vllm
+Tensor Parallelism in nano-vllm
 
-## Overview
+#### Overview
 
 These two files implement **Megatron-LM style tensor parallelism (TP)**, splitting model weights across GPUs to serve large language models. The core pattern is:
 
@@ -195,7 +195,7 @@ Each transformer sub-block (attention, MLP) requires only **one all-reduce**, mi
 
 ---
 
-## Linear Layers (`linear.py`)
+#### Linear Layers (`linear.py`)
 
 | Class | Sharding | Communication | Use Case |
 |---|---|---|---|
@@ -205,13 +205,13 @@ Each transformer sub-block (attention, MLP) requires only **one all-reduce**, mi
 | `QKVParallelLinear` | Output dim (Q/K/V merged) | None | Fused QKV with GQA support |
 | `RowParallelLinear` | Input dim (`dim=1`) | `all_reduce` | Second projection (o_proj, down_proj) |
 
-### Key Mechanisms
+##### Key Mechanisms
 
 - **`weight_loader` hook**: Attached to each parameter; called during checkpoint loading to extract the correct shard per GPU via `.narrow()` / `.chunk()`.
 - **Column-parallel**: Splits output dim → each GPU produces a slice of the output, no communication needed.
 - **Row-parallel**: Splits input dim → each GPU computes a partial result, summed via `all_reduce`. Bias added only on rank 0 to avoid double-counting.
 
-### QKV Weight Layout (per GPU)
+##### QKV Weight Layout (per GPU)
 
 For GQA (e.g., 8 Q heads, 2 KV heads, tp_size=2):
 
@@ -223,21 +223,21 @@ Loaded via `loaded_shard_id ∈ {"q", "k", "v"}` with computed offsets.
 
 ---
 
-## Embedding & LM Head (`embed_head.py`)
+#### Embedding & LM Head (`embed_head.py`)
 
 | Class | Sharding | Communication | Purpose |
 |---|---|---|---|
 | `VocabParallelEmbedding` | Vocab rows | `all_reduce` | Input token embeddings |
 | `ParallelLMHead` | Vocab rows | `gather` to rank 0 | Output logits for sampling |
 
-### Embedding Forward
+##### Embedding Forward
 
 1. **Mask** tokens outside this rank's vocab range.
 2. **Remap** global token IDs to local indices.
 3. **Lookup** embeddings, zero out masked positions.
 4. **All-reduce** to combine (each token is non-zero on exactly one rank).
 
-### LM Head Forward
+##### LM Head Forward
 
 1. **Prefill optimization**: Extract only the last token per sequence (only those need logits).
 2. **Linear projection** with this rank's vocab shard → partial logits.
@@ -245,7 +245,7 @@ Loaded via `loaded_shard_id ∈ {"q", "k", "v"}` with computed offsets.
 
 ---
 
-## End-to-End Transformer Layer Flow
+#### End-to-End Transformer Layer Flow
 
 ```
 Input (identical on all GPUs)
@@ -263,12 +263,76 @@ Input (identical on all GPUs)
 
 ---
 
-## Design Principles
+#### Design Principles
 
 1. **Minimize communication**: Column + Row pairing ensures only one `all_reduce` per sub-block.
 2. **Decoupled loading**: `weight_loader` hooks let each GPU extract its shard from full checkpoint weights independently.
 3. **Asymmetric head output**: Embedding uses `all_reduce` (all GPUs need embeddings), LM head uses `gather` (only rank 0 samples), saving memory.
 
 
-### 
+### models/qwen3.py
+Implementation of the Qwen3 causal language model for the nano-vllm inference engine, with tensor parallelism (TP) and KV caching support.
 
+## Architecture
+
+```
+Qwen3ForCausalLM              # top-level entry point
+  └─ Qwen3Model               # embedding + N decoder layers + final norm
+       └─ Qwen3DecoderLayer    # single transformer block
+            ├─ Qwen3Attention  # GQA + RoPE + optional QK-norm
+            └─ Qwen3MLP       # gated SiLU (SwiGLU) FFN
+```
+
+#### Classes
+
+##### `Qwen3Attention`
+
+Multi-head attention with **Grouped-Query Attention (GQA)** — fewer KV heads than Q heads to reduce memory.
+
+- **`qkv_proj`** (`QKVParallelLinear`): Fused Q/K/V projection in one matmul, column-sharded across GPUs.
+- **`o_proj`** (`RowParallelLinear`): Output projection, row-sharded with `all_reduce`.
+- **`rotary_emb`**: Applies RoPE positional encoding via a precomputed cos/sin cache.
+- **`attn`** (`Attention`): FlashAttention with KV cache — uses `flash_attn_varlen_func` for prefill and `flash_attn_with_kvcache` for decode.
+- **`q_norm` / `k_norm`** (`RMSNorm`): Per-head QK normalization, active only when `qkv_bias=False` (Qwen3 default).
+
+##### `Qwen3MLP`
+
+Gated SiLU (SwiGLU) feed-forward network.
+
+- **`gate_up_proj`** (`MergedColumnParallelLinear`): Fused gate + up projection, column-sharded.
+- **`down_proj`** (`RowParallelLinear`): Down projection, row-sharded with `all_reduce`.
+- **`act_fn`** (`SiluAndMul`): Splits output in half, applies `SiLU(gate) * up`.
+
+##### `Qwen3DecoderLayer`
+
+Single transformer block with **Pre-RMSNorm** and a **fused residual add** optimization.
+
+- The `RMSNorm.add_rms_forward` method fuses `residual = x + old_residual` and `x = RMSNorm(residual)` into one compiled pass, reducing memory overhead.
+- The residual tensor is passed between layers as a separate stream.
+
+##### `Qwen3Model`
+
+Transformer backbone.
+
+- **`embed_tokens`** (`VocabParallelEmbedding`): Vocabulary sharded across GPUs, combined via `all_reduce`.
+- **`layers`**: Stack of `Qwen3DecoderLayer` modules.
+- **`norm`**: Final RMSNorm that folds in the last residual.
+
+##### `Qwen3ForCausalLM`
+
+Top-level model class.
+
+- **`packed_modules_mapping`**: Maps original checkpoint weight names (e.g., `q_proj`, `k_proj`, `v_proj`) to fused parameter names (e.g., `qkv_proj`) for weight loading.
+- **`lm_head`** (`ParallelLMHead`): Projects hidden states to vocab logits; gathers across TP ranks.
+- Supports **weight tying** between embedding and LM head.
+
+#### Key Design Patterns
+
+| Pattern | Details |
+|---|---|
+| Tensor Parallelism | Column-parallel for Q/K/V/gate/up; row-parallel + `all_reduce` for O/down |
+| Fused Projections | QKV in one linear; gate + up in one linear |
+| Fused Residual + Norm | `RMSNorm` combines residual addition and normalization in a single `@torch.compile`d kernel |
+| KV Caching | Triton kernel for cache storage; FlashAttention for prefill and paged decode |
+| GQA | Fewer KV heads than Q heads to reduce memory |
+| QK Normalization | Per-head RMSNorm on Q and K (active when no QKV bias) |
