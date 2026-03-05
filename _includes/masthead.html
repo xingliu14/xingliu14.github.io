@@ -4,26 +4,26 @@
   {% assign metadata_styles = 'd-flex flex-items-center mb-3' %}
 {% endif %}
 
-<img src="{{ user.avatar_url }}" class="circle mb-3" style="max-width: 150px;">
-<h1 class="text-white mb-2 lh-condensed">{% if user.name %}{{ user.name }}{% else %}{{ user.login }}{% endif %}</h1>
-<p class="mb-3 f4 text-white">
+<img src="{{ user.avatar_url }}" class="masthead-avatar mb-3" alt="{{ user.name }}">
+<h1 class="masthead-name text-white mb-2 lh-condensed">{% if user.name %}{{ user.name }}{% else %}{{ user.login }}{% endif %}</h1>
+<p class="masthead-bio mb-3 text-white">
   {{ user.bio }}
 </p>
 
 {% if include.metadata %}
-  <div class="f4 mb-6">
+  <div class="masthead-links f4 mb-6">
 
     {% if site.resume %}
-      <div class="{{ metadata_styles }}">
+      <div class="{{ metadata_styles }} metadata-item">
         {% octicon file height:20 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:file %}
         <a href="{{ site.resume }}" class="text-white">
-          Resumé
+          Resume
         </a>
       </div>
     {% endif %}
 
     {% if user.name %}
-      <div class="{{ metadata_styles }}">
+      <div class="{{ metadata_styles }} metadata-item">
         {% octicon mark-github height:20 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:GitHub %}
         <a href="https://github.com/{{ user.login }}" class="text-white">
           @{{ user.login }}
@@ -32,7 +32,7 @@
     {% endif %}
 
     {% if user.email %}
-      <div class="{{ metadata_styles }}">
+      <div class="{{ metadata_styles }} metadata-item">
         {% octicon mail height:20 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:email %}
         <a href="mailto:{{ user.email }}" class="text-white">
           {{ user.email }}
@@ -41,7 +41,7 @@
     {% endif %}
 
     {% if user.location %}
-      <div class="{{ metadata_styles }} text-white">
+      <div class="{{ metadata_styles }} metadata-item text-white">
         {% octicon location height:20 class:"mr-2 v-align-middle" fill:{{ icon_color }} aria-label:Location %}
         {{ user.location }}
       </div>

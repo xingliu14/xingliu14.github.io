@@ -12,12 +12,12 @@
 
         <div class="sections-grid">
           {% unless posts_total == 0 %}
-          <section class="section-block thoughts-section">
+          <section>
             {% include thoughts.html %}
           </section>
           {% endunless %}
 
-          <section class="section-block projects-section">
+          <section>
             {% include projects.html %}
           </section>
         </div>
@@ -43,17 +43,17 @@
             {% unless posts_total == 0 %}
               {% include thoughts.html %}
             {% endunless %}
-            
+
             {% include projects.html %}
+          </div>
+
+          <div class="visitor-counter">
+            <script type="text/javascript" id="mapmyvisitors" src="//mapmyvisitors.com/map.js?d=nY-hLRI3Ho-Kv8Mx6Mj1mhV0QxgQGbD7bEJBmraNSIU&cl=ffffff&w=a"></script>
           </div>
         </div>
       </main>
     </div>
   {% endif %}
-</div>
-
-<div class="visitor-counter">
-  <script type="text/javascript" id="mapmyvisitors" src="//mapmyvisitors.com/map.js?d=nY-hLRI3Ho-Kv8Mx6Mj1mhV0QxgQGbD7bEJBmraNSIU&cl=ffffff&w=a"></script>
 </div>
 
 {% include footer.html %}
@@ -72,24 +72,13 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.6s ease-in;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .sections-grid {
   display: grid;
-  gap: 2rem;
+  gap: 2.5rem;
   margin: 2rem 0;
-}
-
-.section-block {
-  background: var(--color-bg-secondary, #f6f8fa);
-  border-radius: 8px;
-  padding: 2rem;
-  transition: transform 0.2s ease;
-}
-
-.section-block:hover {
-  transform: translateY(-2px);
 }
 
 .split-layout {
@@ -101,13 +90,14 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
   padding: 2rem;
   width: 300px;
 }
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  padding: 2.5rem;
 }
 
 .theme-dark {
@@ -115,12 +105,8 @@
   color: #ffffff;
 }
 
-.theme-dark .section-block {
-  background: rgba(255, 255, 255, 0.05);
-}
-
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -128,15 +114,19 @@
   .split-layout {
     flex-direction: column;
   }
-  
+
   .sidebar {
     width: 100%;
     height: auto;
     position: relative;
   }
-  
+
+  .main-content {
+    padding: 1.5rem;
+  }
+
   .sections-grid {
-    gap: 1rem;
+    gap: 1.5rem;
   }
 }
 </style>

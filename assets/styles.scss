@@ -3,20 +3,67 @@
 @import url('https://unpkg.com/primer/build/build.css');
 @import 'highlight-syntax';
 
+// ── Design Tokens ──────────────────────────────────────────
+:root {
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --color-accent: #2563eb;
+  --color-accent-light: #3b82f6;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-// If a user adds a custom font, this component will stop it from bleeding into GitHub components:
+// ── Global Reset & Base ────────────────────────────────────
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body) !important;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: white;
+}
+
+a {
+  color: var(--color-accent);
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--color-accent-light);
+}
+
+// ── GitHub Components ──────────────────────────────────────
 .github-component {
-  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol !important;
+  font-family: var(--font-body) !important;
 }
 
 .repo-language-color {
-    filter: brightness(125%) !important;
-    border-radius: 50%;
-    display: inline-block;
-    height: 12px;
-    position: relative;
-    top: 2px;
-    width: 12px;
+  filter: brightness(125%) !important;
+  border-radius: 50%;
+  display: inline-block;
+  height: 12px;
+  position: relative;
+  top: 2px;
+  width: 12px;
 }
 
 .emoji {
@@ -25,6 +72,7 @@
   vertical-align: middle;
 }
 
+// ── Article Content ────────────────────────────────────────
 .article {
   h1, h2, h3, h4,
   .highlight {
@@ -32,10 +80,11 @@
   }
 
   blockquote {
-    color: #6a737d;
-    border-left: 2px solid #959da5;
+    color: var(--color-text-secondary);
+    border-left: 3px solid var(--color-accent);
     padding-left: 16px;
     margin-bottom: 16px;
+    font-style: italic;
   }
 
   ul, ol {
@@ -51,4 +100,178 @@
 
 .min-height-full {
   min-height: 100vh;
+}
+
+// ── Section Headings ───────────────────────────────────────
+.section-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--color-border), transparent);
+  margin-left: 0.75rem;
+}
+
+.section-description {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+// ── Card Styles ────────────────────────────────────────────
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  transition: all var(--transition);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.card-title a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+.card-title a:hover {
+  color: var(--color-accent);
+}
+
+.card-meta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.card-description {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  flex: 1;
+}
+
+// ── About Section ──────────────────────────────────────────
+.about-section {
+  margin-bottom: 2rem;
+}
+
+.about-content {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+}
+
+.about-content p {
+  margin-bottom: 1rem;
+}
+
+.about-content a {
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-light);
+  text-underline-offset: 2px;
+}
+
+// ── Masthead / Sidebar ─────────────────────────────────────
+.masthead-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.masthead-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.masthead-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.masthead-bio {
+  opacity: 0.85;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.masthead-links a {
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.masthead-links a:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.metadata-item {
+  transition: opacity var(--transition);
+}
+
+.metadata-item:hover {
+  opacity: 0.8;
+}
+
+// ── Visitor Counter ────────────────────────────────────────
+.visitor-counter {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  margin-top: 1rem;
+  opacity: 0.9;
+}
+
+// ── Dividers ───────────────────────────────────────────────
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-border), transparent);
+  margin: 2rem 0;
+}
+
+// ── Footer ─────────────────────────────────────────────────
+.site-footer {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.site-footer a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: var(--color-accent);
 }
