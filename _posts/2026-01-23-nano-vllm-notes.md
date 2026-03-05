@@ -182,4 +182,93 @@ A GPU kernel written in Triton that copies newly computed key/value vectors into
 - self.k_cache and self.v_cache are initialized as empty tensors. They get replaced later by the ModelRunner with properly sized paged cache buffers allocated by the block manager.
 
 
+### layers/linear.py & layers/embed_head.py
+# Tensor Parallelism in nano-vllm
+
+## Overview
+
+These two files implement **Megatron-LM style tensor parallelism (TP)**, splitting model weights across GPUs to serve large language models. The core pattern is:
+
+> **Column-parallel (no comm) → local compute → Row-parallel (all-reduce)**
+
+Each transformer sub-block (attention, MLP) requires only **one all-reduce**, minimizing communication overhead.
+
+---
+
+## Linear Layers (`linear.py`)
+
+| Class | Sharding | Communication | Use Case |
+|---|---|---|---|
+| `ReplicatedLinear` | None (full copy) | None | Small layers not worth splitting |
+| `ColumnParallelLinear` | Output dim (`dim=0`) | None | First projection (Q/K/V, gate, up) |
+| `MergedColumnParallelLinear` | Output dim (multiple merged) | None | Fused gate + up proj |
+| `QKVParallelLinear` | Output dim (Q/K/V merged) | None | Fused QKV with GQA support |
+| `RowParallelLinear` | Input dim (`dim=1`) | `all_reduce` | Second projection (o_proj, down_proj) |
+
+### Key Mechanisms
+
+- **`weight_loader` hook**: Attached to each parameter; called during checkpoint loading to extract the correct shard per GPU via `.narrow()` / `.chunk()`.
+- **Column-parallel**: Splits output dim → each GPU produces a slice of the output, no communication needed.
+- **Row-parallel**: Splits input dim → each GPU computes a partial result, summed via `all_reduce`. Bias added only on rank 0 to avoid double-counting.
+
+### QKV Weight Layout (per GPU)
+
+For GQA (e.g., 8 Q heads, 2 KV heads, tp_size=2):
+
+```
+[Q_shard (4 heads) | K_shard (1 head) | V_shard (1 head)]
+```
+
+Loaded via `loaded_shard_id ∈ {"q", "k", "v"}` with computed offsets.
+
+---
+
+## Embedding & LM Head (`embed_head.py`)
+
+| Class | Sharding | Communication | Purpose |
+|---|---|---|---|
+| `VocabParallelEmbedding` | Vocab rows | `all_reduce` | Input token embeddings |
+| `ParallelLMHead` | Vocab rows | `gather` to rank 0 | Output logits for sampling |
+
+### Embedding Forward
+
+1. **Mask** tokens outside this rank's vocab range.
+2. **Remap** global token IDs to local indices.
+3. **Lookup** embeddings, zero out masked positions.
+4. **All-reduce** to combine (each token is non-zero on exactly one rank).
+
+### LM Head Forward
+
+1. **Prefill optimization**: Extract only the last token per sequence (only those need logits).
+2. **Linear projection** with this rank's vocab shard → partial logits.
+3. **Gather to rank 0** and concatenate → only rank 0 has full logits for sampling. Other ranks return `None`.
+
+---
+
+## End-to-End Transformer Layer Flow
+
+```
+Input (identical on all GPUs)
+  │
+  ├─► QKVParallelLinear (column, no comm)
+  │     └─► Attention (local)
+  │           └─► RowParallelLinear/o_proj (all_reduce) ──► + residual
+  │
+  ├─► MergedColumnParallelLinear/gate+up (column, no comm)
+  │     └─► SiLU(gate) * up (local)
+  │           └─► RowParallelLinear/down_proj (all_reduce) ──► + residual
+  │
+  └─► (repeat N layers) ─► ParallelLMHead (gather to rank 0) ─► Sampling
+```
+
+---
+
+## Design Principles
+
+1. **Minimize communication**: Column + Row pairing ensures only one `all_reduce` per sub-block.
+2. **Decoupled loading**: `weight_loader` hooks let each GPU extract its shard from full checkpoint weights independently.
+3. **Asymmetric head output**: Embedding uses `all_reduce` (all GPUs need embeddings), LM head uses `gather` (only rank 0 samples), saving memory.
+
+
+### 
 
