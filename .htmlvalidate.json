@@ -1,0 +1,11 @@
+{
+  "extends": ["html-validate:recommended"],
+  "rules": {
+    "doctype-style": "off",
+    "long-title": "off",
+    "valid-id": ["error", { "relaxed": true }],
+    "prefer-native-element": ["error", { "exclude": ["region"] }],
+    "no-redundant-role": "off",
+    "void-style": "off"
+  }
+}

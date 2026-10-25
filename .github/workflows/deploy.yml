@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
+  schedule:
+    # Daily at 09:17 UTC: refreshes the projects list and What's New, and retires NEW! tags,
+    # with no commit needed.
+    - cron: "17 9 * * *"
   workflow_dispatch:
 
 permissions:
@@ -22,6 +26,9 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history: src/lib/last-modified.mjs dates each post's last edit from git.
+          fetch-depth: 0
       - uses: withastro/action@v6
         with:
           # A restored content cache can carry post HTML rendered by an older markdown plugin.
