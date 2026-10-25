@@ -1,0 +1,27 @@
+// Code block colours. Same palette as the Rouge "github" theme the Jekyll site used,
+// mapped onto the Prism token classes that src/lib/markdown.mjs emits.
+.highlight { width: 100%; overflow: auto; background: #ffffff; }
+
+.highlight .token {
+  &.comment, &.prolog, &.doctype, &.cdata { color: #999988; font-style: italic; }
+  &.delimiter.important { color: #999999; font-weight: bold; }
+  &.keyword, &.operator, &.boolean, &.important, &.atrule { font-weight: bold; }
+  &.class-name { color: #445588; font-weight: bold; }
+  &.number { color: #009999; }
+  &.string, &.char, &.attr-value, &.url { color: #dd1144; }
+  &.regex { color: #009926; }
+  &.symbol { color: #990073; }
+  &.attr-name, &.property, &.constant, &.variable { color: #008080; }
+  &.builtin { color: #0086b3; }
+  &.entity { color: #800080; }
+  &.function { color: #990000; font-weight: bold; }
+  &.namespace { color: #555555; }
+  &.tag, &.selector { color: #000080; }
+  &.inserted { color: #000000; background-color: #ddffdd; }
+  &.deleted { color: #000000; background-color: #ffdddd; }
+  // Prism nests tokens where Rouge used one: YAML keys, CSS url(), shell sessions.
+  &.key { color: #008080; font-weight: normal; }
+  &.url .token.function { color: inherit; font-weight: normal; }
+  &.output { color: #888888; }
+  &.shell-symbol { color: #555555; }
+}

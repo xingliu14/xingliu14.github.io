@@ -1,0 +1,86 @@
+---
+import Octicon from "./Octicon.astro";
+import { RESUME_URL } from "../config";
+import { getOwner } from "../lib/github";
+import { getSocialAccounts } from "../lib/social";
+
+interface Props {
+  /** Show the links (resume, GitHub, email, location, social accounts). */
+  metadata?: boolean;
+}
+
+const { metadata = false } = Astro.props;
+const user = await getOwner();
+const accounts = getSocialAccounts();
+const iconColor = "#ffffff";
+const itemClass = "d-flex flex-items-center mb-3 metadata-item";
+---
+
+<img src={user.avatar_url} class="masthead-avatar mb-3" alt={user.name ?? user.login} />
+<h1 class="masthead-name text-white mb-2 lh-condensed">{user.name || user.login}</h1>
+<p class="masthead-bio mb-3 text-white">
+  {user.bio}
+</p>
+
+{
+  metadata && (
+    <div class="masthead-links f4 mb-6">
+      {RESUME_URL && (
+        <div class={itemClass}>
+          <Octicon name="file" height={20} class="mr-2 v-align-middle" fill={iconColor} label="file" />
+          <a href={RESUME_URL} class="text-white">
+            Resume
+          </a>
+        </div>
+      )}
+
+      {user.name && (
+        <div class={itemClass}>
+          <Octicon name="mark-github" height={20} class="mr-2 v-align-middle" fill={iconColor} label="GitHub" />
+          <a href={`https://github.com/${user.login}`} class="text-white">
+            @{user.login}
+          </a>
+        </div>
+      )}
+
+      {user.email && (
+        <div class={itemClass}>
+          <Octicon name="mail" height={20} class="mr-2 v-align-middle" fill={iconColor} label="email" />
+          <a href={`mailto:${user.email}`} class="text-white">
+            {user.email}
+          </a>
+        </div>
+      )}
+
+      {user.location && (
+        <div class={`${itemClass} text-white`}>
+          <Octicon name="location" height={20} class="mr-2 v-align-middle" fill={iconColor} label="Location" />
+          {user.location}
+        </div>
+      )}
+
+      {accounts.length > 0 && (
+        <div class="d-flex flex-wrap flex-items-start">
+          {accounts.map(({ service, username }, i) => (
+            <div class:list={[{ "mr-3": i < accounts.length - 1 }, "mb-3"]}>
+              <a
+                href={`${service.profile_url_prefix ?? ""}${username}`}
+                class="tooltipped tooltipped-se"
+                aria-label={`${service.name}: ${username}`}
+              >
+                <Fragment set:html={service.icon_svg} />
+                <span class="d-none">{service.name}</span>
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {user.hireable && (
+        <span title="Hire me" class="d-inline-block f5 rounded-2 text-white bg-green py-1 px-2">
+          Available for hire
+        </span>
+      )}
+    </div>
+  )
+}

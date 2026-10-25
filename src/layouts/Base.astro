@@ -1,0 +1,40 @@
+---
+import "primer/build/build.css";
+import "../styles/global.scss";
+import { getOwner } from "../lib/github";
+
+interface Props {
+  /** Defaults to the owner's name. */
+  title?: string;
+  /** Defaults to the owner's GitHub bio. */
+  description?: string;
+  lang?: string;
+}
+
+const owner = await getOwner();
+const name = owner.name || owner.login;
+const { title = name, description = (owner.bio ?? "").replace(/\s+/g, " ").trim(), lang = "en" } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang} class="min-height-full">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={name} />
+    <meta property="og:image" content={owner.avatar_url} />
+    <meta property="og:description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-white min-height-full">
+    <slot />
+    <footer class="site-footer" lang="en">
+      <p>&copy; {new Date().getFullYear()} {name}. Built with Astro.</p>
+    </footer>
+  </body>
+</html>

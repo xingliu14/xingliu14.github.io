@@ -1,0 +1,28 @@
+---
+import { OCTICONS, type OcticonName } from "../lib/octicons";
+
+interface Props {
+  name: OcticonName;
+  height?: number;
+  class?: string;
+  fill?: string;
+  /** Accessible name; without one the icon is hidden from assistive technology. */
+  label?: string;
+}
+
+const { name, height = 16, class: className, fill, label } = Astro.props;
+const width = height;
+---
+
+<svg
+  height={height}
+  class:list={["octicon", `octicon-${name}`, className]}
+  fill={fill}
+  aria-label={label}
+  viewBox="0 0 16 16"
+  version="1.1"
+  width={width}
+  role={label ? "img" : undefined}
+  aria-hidden={label ? undefined : "true"}
+  set:html={OCTICONS[name]}
+/>

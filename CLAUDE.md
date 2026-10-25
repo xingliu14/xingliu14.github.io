@@ -1,56 +1,30 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Personal site and blog for Xing Liu, built with Astro and deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to `master`. It was migrated from a Jekyll site (GitHub's personal-website template) in October 2026, keeping the same look and URLs.
 
-## Project Overview
+`npm run build` type-checks (`astro check`) and then builds into `dist/` with `--force`: Astro's content cache does not notice changes to `src/lib/markdown.mjs`, so a cached build would keep post HTML from the old plugin. Run `astro dev --force` after editing that file too.
 
-This is a Jekyll-based personal portfolio and blog website deployed to GitHub Pages. The site is forked from GitHub's personal-website template and customized.
+## Posts
 
-## Build Commands
+- A post is `src/content/posts/YYYY-MM-DD-slug.md` with `title` (and optionally `published: false`, `lang: zh-CN`) in its frontmatter.
+- The file name is the URL: `/YYYY/MM/DD/slug/`, case preserved. Published posts are linked from elsewhere, so their file names are permanent.
+- Markdown is rendered by Astro's default Sätteri processor (CommonMark + GFM + smart punctuation), not kramdown. Two habits keep posts rendering as intended:
+  - Put an inline HTML tag like `<br>` on the same line as the text it belongs to; on a line by itself it starts a raw HTML block and the text after it loses its `<p>`.
+  - In Chinese prose, type curly quotes “…” directly; smart punctuation can't tell opening from closing quotes next to CJK characters.
+- Emoji go in as Unicode characters (Jekyll's `:shortcode:` emoji are not supported).
 
-```bash
-# Install dependencies
-bundle install
+## Look and markup
 
-# Build the site (generates _site/)
-bundle exec jekyll build
+- The design is Primer 11 (`primer/build/build.css`, imported in `src/layouts/Base.astro`) plus `src/styles/global.scss`. Each page's `<style is:global>` block is the layout CSS carried over from the Jekyll layouts.
+- `src/lib/markdown.mjs` makes code blocks and inline code emit the same markup kramdown/Rouge did and highlights with Prism; token colours live in `src/styles/_highlight-syntax.scss`.
+- `compressHTML: false` is deliberate: the whitespace between inline elements (an icon and its label) renders as a space the layout relies on.
+- `vite.build.cssTarget` targets older browsers on purpose: with Vite's default the minifier rewrites media queries into range syntax (`width <= 768px`), which Safari before 16.4 ignores.
 
-# Serve locally with live reload (localhost:4000)
-bundle exec jekyll serve
-```
+## Files
 
-## Architecture
+- `public/resume/` holds the resume the site links to (`RESUME_URL` in `src/config.ts`). `resume/` at the repo root only keeps the 2025 PDF at the GitHub path the Jekyll site linked to; the build ignores it.
 
-### Layout System
-- **Sidebar layout** (default): Split view with profile sidebar + main content area
-- **Stacked layout**: Full-width single column
-- Theme support: Light (default) and dark mode via `site.style == 'dark'` conditionals
+## Data
 
-### Key Directories
-- `_layouts/` - Page templates (default.html, home.html, post.html)
-- `_includes/` - Reusable components (masthead, projects, thoughts, post-card, etc.)
-- `_posts/` - Blog posts in markdown (YYYY-MM-DD-title.md format)
-- `_sass/` - SCSS partials
-- `_data/` - Data files (social_media.yml, colors.json)
-- `resume/` - Resume files (LaTeX source and PDF)
-
-### Data Flow
-- GitHub metadata: `site.github` object auto-fetches user data and repositories via `jekyll-github-metadata` plugin
-- Configuration: `_config.yml` controls layout, project display settings, social media links
-- Posts: Markdown files in `_posts/` automatically become blog pages
-
-### Styling
-- Base CSS: GitHub Primer framework (CDN import)
-- Custom styles: `assets/styles.scss` with SCSS partials in `_sass/`
-- Responsive breakpoints at 768px
-
-### Key Plugins
-- `jekyll-github-metadata` - GitHub API integration for profile/repo data
-- `jekyll-octicons` - GitHub icon support
-- `jemoji` - Emoji rendering
-
-## Configuration Notes
-
-- Repository: `XingLiu14/XingLiu14.github.io`
-- Projects display: Top 3 repos sorted by push date, forks excluded
-- Permalink pattern: `/:year/:month/:day/:title/`
+- `src/config.ts` holds the resume path, social accounts, and Projects settings.
+- The sidebar profile and the Projects cards come from the GitHub API at build time (`src/lib/github.ts`); when the API is unreachable the build falls back to `src/data/github-snapshot.json`. CI passes `GITHUB_TOKEN` so it isn't rate limited.

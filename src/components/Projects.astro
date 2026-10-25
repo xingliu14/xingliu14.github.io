@@ -1,0 +1,20 @@
+---
+import RepoCard from "./RepoCard.astro";
+import { getProjects } from "../lib/github";
+
+const repositories = await getProjects();
+---
+
+<h2 class="section-heading">Projects</h2>
+<p class="section-description">GitHub repositories that I've built.</p>
+<div class="d-sm-flex flex-wrap gutter-condensed mb-4">
+  {
+    repositories.map((repository) => (
+      <div class="col-sm-6 col-md-12 col-lg-6 col-xl-4 mb-3">
+        <RepoCard repository={repository} />
+      </div>
+    ))
+  }
+</div>
+
+<hr class="section-divider" />

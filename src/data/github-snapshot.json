@@ -1,0 +1,123 @@
+{
+  "owner": {
+    "login": "xingliu14",
+    "name": "Xing Liu",
+    "bio": "A random dude   \r\n\r\n@xingliu-aws is also me",
+    "avatar_url": "https://avatars.githubusercontent.com/u/93360308?v=4",
+    "email": null,
+    "location": null,
+    "hireable": null
+  },
+  "repos": [
+    {
+      "name": "ClaudeXingCode",
+      "html_url": "https://github.com/xingliu14/ClaudeXingCode",
+      "description": null,
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-07-13T00:33:35Z"
+    },
+    {
+      "name": "GameKingdom",
+      "html_url": "https://github.com/xingliu14/GameKingdom",
+      "description": "endless games to kill the limited time",
+      "language": "HTML",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-05-24T23:33:40Z"
+    },
+    {
+      "name": "LowStakesLivePokerCrusher",
+      "html_url": "https://github.com/xingliu14/LowStakesLivePokerCrusher",
+      "description": "A easy to follow guide to crush low stake live poker at casino",
+      "language": "TypeScript",
+      "stargazers_count": 1,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-02-10T00:52:03Z"
+    },
+    {
+      "name": "OPC",
+      "html_url": "https://github.com/xingliu14/OPC",
+      "description": null,
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-08-10T04:30:19Z"
+    },
+    {
+      "name": "polymarket-kalshi-btc-arbitrage-bot",
+      "html_url": "https://github.com/xingliu14/polymarket-kalshi-btc-arbitrage-bot",
+      "description": "Real-time arbitrage bot detecting risk-free opportunities in Bitcoin 1-Hour Price markets between Polymarket and Kalshi",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": true,
+      "archived": false,
+      "pushed_at": "2026-03-11T04:13:23Z"
+    },
+    {
+      "name": "ToyStory",
+      "html_url": "https://github.com/xingliu14/ToyStory",
+      "description": null,
+      "language": "TypeScript",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-02-10T08:39:09Z"
+    },
+    {
+      "name": "tpu-inference",
+      "html_url": "https://github.com/xingliu14/tpu-inference",
+      "description": "TPU inference for vLLM, with unified JAX and PyTorch support.",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": true,
+      "archived": false,
+      "pushed_at": "2025-12-17T15:43:58Z"
+    },
+    {
+      "name": "vllm",
+      "html_url": "https://github.com/xingliu14/vllm",
+      "description": "A high-throughput and memory-efficient inference and serving engine for LLMs",
+      "language": "Python",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": true,
+      "archived": false,
+      "pushed_at": "2025-12-11T05:46:21Z"
+    },
+    {
+      "name": "xingliu14.github.io",
+      "html_url": "https://github.com/xingliu14/xingliu14.github.io",
+      "description": null,
+      "language": "CSS",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-04-06T03:30:12Z"
+    },
+    {
+      "name": "YOY-Labs-Website",
+      "html_url": "https://github.com/xingliu14/YOY-Labs-Website",
+      "description": null,
+      "language": "Astro",
+      "stargazers_count": 0,
+      "forks_count": 0,
+      "fork": false,
+      "archived": false,
+      "pushed_at": "2026-10-24T22:55:24Z"
+    }
+  ]
+}
