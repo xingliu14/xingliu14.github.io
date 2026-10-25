@@ -1,0 +1,25 @@
+---
+// The line under a post's title: when it was posted, by whom, when its words last changed (only if
+// that was on a later day), how long it takes to read, and its topic. Chinese posts get a Chinese
+// byline. Middle dots are "&nbsp;· ", so a wrapped line never starts with one.
+import { longDate, shortDate, zhDate, zhWeekday } from "../lib/dates";
+import type { Post } from "../lib/posts";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { date, modified, minutes, count, topic } = post;
+// "January&nbsp;23,": on phones the date may wrap under large text settings (style.css), but the
+// month and day stay together.
+const posted = longDate(date).replace(/ (\d+,)/, " $1");
+---
+
+{
+  post.zh ? (
+    <p class="byline"><span class="nowrap"><time datetime={date}>{zhDate(date)}</time>（{zhWeekday(date)}）发表</span><span class="sep" aria-hidden="true">&nbsp;· </span><span class="nowrap">作者 <a href="/about/" rel="author">刘星</a></span>{modified && <Fragment><span class="sep" aria-hidden="true">&nbsp;· </span><span class="nowrap">更新于 <time datetime={modified.date}>{zhDate(modified.date)}</time></span></Fragment>}<span class="sep" aria-hidden="true">&nbsp;· </span><span class="nowrap">约 {minutes} 分钟读完（{count.toLocaleString("en-US")} 字）</span><span class="sep" aria-hidden="true">&nbsp;· </span><a class="nowrap" href={`/writing/#topic-${topic.id}`}>{topic.zh}</a></p>
+  ) : (
+    <p class="byline"><span class="nowrap">Posted <time datetime={date}>{posted}</time></span> <span class="nowrap">by <a href="/about/" rel="author">Xing Liu</a></span>{modified && <Fragment><span class="sep" aria-hidden="true">&nbsp;· </span><span class="nowrap">Updated <time datetime={modified.date}>{shortDate(modified.date)}</time></span></Fragment>}<span class="sep" aria-hidden="true">&nbsp;· </span><span class="nowrap">{minutes} minute read</span><span class="sep" aria-hidden="true">&nbsp;· </span><a class="nowrap" href={`/writing/#topic-${topic.id}`}>{topic.name}</a></p>
+  )
+}

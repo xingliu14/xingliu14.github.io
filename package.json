@@ -17,7 +17,6 @@
     "@astrojs/sitemap": "3.7.4",
     "astro": "7.4.2",
     "github-slugger": "2.0.0",
-    "primer": "11.0.0",
     "prismjs": "1.30.0"
   },
   "devDependencies": {
@@ -29,7 +28,6 @@
     "@types/prismjs": "1.26.6",
     "dejavu-fonts-ttf": "2.37.3",
     "html-validate": "11.17.0",
-    "sass": "1.106.1",
     "satori": "0.63.2",
     "subset-font": "2.9.0",
     "typescript": "6.0.3"

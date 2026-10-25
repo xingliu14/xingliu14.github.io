@@ -1,0 +1,23 @@
+---
+// What's New: a dated log of the five latest events (src/lib/whats-new.ts), the home page's digest.
+// NEW! marks events under 30 days old at build time; site.js removes it once the reader's own date
+// reaches data-until. The tag is followed by a real space, which collapses when it goes.
+import type { WhatsNewItem } from "../lib/whats-new";
+
+interface Props {
+  items: WhatsNewItem[];
+  postCount: number;
+  projectCount: number;
+}
+
+const { items, postCount, projectCount } = Astro.props;
+---
+
+<h2 id="whats-new">What’s New</h2>
+<ul class="log">{items.map((item) => <Fragment>{"\n"}<li><time datetime={item.date}>{item.date}</time><span>{item.isNew && <Fragment><span class="new" data-until={item.until}>NEW!</span> </Fragment>}{
+  item.kind === "site" ? <Fragment set:html={item.html} />
+  : item.kind === "project" ? <Fragment>New project: <a href={item.project.html_url}>{item.project.name}</a>.{item.project.about && ` ${item.project.about}`}</Fragment>
+  : <Fragment>New post: <a href={item.post.url} lang={item.post.zh ? "zh-CN" : undefined}>{item.post.title}</a>. {item.post.zh ? <span lang="zh-CN">{item.post.description}</span> : item.post.description}</Fragment>
+}</span></li></Fragment>)}
+</ul>
+<p class="more">Older news: <a href="/writing/">all {postCount} posts</a>&nbsp;· <a href="/projects/">all {projectCount} projects</a>&nbsp;· <a href="/feed.xml">RSS feed</a></p>

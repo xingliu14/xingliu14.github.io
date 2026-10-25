@@ -44,7 +44,6 @@ interface ReadingTime {
 }
 
 const FILE_NAME = /^(\d{4})-(\d{2})-(\d{2})-(.+)$/;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DESCRIPTION_LENGTH = 160;
 
 /** Typewriter apostrophes between letters become ’, and paired straight double quotes “…”. */
@@ -118,9 +117,4 @@ function toPost(entry: CollectionEntry<"posts">): Post {
 export async function getPosts(): Promise<Post[]> {
   const entries = await getCollection("posts", ({ data }) => data.published);
   return entries.map(toPost).sort((a, b) => b.id.localeCompare(a.id));
-}
-
-/** "Mar 10, 2026", the format the Jekyll templates used. */
-export function formatDate({ year, month, day }: Post): string {
-  return `${MONTHS[Number(month) - 1]} ${day}, ${year}`;
 }

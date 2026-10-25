@@ -1,0 +1,857 @@
+/* xingliu.me: "Navigator Grey"
+   Xing Liu's Home Page as Netscape Navigator 3 drew a page in 1997 (grey page, Times headings,
+   blue underlined links that turn purple once read, shaded rules, bevelled tables), then typeset
+   with care. The rule that governs every choice below:
+       only what Navigator could draw, set the way a typographer would.
+   System fonts only; nothing is downloaded. Everything works without JavaScript.
+   Safari 14 safe: no flex `gap`, :has(), container queries, aspect-ratio or overflow-wrap:anywhere.
+   Sizes are in rem/em so the reader's own default font size is honoured; breakpoints too, so a
+   larger default never pushes the layout off screen.
+
+   Contents
+     0. Faces          5. Tables         10. Post            15. Search
+     1. Tokens         6. Forms          11. Contents box    16. Not Found
+     2. Page           7. Masthead/nav   12. Chinese posts   17. Footer
+     3. Text           8. Home           13. Projects        18. Small screens
+     4. Code           9. Writing        14. About           19. Print            */
+
+/* ------------------------------------------------------------------ 0. Faces */
+
+/* Chinese punctuation, from local fonts only (nothing is downloaded). Times and Song draw “ ” at
+   0.4-0.44 em, so Chinese double quotes come from a face that draws them a full em wide (measured in
+   Chrome on macOS: Hiragino Sans GB W3 and Heiti SC 1.00 em; SimSun on Windows). Song supplies the
+   centred dash and ellipsis. ‘ ’ stay with Times because ’ is also the English apostrophe, and the
+   interpunct · stays narrow (Times), close to the half-width 间隔号. Where none of these faces is
+   installed the rule is skipped and the quotes fall back to Times: narrow, but correct. */
+@font-face {
+  font-family: "ZH Punct";
+  src: local("Hiragino Sans GB W3"), local("HiraginoSansGB-W3"), local("Heiti SC Light"),
+    local("STHeitiSC-Light"), local("STHeiti"), local("SimSun");
+  unicode-range: U+201C-201D;
+}
+@font-face {
+  font-family: "ZH Punct";
+  src: local("Songti SC Regular"), local("STSongti-SC-Regular"), local("STSong"), local("SimSun"),
+    local("Noto Serif CJK SC"), local("NotoSerifCJKsc-Regular"), local("Source Han Serif SC");
+  unicode-range: U+2014, U+2026;
+}
+
+/* ------------------------------------------------------------------ 1. Tokens */
+
+:root {
+  color-scheme: light;
+  /* Navigator 1-3 defaults: page, text, link, visited link. */
+  --page: #c0c0c0;
+  --ink: #000000;
+  --link: #0000ee;
+  --visited: #551a8b;
+  --active: #800000;
+  /* Bevels: the two shades Navigator derived from the page colour, plus a hard edge. */
+  --hi: #ffffff;
+  --lo: #808080;
+  --edge: #000000;
+  /* Sunken wells: code, fields, table cells, the visitor map, the jumped-to heading. */
+  --well: #ffffff;
+  --well-ink: #000000;
+  --head: #c0c0c0;
+  --hint: #595959;
+  /* Fixed accents. */
+  --mark: #000080;
+  --mark-ink: #ffffff;
+  --new: #cc0000;
+  --new-ink: #ffffff;
+  /* Code: HTML 3.2 colour names, the way 1990s editors coloured code. */
+  --kw: #0000ff;
+  --cm: #008000;
+  --st: #800000;
+  --nu: #800080;
+  --ty: #008080;
+  --fn: #000080;
+
+  /* Microsoft's Core Fonts for the Web (1996) first, then their metric twins, then CJK. */
+  --text: Georgia, "Gelasio", "Noto Serif", "DejaVu Serif", "Songti SC", STSong, SimSun, serif;
+  --display: "Times New Roman", Times, Tinos, "Liberation Serif", "Noto Serif", "Songti SC", STSong, SimSun, serif;
+  --small: Verdana, "DejaVu Sans", "Bitstream Vera Sans", Tahoma, Geneva, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --mono: Monaco, "Lucida Console", "Andale Mono", "DejaVu Sans Mono", Consolas, "Courier New", "PingFang SC", monospace;
+  --cjk: "ZH Punct", "Times New Roman", Times, Tinos, "Songti SC", STSong, SimSun, "Noto Serif CJK SC", "Source Han Serif SC", serif;
+}
+
+/* Paper white: the same system on a white page. Chosen by the reader, never automatic. */
+:root[data-theme="white"] {
+  --page: #ffffff;
+  --hi: #ffffff;
+  --lo: #999999;
+  --head: #e0e0e0;
+}
+
+/* Night: the same browser with the lights off, in browser-safe colours. Screen only, so a page
+   printed from a dark-mode system still prints black on white. */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="grey"]):not([data-theme="white"]) {
+    color-scheme: dark;
+    --page: #333333;
+    --ink: #e6e6e6;
+    --link: #99ccff;
+    --visited: #cc99ff;
+    --active: #ff9966;
+    --hi: #808080;
+    --lo: #000000;
+    --edge: #000000;
+    --well: #000000;
+    --well-ink: #e6e6e6;
+    --head: #333333;
+    --hint: #999999;
+    --kw: #6699ff;
+    --cm: #66cc66;
+    --st: #ff9966;
+    --nu: #cc99ff;
+    --ty: #66cccc;
+    --fn: #99ccff;
+  }
+}
+@media screen {
+  :root[data-theme="night"] {
+    color-scheme: dark;
+    --page: #333333;
+    --ink: #e6e6e6;
+    --link: #99ccff;
+    --visited: #cc99ff;
+    --active: #ff9966;
+    --hi: #808080;
+    --lo: #000000;
+    --edge: #000000;
+    --well: #000000;
+    --well-ink: #e6e6e6;
+    --head: #333333;
+    --hint: #999999;
+    --kw: #6699ff;
+    --cm: #66cc66;
+    --st: #ff9966;
+    --nu: #cc99ff;
+    --ty: #66cccc;
+    --fn: #99ccff;
+  }
+}
+
+/* ------------------------------------------------------------------ 2. Page */
+
+html {
+  font-size: 100%;
+  background: var(--page);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 1.1875rem/1.6 var(--text); /* 19px at the browser default */
+  font-kerning: normal;
+  overflow-wrap: break-word;
+}
+.page {
+  max-width: 33em; /* 627px: about 70 characters of Georgia */
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+::selection { background: var(--mark); color: var(--mark-ink); }
+
+[hidden] { display: none !important; }
+/* Controls that only work with site.js are shown only when scripts run ("js" on <html>, set by the
+   head script before first paint), so they take their room from the start. */
+.prefs, .colours-line, .copy-link { display: none; }
+.js .prefs, .js .colours-line { display: block; }
+.js .copy-link { display: inline-block; }
+.nowrap { white-space: nowrap; }
+.visually-hidden, .sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: 8px;
+  top: -100px;
+  z-index: 9;
+  padding: 6px 12px;
+  font: bold 0.875rem var(--small);
+  background: var(--page);
+  color: var(--ink);
+  border: 2px solid;
+  border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+  box-shadow: 1px 1px 0 var(--edge);
+}
+.skip:focus { top: 8px; }
+main:focus { outline: none; }
+
+/* ------------------------------------------------------------------ 3. Text */
+
+p { margin: 0 0 0.85em; }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--display);
+  font-weight: bold;
+  line-height: 1.18;
+  margin: 1.55em 0 0.45em;
+  text-wrap: balance;
+}
+h1 { font-size: 2.3em; margin: 0.55em 0 0.3em; letter-spacing: -0.005em; }
+h2 { font-size: 1.62em; }
+h3 { font-size: 1.32em; }
+h4 { font-size: 1.14em; }
+h5 { font-size: 1.04em; }
+h6 { font-size: 1em; font-style: italic; }
+h2 + h3, h3 + h4, h4 + h5 { margin-top: 0.6em; }
+
+a { color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.13em; }
+a:visited { color: var(--visited); }
+a:active { color: var(--active); }
+a:focus, button:focus, input:focus, select:focus, summary:focus, [tabindex]:focus {
+  outline: 2px dotted var(--ink);
+  outline-offset: 2px;
+}
+/* Browsers without :focus-visible drop this rule and keep the dotted rectangle. */
+a:focus:not(:focus-visible), summary:focus:not(:focus-visible), [tabindex]:focus:not(:focus-visible) { outline: none; }
+
+/* Navigator's shaded rule: a dark line over a light one. */
+hr {
+  height: 0;
+  margin: 1.6em 0;
+  border: 0;
+  border-top: 1px solid var(--lo);
+  border-bottom: 1px solid var(--hi);
+}
+
+ul, ol { margin: 0 0 0.9em; padding-left: 1.35em; }
+li { margin: 0.18em 0; }
+li > ul, li > ol { margin: 0.2em 0 0.3em; }
+dl { margin: 0 0 1em; }
+dt { font-weight: bold; }
+dd { margin: 0 0 0.6em 2em; }
+
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.1em 0 0.1em 1.2em;
+  border-left: 1px solid var(--lo);
+  box-shadow: inset 1px 0 0 var(--hi);
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+address { font-style: italic; }
+/* Song has no italic: Chinese in italic text stays upright rather than fake-slanted. */
+address :lang(zh), h6 :lang(zh), .s6 :lang(zh) { font-style: normal; }
+small, .small { font: 0.8125rem/1.5 var(--small); }
+b, strong { font-weight: bold; }
+sup, sub { line-height: 0; font-size: 0.75em; }
+img { max-width: 100%; height: auto; border: 0; }
+
+/* Footnotes (no post has any yet): bracketed reference marks, notes under a shaded rule. */
+.footnotes { font-size: 0.9em; margin-top: 2em; border-top: 1px solid var(--lo); box-shadow: inset 0 1px 0 var(--hi); padding-top: 0.6em; }
+.footnotes ol { padding-left: 1.6em; }
+a[data-footnote-ref], a.footnote-ref { text-decoration: none; }
+a[data-footnote-ref]::before, a.footnote-ref::before { content: "["; }
+a[data-footnote-ref]::after, a.footnote-ref::after { content: "]"; }
+
+/* The heading a contents link jumped to sits in a white band, like a selected list item. */
+.article :target { background: var(--well); color: var(--well-ink); box-shadow: 0 0 0 0.25em var(--well); scroll-margin-top: 1em; }
+
+/* ------------------------------------------------------------------ 4. Code */
+
+code, kbd, samp, tt, pre { font-family: var(--mono); }
+:not(pre) > code, kbd, samp, tt { font-size: 0.8em; }
+kbd {
+  padding: 0 0.3em;
+  border: 1px solid;
+  border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+}
+div.highlighter-rouge { margin: 1.2em 0 1.3em; }
+pre {
+  margin: 1.2em 0;
+  padding: 0.7em 0.9em;
+  overflow-x: auto;
+  font-size: 0.8em;
+  line-height: 1.45;
+  tab-size: 4;
+  background: var(--well);
+  color: var(--well-ink);
+  border: 2px solid;
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+  box-shadow: inset 1px 1px 0 var(--edge);
+}
+div.highlighter-rouge pre { margin: 0; }
+pre code { font-size: 1em; }
+/* site.js adds the language and a Copy button above each well. The inline head script puts class
+   "js" on <html> before first paint, so the bar's room is reserved and nothing moves when it lands. */
+.js div.highlighter-rouge { position: relative; padding-top: 30px; }
+.code-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 27px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font: 0.75rem/1.2 var(--small);
+}
+
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: var(--cm); font-style: italic; }
+.token.keyword, .token.important, .token.atrule, .token.boolean { color: var(--kw); }
+.token.string, .token.char, .token.attr-value, .token.url, .token.regex { color: var(--st); }
+.token.number, .token.symbol, .token.constant, .token.entity { color: var(--nu); }
+.token.class-name, .token.builtin, .token.namespace { color: var(--ty); }
+.token.function, .token.tag, .token.selector { color: var(--fn); }
+.token.attr-name, .token.property, .token.variable, .token.key { color: var(--ty); }
+.token.inserted { color: var(--cm); }
+.token.deleted { color: var(--st); }
+.token.output { font-style: italic; }
+
+/* ------------------------------------------------------------------ 5. Tables */
+
+/* HTML 3.2's <table border=1 cellspacing=2>: a raised outline round sunken cells. */
+.table-scroll { margin: 1.2em 0 1.4em; overflow-x: auto; }
+.table-scroll > table { margin: 0; }
+table {
+  border-collapse: separate;
+  border-spacing: 2px;
+  border: 1px solid;
+  border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+  font: 0.875rem/1.45 var(--small);
+  margin: 1.2em 0 1.4em;
+}
+th, td {
+  padding: 0.4em 0.65em;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid;
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+}
+td { background: var(--well); color: var(--well-ink); }
+th { background: var(--head); font-weight: bold; white-space: nowrap; }
+/* GFM column alignment, turned into classes by the Markdown pipeline (no inline styles). */
+th.al-left, td.al-left { text-align: left; }
+th.al-center, td.al-center { text-align: center; }
+th.al-right, td.al-right { text-align: right; }
+table code { font-size: 0.92em; }
+/* Added by site.js only while a table is wider than its box. */
+.scroll-hint { margin: -0.9em 0 1.3em; font: 0.8125rem/1.5 var(--small); text-align: right; }
+
+/* ------------------------------------------------------------------ 6. Forms */
+
+input[type="search"], input[type="text"], input[type="url"], select {
+  font: 0.9375rem/1.3 var(--small);
+  color: var(--well-ink);
+  background-color: var(--well);
+  border: 2px solid;
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+  box-shadow: inset 1px 1px 0 var(--edge);
+  border-radius: 0;
+  padding: 5px 6px;
+  margin: 0;
+  min-height: 32px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+/* No blue clear button: Navigator had none, and select-all clears a field. */
+input[type="search"]::-webkit-search-decoration, input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+select {
+  padding-right: 22px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--well-ink) 50%), linear-gradient(-45deg, transparent 50%, var(--well-ink) 50%);
+  background-position: right 11px top 55%, right 6px top 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+input::placeholder { color: var(--hint); opacity: 1; }
+button {
+  font: bold 0.875rem/1.2 var(--small);
+  color: var(--ink);
+  background: var(--page);
+  border: 2px solid;
+  border-color: var(--hi) var(--lo) var(--lo) var(--hi);
+  box-shadow: 1px 1px 0 var(--edge);
+  border-radius: 0;
+  padding: 6px 14px;
+  min-height: 32px;
+  margin: 0;
+  cursor: pointer;
+}
+button:active, button[aria-pressed="true"] {
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+  box-shadow: inset 1px 1px 0 var(--edge);
+}
+button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
+
+/* ------------------------------------------------------------------ 7. Masthead and navigation */
+
+/* [ Home | Writing | Projects | About | Search ]: real brackets and pipes (Lynx shows them),
+   hidden from screen readers. Each item is an unbreakable group carrying its own separator. */
+.navbar {
+  margin: 0;
+  padding: 0.9em 0 0;
+  text-align: center;
+  font-size: 1.0625rem;
+  line-height: 1.9;
+  text-wrap: balance;
+}
+.navbar .ni { white-space: nowrap; }
+.navbar .sep { margin: 0 0.1em 0 0.38em; }
+.navbar a, .navbar b { padding: 3px 1px; }
+.navbar a.here { font-weight: bold; }
+.masthead hr, .foot hr { margin: 0.7em 0 0; }
+
+.crumbs { margin: 1.4em 0 0; font: 0.8125rem/1.5 var(--small); }
+
+/* ------------------------------------------------------------------ 8. Home */
+
+.hello { text-align: center; margin: 1.6em 0 1.3em; }
+.avatar {
+  display: block;
+  margin: 0 auto 0.6em;
+  width: 120px;
+  height: 120px;
+  border: 2px solid;
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+}
+.hello h1 { margin: 0.15em 0 0; }
+.hello .sub { margin: 0.2em 0 0; font: 1.25em/1.3 var(--cjk); letter-spacing: 0.08em; }
+
+/* What's New: an NCSA-style dated log. */
+.log { list-style: none; padding: 0; margin: 0 0 0.9em; }
+.log li {
+  display: grid;
+  grid-template-columns: 5.6em 1fr;
+  grid-column-gap: 0.8em;
+  margin: 0 0 0.55em;
+}
+.log time, .date {
+  font: 0.875rem/1.95 var(--mono);
+  white-space: nowrap;
+}
+/* NEW! is followed by a real space in the markup, so removing it (site.js, after 30 days) leaves
+   no gap. */
+.new {
+  display: inline-block;
+  padding: 2px 4px 1px;
+  font: bold 0.75rem/1.1 var(--small);
+  letter-spacing: 0.04em;
+  color: var(--new-ink);
+  background: var(--new);
+  vertical-align: 2px;
+}
+.more { font: 0.875rem/1.6 var(--small); }
+
+.columns { display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 2em; }
+.columns h2 { margin-top: 1.1em; }
+.columns .note { font-size: 0.8125rem; font-family: var(--small); }
+
+/* The visitor map: the real mapmyvisitors widget in a sunken navy well, loaded last. The well
+   reserves the widget's height so nothing moves when it arrives. */
+.visitor-map { margin: 0 0 1em; }
+.map-well {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+  min-height: 185px;
+  border: 2px solid;
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+  box-shadow: inset 1px 1px 0 var(--edge);
+  background: #000080;
+  color: #ffffff;
+  line-height: 0;
+}
+.map-well img { display: block; width: 100%; height: auto; }
+.map-well .mm-count, .map-well .mm-wait {
+  display: block;
+  padding: 5px 0 3px;
+  text-align: center;
+  font: 0.75rem/1rem Arial, Helvetica, sans-serif;
+  color: #ffffff;
+}
+/* Placeholder until the widget arrives (site.js), or the <noscript> link without JavaScript. */
+.map-well .mm-wait { margin: 0; padding: 80px 8px 0; }
+.map-well a, .map-well a:visited { color: #ffffff; }
+.visitor-map figcaption { font: 0.8125rem/1.5 var(--small); margin-top: 0.5em; max-width: 34em; }
+
+/* ------------------------------------------------------------------ 9. Writing */
+
+.lede { font-size: 1.04em; }
+.visited-demo { color: var(--visited); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.13em; }
+
+.search { margin: 1.2em 0 1.4em; }
+.search label { display: block; margin-bottom: 4px; font: bold 0.875rem/1.5 var(--small); }
+.search .row { display: flex; align-items: stretch; }
+.search input[type="search"] { flex: 1 1 auto; min-width: 0; margin-right: 8px; }
+.search .hint { margin: 5px 0 0; font: 0.8125rem/1.5 var(--small); }
+
+.views { font: 0.875rem/1.7 var(--small); }
+.views .sep { margin: 0 0.25em; }
+
+.year { margin-bottom: 0.3em; }
+.year .count, .topic .count { font: normal 0.875rem var(--small); }
+.archive { list-style: none; padding: 0; margin: 0 0 1em; }
+.archive li {
+  display: grid;
+  grid-template-columns: 4.6em 1fr;
+  grid-column-gap: 0.8em;
+  margin: 0 0 0.45em;
+}
+.archive .date { line-height: 2.05; white-space: pre; } /* "Jan  1": the day is space-padded */
+.archive .meta { margin-left: 0.3em; font: 0.8125rem/1.5 var(--small); white-space: nowrap; }
+/* The 中文 chip: a tiny flat label (raised would mean "press me"). */
+.zh {
+  display: inline-block;
+  margin-left: 0.35em;
+  padding: 1px 4px 0;
+  font: 0.8125rem/1.25 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", var(--small);
+  border: 1px solid var(--lo);
+  vertical-align: 2px;
+}
+
+/* By topic: a run-in index on wide screens (the way 1990s FAQs indexed themselves), a plain
+   bulleted list on phones. */
+.topic { margin: 0 0 0.75em; }
+.topic h3 { display: inline; margin: 0; font-size: 1.1em; }
+.topic h3::after { content: " \2014  "; content: " \2014  " / ""; font-weight: normal; }
+.runin { display: inline; margin: 0; padding: 0; list-style: none; }
+.runin li { display: inline; margin: 0; }
+.runin .sep { margin: 0 0.3em; }
+
+/* ------------------------------------------------------------------ 10. Post */
+
+.post-head h1 { margin-bottom: 0.25em; }
+.byline { margin: 0 0 1.1em; font: 0.875rem/1.75 var(--small); } /* 24.5px lines: links 24px apart */
+.byline .sep { margin: 0 0.1em; }
+/* Long reads (10 minutes or more) repeat the footer's colour menu under the byline. */
+.colours-line { margin: -0.6em 0 1.2em; font: 0.8125rem/1.6 var(--small); }
+.colours-line select, .prefs select { font-size: 0.8125rem; min-height: 28px; padding: 3px 22px 3px 5px; }
+.print-url { display: none; }
+
+/* The post body is the reference box for the Contents rail on wide screens. */
+.article { position: relative; }
+.article h2 { font-size: 1.5em; }
+/* The pipeline renumbers in-body headings so every post's outline starts at h2 under the title,
+   and tags a heading with the size its Markdown level implies when the two differ: a post written
+   with ## and ### gets <h2 class="s3"> and <h3 class="s4">; a book list written with #### gets
+   <h2 class="s5">. */
+.article .s2 { font-size: 1.5em; font-style: normal; }
+.article .s3 { font-size: 1.32em; font-style: normal; }
+.article .s4 { font-size: 1.14em; font-style: normal; }
+.article .s5 { font-size: 1.04em; font-style: normal; }
+.article .s6 { font-size: 1em; font-style: italic; }
+.secno { margin-right: 0.15em; }
+
+/* Wide figures (code wells, tables) may leave the text measure on big screens. */
+@media (min-width: 56.25em) {
+  .article div.highlighter-rouge, .article .table-scroll { margin-left: -3em; margin-right: -3em; }
+  .article .table-scroll + .scroll-hint { margin-right: -3em; }
+  .projects-wrap { margin-left: -4.6em; margin-right: -4.6em; }
+}
+
+/* FAQ-style "↑ Contents" links close each top-level section. */
+.article .top { margin: 1.2em 0 -0.6em; text-align: right; font: 0.75rem/24px var(--small); }
+.article .top a { display: inline-block; padding: 0 2px; }
+
+.end { margin: 2em 0 0; text-align: center; font: 0.875rem var(--small); letter-spacing: 0.3em; }
+
+.share { margin: 0 0 1.2em; }
+.share h2, .pager h2 { margin: 0 0 0.35em; font-size: 1.12em; }
+.share p { margin: 0 0 0.5em; font: 0.875rem/1.9 var(--small); }
+.share .sep { margin: 0 0.3em; }
+.share .row { display: flex; align-items: center; }
+.share input { flex: 1 1 auto; min-width: 0; margin-right: 8px; font-size: 0.8125rem; }
+
+/* GNU-manual pager: « Previous (older) | Next (newer) », greyed text at either end. */
+.pager { display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 1.5em; margin: 0 0 1em; }
+.pager .next { text-align: right; }
+.pager .label { display: block; font: 0.8125rem/1.5 var(--small); }
+.pager a { line-height: 1.35; }
+.pager .none { font-style: italic; line-height: 1.35; }
+.up { margin: 0.4em 0 0; text-align: center; font: 0.875rem/1.6 var(--small); }
+
+/* ------------------------------------------------------------------ 11. Contents box */
+
+/* A Navigator group box: an etched frame with its title sitting on the top line. It is a
+   <details>, so it folds without JavaScript; an inline script closes it on phones before paint. */
+.toc { margin: 1.9em 0 1.7em; font-size: 0.9em; }
+.toc details {
+  padding: 0 1.1em 0.75em;
+  border: 1px solid var(--lo);
+  box-shadow: inset 1px 1px 0 var(--hi), 1px 1px 0 var(--hi);
+}
+/* Closed (phones, before first paint): the box folds to its title on a shaded rule, like a
+   section break with a label, rather than an empty frame. */
+.toc details:not([open]) { padding: 0; border-width: 1px 0 0; box-shadow: inset 0 1px 0 var(--hi); }
+.toc details:not([open]) summary { margin-bottom: 0; }
+/* The title sits on the top rule, like a <legend>. It is block-level and shrink-wrapped, because
+   a negative top margin does not lift an inline-block out of its line box. */
+.toc summary {
+  display: block;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin: -0.72em 0 0.35em -0.4em;
+  padding: 0 0.4em;
+  min-height: 24px;
+  background: var(--page);
+  font: bold 1.08em/1.3 var(--display);
+  cursor: pointer;
+  list-style: none;
+}
+.toc summary::-webkit-details-marker { display: none; }
+/* Marks are decoration: / "" gives them no spoken text (older browsers keep the first value). */
+.toc summary::before { content: "\25BE"; content: "\25BE" / ""; display: inline-block; width: 1em; font-weight: normal; }
+.toc details:not([open]) summary::before { content: "\25B8"; content: "\25B8" / ""; }
+.toc details[open] .toc-n { display: none; }
+.toc .toc-n { font-weight: normal; font-family: var(--small); font-size: 0.8em; }
+.toc ol, .toc ul { margin: 0; padding-left: 1.75em; }
+.toc ul { list-style: none; padding-left: 0; }
+.toc li { margin: 0 0 0.28em; line-height: 1.35; break-inside: avoid; page-break-inside: avoid; }
+/* The section being read (site.js, wide screens) is "selected", the way a 1997 list box drew it:
+   white on navy, no underline. Same weight as its neighbours, so the rail never reflows. */
+.toc a[aria-current], .toc a[aria-current]:visited {
+  color: var(--mark-ink);
+  background: var(--mark);
+  box-shadow: 0 0 0 2px var(--mark);
+  text-decoration: none;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+/* Forced colours drop background images (the menus' arrow) and the navy mark. */
+@media (forced-colors: active) {
+  select { appearance: auto; }
+  .toc a[aria-current] { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+}
+@media (min-width: 43.75em) and (max-width: 77.4375em) {
+  .toc ol, .toc ul { columns: 2; column-gap: 2.2em; }
+}
+/* Wide screens: the Contents frame of a framed site, without the frameset. The box leaves the
+   column for the empty grey margin and stays in view while the post scrolls. */
+@media (min-width: 77.5em) {
+  .toc {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 100%;
+    width: 15rem;
+    margin: 0 2.75rem 0 0;
+    font-size: 0.8em; /* 15px: engine/block_manager.py fits on one line */
+  }
+  /* Sticky box; only the list scrolls, so the title lifted onto the top rule is never clipped. */
+  .toc details {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 1.6rem;
+    padding: 0 0.8em 0.6em;
+  }
+  .toc details > ol, .toc details > ul { max-height: calc(100vh - 6rem); overflow-y: auto; overflow-x: hidden; }
+  /* Room for the focus ring and the mark inside the clipping list. */
+  .toc details > ol, .toc details > ul { padding-top: 4px; }
+  .toc ol { padding-left: 1.5em; }
+  .toc ul { padding-left: 4px; }
+  .toc li { margin-bottom: 0.4em; }
+  .article .top { display: none; }
+  /* The rail holds the left margin, so wide figures after it reach 6em to the right instead of
+     3em each side: the same width, clear of the rail. (A sibling selector, so no :has().) */
+  .article .toc ~ div.highlighter-rouge, .article .toc ~ .table-scroll { margin-left: 0; margin-right: -6em; }
+  .article .toc ~ .table-scroll + .scroll-hint { margin-right: -6em; }
+}
+
+/* ------------------------------------------------------------------ 12. Chinese posts */
+
+/* Song for Han characters, Times for Latin and figures, full-width punctuation from ZH Punct,
+   two-character indents, justified where lines are long enough to justify well. */
+.post-head h1:lang(zh), .article:lang(zh), .toc:lang(zh), .hello .sub { font-family: var(--cjk); }
+.post-head h1:lang(zh) { font-feature-settings: "palt"; }
+.article:lang(zh) { font-size: 1.04em; line-height: 1.85; text-autospace: normal; }
+.article:lang(zh) p { margin: 0 0 0.55em; text-indent: 2em; }
+@media (min-width: 43.75em) {
+  .article:lang(zh) p { text-align: justify; text-justify: inter-character; }
+}
+.article:lang(zh) h2, .article:lang(zh) h3, .article:lang(zh) h4, .article:lang(zh) h5 { font-family: var(--cjk); }
+.toc:lang(zh) { font-feature-settings: "palt"; }
+/* Fiction is set like a book: a title page, centred chapter heads, scene numbers between dashes. */
+.fiction h2 { margin: 1.2em 0 0.2em; text-align: center; font-size: 1.45em; font-weight: normal; letter-spacing: 0.02em; }
+.fiction h3 { margin: 0 0 1.4em; text-align: center; font-size: 1em; font-weight: normal; letter-spacing: 0.6em; text-indent: 0.6em; }
+.fiction h4 { margin: 2.2em 0 1em; text-align: center; font-size: 1.25em; font-feature-settings: "palt"; }
+.fiction h5 { margin: 1.8em 0 0.8em; text-align: center; font: bold 1em/1.4 var(--display); letter-spacing: 0.2em; }
+.fiction h5::before, .fiction h5::after { content: " \2014  "; content: " \2014  " / ""; font-weight: normal; }
+
+/* ------------------------------------------------------------------ 13. Projects */
+
+.projects { width: 100%; }
+.projects td.name, .projects td.upd { white-space: nowrap; }
+.projects td.num { text-align: right; }
+.projects .desc { display: block; }
+.projects .none { font-style: italic; }
+.projects .home { display: block; margin-top: 2px; }
+
+/* ------------------------------------------------------------------ 14. About */
+
+.portrait {
+  float: right;
+  width: 160px;
+  height: 160px;
+  margin: 0.35em 0 0.8em 1.2em;
+  border: 2px solid;
+  border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+}
+.bio { font-size: 0.95em; }
+.elsewhere dt { float: left; clear: left; width: 6.2em; }
+.elsewhere dd { margin: 0 0 0.35em 6.2em; }
+.colophon-list li { margin-bottom: 0.45em; }
+.claims { font: 0.8125rem/1.6 var(--small); }
+.claims li { margin: 0.1em 0; }
+.weight { font: 0.8125rem/1.6 var(--small); }
+
+/* ------------------------------------------------------------------ 15. Search */
+
+/* Results the AltaVista way: a count, then numbered hits with a line of context, the match in
+   bold, and the address in small print. */
+.results { margin: 0 0 1.4em; }
+.results .count { font: 0.875rem/1.6 var(--small); }
+.results .count:empty { margin: 0; } /* the status line exists before any search, so it is announced */
+.hits { margin: 0 0 1em; padding-left: 1.6em; }
+.hits li { margin: 0 0 1em; }
+.hits .t { font-size: 1.05em; }
+.hits .snip { margin: 0.15em 0 0.1em; font-size: 0.9em; line-height: 1.5; }
+.hits .snip:lang(zh) { font-family: var(--cjk); }
+.hits .snip b { font-weight: bold; }
+.hits .where { margin: 0; font: 0.8125rem/1.5 var(--small); }
+.hits .where .u { color: var(--ink); }
+.results .other { font: 0.8125rem/1.6 var(--small); }
+
+/* ------------------------------------------------------------------ 16. Not Found */
+
+.server { margin: 0; font-size: 1em; }
+.didyoumean { font-weight: bold; }
+.didyoumean .why { font: normal 0.8125rem/1.6 var(--small); }
+
+/* ------------------------------------------------------------------ 17. Footer */
+
+.foot { padding: 0 0 2.2em; text-align: center; }
+.foot .navbar { padding-top: 0.6em; }
+/* 88x31 buttons, the 1996 standard size, drawn as true pixel art. */
+.foot .badges { margin: 1.1em 0 0.9em; line-height: 0; } /* .foot p would zero the margin */
+.badges a { display: inline-block; margin: 3px; vertical-align: top; }
+.badges img { display: block; width: 88px; height: 31px; image-rendering: -webkit-optimize-contrast; image-rendering: pixelated; }
+.badges a:focus { outline: 2px dotted var(--ink); outline-offset: 2px; }
+.foot address { margin: 0 0 0.2em; font: italic 0.9375rem/1.6 var(--text); }
+.foot p { margin: 0 0 0.2em; font: 0.8125rem/1.7 var(--small); }
+.prefs { margin-top: 0.6em !important; }
+/* "Search this site" in every footer except /writing/ and the Not Found page, which carry the
+   full form in the page itself. */
+.foot .search.mini { max-width: 24em; margin: 1.1em auto 0; text-align: left; }
+.foot .search.mini label { font-weight: normal; font-size: 0.8125rem; }
+
+/* ------------------------------------------------------------------ 18. Small screens */
+
+@media (max-width: 40em) {
+  body { font-size: 1.125rem; line-height: 1.58; } /* 18px */
+  .page { padding: 0 16px; }
+  /* 16px fields: iOS zooms into smaller ones on focus. */
+  input[type="search"], input[type="url"], select.colours { font-size: 1rem; }
+  /* The date may wrap under large text settings. */
+  .byline > .nowrap:first-child { white-space: normal; }
+  h1 { font-size: 2em; }
+  h2 { font-size: 1.45em; }
+  .article h2, .article .s2 { font-size: 1.36em; }
+  h3, .article .s3 { font-size: 1.24em; }
+  .navbar { padding-top: 0.7em; font-size: 1rem; line-height: 1.75; }
+  .navbar .sep { margin: 0 0 0 0.24em; }
+  .columns { grid-template-columns: 1fr; }
+  .pager { grid-template-columns: 1fr; }
+  .pager .next { margin-top: 0.8em; text-align: left; }
+  .log li { grid-template-columns: 1fr; }
+  .log time { line-height: 1.5; }
+  /* A narrow date gutter, so titles keep most of the line. */
+  .archive li { grid-template-columns: 3.6em 1fr; grid-column-gap: 0.55em; }
+  .archive .date { font-size: 0.8125rem; line-height: 2.1; }
+  .topic h3 { display: block; margin: 0 0 0.15em; }
+  .topic h3::after { content: none; }
+  .runin { display: block; padding-left: 1.35em; list-style: disc; }
+  .runin li { display: list-item; margin: 0.15em 0; }
+  .runin .sep { display: none; }
+  .toc { font-size: 0.86em; }
+  .toc details { padding: 0 0.85em 0.6em; }
+  /* A 24px pitch at least, for the target-size rule (17px text gives only 22.7px). */
+  .toc li { margin-bottom: 0; line-height: 1.55; min-height: 24px; }
+  /* Never "E-" / "mail". */
+  .share p a { white-space: nowrap; }
+  .portrait { width: 112px; height: 112px; margin-left: 0.9em; }
+  pre { padding: 0.6em 0.7em; font-size: 0.76em; }
+  table { font-size: 0.8125rem; }
+  /* Scrolling tables keep readable columns instead of one word per line. */
+  .table-scroll th, .table-scroll td { min-width: 6.5em; }
+  .elsewhere dt { float: none; width: auto; }
+  .elsewhere dd { margin: 0 0 0.5em; }
+  .foot .badges { max-width: 196px; margin-left: auto; margin-right: auto; }
+
+  /* Projects: each row becomes a sunken well. The markup carries explicit table roles, so
+     screen readers keep the table even though the display changes. */
+  .projects-wrap { overflow: visible; }
+  .projects, .projects tbody, .projects tr, .projects td { display: block; width: auto; }
+  .projects { border: 0; border-spacing: 0; font-size: 0.875rem; }
+  .projects thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .projects tr {
+    margin: 0 0 12px;
+    padding: 0.55em 0.75em 0.65em;
+    background: var(--well);
+    color: var(--well-ink);
+    border: 2px solid;
+    border-color: var(--lo) var(--hi) var(--hi) var(--lo);
+    box-shadow: inset 1px 1px 0 var(--edge);
+  }
+  .projects td { min-width: 0; padding: 0; background: none; border: 0; }
+  .projects td.name { margin-bottom: 0.2em; font-size: 1rem; white-space: normal; overflow-wrap: break-word; }
+  .projects td.about { padding-bottom: 0.35em; }
+  .projects td.lang, .projects td.num, .projects td.upd { display: inline; font-size: 0.8125rem; }
+  .projects td.num::before { content: " \00b7  Stars: "; }
+  .projects td.upd::before { content: " \00b7  Updated "; }
+}
+@media (max-width: 22.5em) {
+  body { font-size: 1.0625rem; } /* 17px */
+  .navbar { font-size: 0.9375rem; }
+  h1 { font-size: 1.85em; }
+  .portrait { width: 88px; height: 88px; } /* leaves the About text a usable measure beside it */
+}
+
+/* ------------------------------------------------------------------ 19. Print */
+
+/* Posts print like a typed manuscript: black on white, no navigation, URLs after links. */
+@page { margin: 2cm 2.2cm; }
+@page {
+  @bottom-right { content: counter(page); font: 8pt Verdana, sans-serif; }
+  @bottom-left { content: "xingliu.me"; font: 8pt Verdana, sans-serif; }
+}
+@media print {
+  :root, :root[data-theme] {
+    --page: #ffffff; --ink: #000000; --link: #000000; --visited: #000000; --active: #000000;
+    --hi: #ffffff; --lo: #999999; --well: #ffffff; --well-ink: #000000; --head: #eeeeee;
+    --kw: #000000; --cm: #444444; --st: #000000; --nu: #000000; --ty: #000000; --fn: #000000;
+  }
+  html, body { background: #ffffff; color: #000000; }
+  body { font-size: 11pt; line-height: 1.45; }
+  .page { max-width: none; padding: 0; }
+  .navbar, .skip, .share, .pager, .up, .badges, .prefs, .colours-line, .search, .results, .code-bar,
+  .scroll-hint, .visitor-map, .masthead hr, .top, .toc summary::before { display: none !important; }
+  .print-url { display: block; margin: 0.5em 0 0; font: 8pt/1.4 var(--mono); }
+  a { color: #000000; text-decoration: none; }
+  .article a[href^="http"]::after { content: " <" attr(href) ">"; font: 8pt var(--mono); word-break: break-all; }
+  pre { white-space: pre-wrap; border: 1px solid #999999; box-shadow: none; font-size: 8.5pt; }
+  div.highlighter-rouge { padding-top: 0 !important; }
+  .table-scroll { overflow: visible; }
+  td { background: #ffffff; }
+  h1, h2, h3, h4, h5 { break-after: avoid; page-break-after: avoid; }
+  pre, blockquote, tr, .toc { break-inside: avoid; page-break-inside: avoid; }
+  .toc { position: static; width: auto; margin: 1em 0; }
+  .toc details { position: static; max-height: none; overflow: visible; border: 0; box-shadow: none; padding: 0; }
+  .toc summary { margin: 0; padding: 0; }
+  .article :target { background: none; box-shadow: none; }
+  .post ~ hr { display: none; }
+  .foot { padding: 0; }
+  .foot::before { content: "Printed from xingliu.me"; font: 8pt var(--small); }
+}

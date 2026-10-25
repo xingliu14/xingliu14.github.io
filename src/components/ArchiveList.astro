@@ -1,0 +1,17 @@
+---
+// Rows of posts, a date column in Monaco beside each title. Full rows ("Jan  1", then the 中文 chip
+// and the reading time, which stay together) make the archive; brief rows (year and month, title
+// only) list the newest posts on the Not Found page.
+import { monthDay } from "../lib/dates";
+import type { Post } from "../lib/posts";
+
+interface Props {
+  posts: Post[];
+  brief?: boolean;
+}
+
+const { posts, brief = false } = Astro.props;
+---
+
+<ul class="archive">{posts.map((post) => <Fragment>{"\n"}<li><time class="date" datetime={post.date}>{brief ? post.date.slice(0, 7) : monthDay(post.date)}</time><span><a href={post.url} lang={post.zh ? "zh-CN" : undefined}>{post.title}</a>{!brief && (post.zh ? <span class="nowrap"><span class="zh" lang="zh-CN" title="Written in Chinese">中文</span><span class="meta">{post.minutes}&nbsp;min</span></span> : <span class="meta">{post.minutes}&nbsp;min</span>)}</span></li></Fragment>)}
+</ul>

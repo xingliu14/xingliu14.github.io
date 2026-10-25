@@ -1,113 +1,67 @@
 ---
+// The front door: who this is, what's new, and where to go from here. The archive lives on /writing/.
+import { statSync } from "node:fs";
+import AboutText from "../components/AboutText.astro";
+import VisitorMap from "../components/VisitorMap.astro";
+import WhatsNew from "../components/WhatsNew.astro";
+import { ELSEWHERE, RESUME_URL } from "../config";
+import siteLog from "../data/site-log.json";
 import Base from "../layouts/Base.astro";
-import Masthead from "../components/Masthead.astro";
-import About from "../components/About.astro";
-import Thoughts from "../components/Thoughts.astro";
-import Projects from "../components/Projects.astro";
-import { VISITOR_MAP_SRC } from "../config";
+import { buildDate, later } from "../lib/dates";
+import { getProjects } from "../lib/github";
+import { pathsLastModified } from "../lib/last-modified.mjs";
 import { getPosts } from "../lib/posts";
+import { homeJsonLd } from "../lib/seo";
+import { getWhatsNew } from "../lib/whats-new";
 
 const posts = await getPosts();
+const projects = await getProjects();
+const today = buildDate();
+const whatsNew = getWhatsNew({ posts, projects, siteLog, today });
+// The page changes when its own files do, and when What's New gains an entry.
+const lastModified = later(
+  pathsLastModified(["src/pages/index.astro", "src/components/AboutText.astro", "src/data/site-log.json"]) ?? { date: today, iso: null },
+  { date: whatsNew[0]?.date ?? "", iso: null },
+);
+const resumeKb = Math.round(statSync(`public${RESUME_URL}`).size / 1024);
 ---
 
-<Base>
-  <div class="home-container" data-layout="sidebar">
-    <div class="split-layout">
-      <aside class="sidebar bg-gray-dark">
-        <Masthead metadata />
-      </aside>
-
-      <main class="main-content">
-        <div class="content-wrapper">
-          <About />
-
-          <div class="sections-grid">
-            {posts.length > 0 && <Thoughts posts={posts} />}
-
-            <Projects />
-          </div>
-
-          <div class="visitor-counter-wrapper">
-            <div class="visitor-counter">
-              <script is:inline type="text/javascript" id="mapmyvisitors" src={VISITOR_MAP_SRC}></script>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  </div>
+<Base
+  title="Xing Liu (刘星) — Home Page"
+  ogTitle="Xing Liu’s Home Page"
+  description="Xing Liu (刘星) is an engineer at Annapurna Labs of AWS working on LLM serving efficiency. Notes on LLM inference, books, crypto and life, plus projects and résumé."
+  path="/"
+  current="home"
+  ogType="website"
+  ogKey="home"
+  jsonld={homeJsonLd(lastModified)}
+  lastModified={lastModified}
+>
+<div class="hello">
+<img class="avatar" src="/avatar-240.jpg" width="120" height="120" alt="Vault Boy badge reading “My mom thinks I’m S.P.E.C.I.A.L.”">
+<h1>Xing Liu’s Home Page</h1>
+<p class="sub" lang="zh-CN">刘星的个人主页</p>
+</div>
+<AboutText />
+<WhatsNew items={whatsNew} postCount={posts.length} projectCount={projects.length} />
+<div class="columns">
+<section aria-labelledby="here-h">
+<h2 id="here-h">On this site</h2>
+<ul>
+<li><a href="/writing/">Writing</a> ({posts.length} posts)</li>
+<li><a href="/projects/">Projects</a> ({projects.length} repositories)</li>
+<li><a href="/about/">About me</a></li>
+<li><a href={RESUME_URL}>Résumé</a> (PDF, {resumeKb}&nbsp;KB)</li>
+<li><a href="/writing/#search">Search</a> (English or <span lang="zh-CN" class="nowrap">中文</span>)</li>
+</ul>
+</section>
+<section aria-labelledby="else-h">
+<h2 id="else-h">Elsewhere</h2>
+<ul>{ELSEWHERE.map((site) => <Fragment>{"\n"}<li><a href={site.url}>{site.name}</a></li></Fragment>)}
+<li><a href="/feed.xml">RSS feed</a> (full text)</li>
+<li><a href="/about/#colophon">How this site is made</a></li>
+</ul>
+</section>
+</div>
+<VisitorMap />
 </Base>
-
-<style is:global>
-/* Layout styles carried over unchanged from _layouts/home.html. */
-.home-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.sections-grid {
-  display: grid;
-  gap: 2.5rem;
-  margin: 2rem 0;
-}
-
-.split-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  padding: 2rem;
-  width: 300px;
-}
-
-.main-content {
-  flex: 1;
-  padding: 2.5rem;
-}
-
-.theme-dark {
-  background-color: #1a1a1a;
-  color: #ffffff;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-  .split-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-
-  .main-content {
-    padding: 1.5rem;
-  }
-
-  .sections-grid {
-    gap: 1.5rem;
-  }
-}
-</style>

@@ -1,0 +1,26 @@
+---
+// Interim projects page, until redesign step 3 builds the bevelled table: every repository the
+// owner has started on GitHub, with what it is.
+import Base from "../../layouts/Base.astro";
+import { buildDate } from "../../lib/dates";
+import { getProjects } from "../../lib/github";
+import { pathsLastModified } from "../../lib/last-modified.mjs";
+
+const projects = await getProjects();
+const lastModified = pathsLastModified(["src/pages/projects/index.astro"]) ?? { date: buildDate(), iso: null };
+---
+
+<Base
+  title="Projects — Xing Liu"
+  ogTitle="Projects"
+  description={`The ${projects.length} public repositories Xing Liu has started on GitHub (forks left out): what each one is, its language, its stars and when it last changed.`}
+  path="/projects/"
+  current="projects"
+  ogKey="projects"
+  lastModified={lastModified}
+>
+<p class="crumbs"><a href="/">Xing Liu’s Home Page</a> › Projects</p>
+<h1>Projects</h1>
+<ul>{projects.map((project) => <Fragment>{"\n"}<li><a href={project.html_url}>{project.name}</a>{project.about && `: ${project.about}`}</li></Fragment>)}
+</ul>
+</Base>

@@ -15,10 +15,12 @@ Personal site and blog for Xing Liu at https://xingliu.me, built with Astro and 
 
 ## Look and markup
 
-- The design is Primer 11 (`primer/build/build.css`, imported in `src/layouts/Base.astro`) plus `src/styles/global.scss`. Each page's `<style is:global>` block is the layout CSS carried over from the Jekyll layouts.
-- `src/lib/markdown.mjs` makes code blocks and inline code emit the same markup kramdown/Rouge did and highlights with Prism; token colours live in `src/styles/_highlight-syntax.scss`.
-- `compressHTML: false` is deliberate: the whitespace between inline elements (an icon and its label) renders as a space the layout relies on.
-- `vite.build.cssTarget` targets older browsers on purpose: with Vite's default the minifier rewrites media queries into range syntax (`width <= 768px`), which Safari before 16.4 ignores.
+- The design is "Navigator Grey": a 1997 Netscape-style home page, typeset with care. The rule behind every choice: only what Navigator could draw, set the way a typographer would.
+- `public/style.css` and `public/site.js` are served verbatim: no Sass, no bundling. `src/layouts/Base.astro` links them with a `?v=` hash of their contents and writes every `<script>` with `is:inline`, so Astro emits no `_astro/` folder. Their budgets include the comments, and both files are close to them: style.css at most 36,000 bytes (11,000 gzipped), site.js at most 18,000 (7,000 gzipped).
+- Breakpoints are in em (`40em` is 640px at the 16px default), so a reader's larger default font size never pushes the layout off screen. site.js's `(min-width: 77.5em)` and the contents box's `(max-width: 40em)` script match them.
+- `src/lib/markdown.mjs` makes code blocks and inline code emit the same markup kramdown/Rouge did and highlights with Prism; token colours live in `public/style.css`.
+- `compressHTML: false` is deliberate: the single spaces between navigation items (`src/lib/nav.ts`) and other inline elements render as spaces, and are where a narrow line may wrap.
+- `vite.build.cssTarget` targets older browsers on purpose: with Vite's default the minifier rewrites media queries into range syntax (`width <= 40em`), which Safari before 16.4 ignores.
 
 ## Files
 
@@ -27,4 +29,4 @@ Personal site and blog for Xing Liu at https://xingliu.me, built with Astro and 
 ## Data
 
 - `src/config.ts` holds the resume path, social accounts, and Projects settings.
-- The sidebar profile and the Projects cards come from the GitHub API at build time (`src/lib/github.ts`); when the API is unreachable the build falls back to `src/data/github-snapshot.json`. CI passes `GITHUB_TOKEN` so it isn't rate limited.
+- The Projects page and What's New's new repositories come from the GitHub API at build time (`src/lib/github.ts`); when the API is unreachable the build falls back to `src/data/github-snapshot.json`. CI passes `GITHUB_TOKEN` so it isn't rate limited.

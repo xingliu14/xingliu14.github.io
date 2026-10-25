@@ -1,161 +1,36 @@
 ---
+// Not Found, the way Apache said it, with a way back: a search form, the newest posts and the
+// archive. GitHub Pages serves this file at any missing address, so every link here is
+// root-relative. site.js names the missing path, fills in the search from it, and suggests the post
+// it probably meant.
+import ArchiveList from "../components/ArchiveList.astro";
+import SearchForm from "../components/SearchForm.astro";
 import Base from "../layouts/Base.astro";
-import Masthead from "../components/Masthead.astro";
-import Octicon from "../components/Octicon.astro";
+import { buildDate, later } from "../lib/dates";
+import { pathsLastModified } from "../lib/last-modified.mjs";
+import { getPosts } from "../lib/posts";
+
+const posts = await getPosts();
+const lastModified = later(pathsLastModified(["src/pages/404.astro"]) ?? { date: buildDate(), iso: null }, { date: posts[0]?.date ?? "", iso: null });
 ---
 
-<Base title="Page not found">
-  <div class="default-container" data-layout="sidebar">
-    <div class="split-layout">
-      <aside class="sidebar bg-gray-dark">
-        <Masthead metadata />
-      </aside>
-
-      <main class="main-content">
-        <div class="content-wrapper animate-fade-in">
-          <article class="content-card">
-            <div class="content-nav">
-              <a href="/" class="nav-link">
-                <Octicon name="chevron-left" class="nav-icon" fill="var(--color-accent, #2563eb)" label="Home" />
-                <span>Home</span>
-              </a>
-            </div>
-
-            <h1 class="page-title">Page not found</h1>
-            <div class="page-content">
-              <p>The page you're looking for doesn't exist or has moved.</p>
-            </div>
-          </article>
-        </div>
-      </main>
-    </div>
-  </div>
+<Base
+  title="Not Found — Xing Liu"
+  description="This page does not exist on xingliu.me. Search the posts or start from the archive."
+  path="/404.html"
+  current="404"
+  noindex
+  footerSearch={false}
+  lastModified={lastModified}
+>
+<h1>Not Found</h1>
+<p id="missing">The requested URL was not found on this server.</p>
+<p class="didyoumean" id="didyoumean" hidden></p>
+<p>Perhaps it moved, or the link has a typo. One of these may help:</p>
+<SearchForm variant="404" />
+<h2 id="newest">The five newest posts</h2>
+<ArchiveList posts={posts.slice(0, 5)} brief />
+<p>Or start again from the <a href="/">home page</a> or the <a href="/writing/">Writing archive</a>.</p>
+<hr>
+<address class="server">GitHub Pages server at xingliu.me Port 443</address>
 </Base>
-
-<style is:global>
-/* Layout styles carried over unchanged from _layouts/default.html. */
-.default-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.content-card {
-  background: var(--color-surface, #ffffff);
-  border-radius: var(--radius-lg, 16px);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.08));
-  padding: 2.5rem;
-  margin-top: 2rem;
-}
-
-.content-nav {
-  margin-bottom: 2rem;
-}
-
-.nav-link {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-accent, #2563eb);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: opacity 0.2s ease;
-}
-
-.nav-link:hover {
-  opacity: 0.7;
-  text-decoration: none;
-}
-
-.nav-icon {
-  margin-right: 0.5rem;
-}
-
-.page-title {
-  font-size: 2.25rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
-  color: var(--color-text-primary, #0f172a);
-}
-
-.page-content {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: var(--color-text-secondary, #475569);
-}
-
-.split-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  padding: 2rem;
-  width: 300px;
-}
-
-.main-content {
-  flex: 1;
-  padding: 2.5rem;
-  background: var(--color-surface-elevated, #f8fafc);
-}
-
-.theme-dark {
-  --color-surface: #2d333b;
-  --color-surface-elevated: #22272e;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: rgba(255, 255, 255, 0.85);
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-accent: #58a6ff;
-}
-
-.theme-dark .content-card {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-  .split-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-
-  .main-content {
-    padding: 1.5rem;
-  }
-
-  .content-card {
-    margin: 1rem 0;
-    padding: 1.5rem;
-  }
-
-  .page-title {
-    font-size: 1.75rem;
-  }
-}
-</style>

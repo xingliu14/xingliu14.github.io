@@ -1,0 +1,43 @@
+---
+// Interim archive, until redesign step 3 builds this page in full: the search form, and every post
+// by year and by topic, so the links that point here (#search, #y<year>, #topic-<id>) land.
+import ArchiveList from "../../components/ArchiveList.astro";
+import SearchForm from "../../components/SearchForm.astro";
+import Base from "../../layouts/Base.astro";
+import { buildDate, later } from "../../lib/dates";
+import { pathsLastModified } from "../../lib/last-modified.mjs";
+import { topics } from "../../lib/post-meta.mjs";
+import { getPosts } from "../../lib/posts";
+
+const posts = await getPosts();
+const years = [...new Set(posts.map((post) => post.year))];
+const lastModified = later(
+  pathsLastModified(["src/pages/writing/index.astro", "src/data/posts.json"]) ?? { date: buildDate(), iso: null },
+  posts.map((post) => post.lastModified).reduce(later),
+);
+---
+
+<Base
+  title="Writing — Xing Liu"
+  ogTitle="Writing"
+  description={`All ${posts.length} posts by Xing Liu, by date and by topic: notes on LLM inference, books, crypto and life, and a detective story in Chinese.`}
+  path="/writing/"
+  current="writing"
+  ogKey="writing"
+  footerSearch={false}
+  lastModified={lastModified}
+>
+<p class="crumbs"><a href="/">Xing Liu’s Home Page</a> › Writing</p>
+<h1>Writing</h1>
+<SearchForm variant="main" />
+<h2 id="by-date">By date</h2>
+{years.map((year) => {
+  const inYear = posts.filter((post) => post.year === year);
+  return <Fragment><h3 class="year" id={`y${year}`}>{year} <span class="count">({inYear.length})</span></h3>{"\n"}<ArchiveList posts={inYear} />{"\n"}</Fragment>;
+})}<hr>
+<h2 id="by-topic">By topic</h2>
+{topics.map((topic) => {
+  const inTopic = posts.filter((post) => post.topic.id === topic.id);
+  return <Fragment><div class="topic"><h3 id={`topic-${topic.id}`}>{topic.name} <span class="count">({inTopic.length})</span></h3><ul class="runin">{inTopic.map((post, i) => <li><a href={post.url} lang={post.zh ? "zh-CN" : undefined}>{post.title}</a>{i < inTopic.length - 1 && <span class="sep" aria-hidden="true">·</span>}</li>)}</ul></div>{"\n"}</Fragment>;
+})}
+</Base>

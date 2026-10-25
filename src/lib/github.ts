@@ -89,10 +89,6 @@ export function getGitHubData(): Promise<GitHubData> {
   return data;
 }
 
-export async function getOwner(): Promise<Owner> {
-  return (await getGitHubData()).owner;
-}
-
 /** Every public repository not excluded by PROJECTS (forks, by default), most recently pushed first. */
 export async function getProjects(): Promise<Project[]> {
   const { repos } = await getGitHubData();

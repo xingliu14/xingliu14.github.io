@@ -1,0 +1,31 @@
+---
+// Interim About page, until redesign step 3 builds it in full: the owner's own words, and the
+// colophon's anchor, which the home page links to.
+import AboutText from "../../components/AboutText.astro";
+import { ELSEWHERE, RESUME_URL } from "../../config";
+import Base from "../../layouts/Base.astro";
+import { buildDate } from "../../lib/dates";
+import { pathsLastModified } from "../../lib/last-modified.mjs";
+
+const lastModified =
+  pathsLastModified(["src/pages/about/index.astro", "src/components/AboutText.astro", "public/resume"]) ?? { date: buildDate(), iso: null };
+---
+
+<Base
+  title="About Xing Liu (刘星)"
+  description="Xing Liu (刘星) is an engineer at Annapurna Labs of AWS focused on LLM serving, previously at Google (Gemini serving and quantization) and Yahoo. Résumé, links and how this site is made."
+  path="/about/"
+  current="about"
+  ogType="profile"
+  ogKey="about"
+  lastModified={lastModified}
+>
+<p class="crumbs"><a href="/">Xing Liu’s Home Page</a> › About</p>
+<h1>About Me</h1>
+<AboutText />
+<ul>
+<li><a href={RESUME_URL}>Résumé</a> (PDF)</li>{ELSEWHERE.map((site) => <Fragment>{"\n"}<li><a href={site.url}>{site.name}</a></li></Fragment>)}
+</ul>
+<h2 id="colophon">Colophon</h2>
+<p>This site is built with Astro from Markdown posts, and hosted on GitHub Pages.</p>
+</Base>

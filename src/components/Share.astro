@@ -1,0 +1,27 @@
+---
+// "Tell a friend about this page": plain links to each service's own share form (no third-party
+// script, no target), and the page's address in a read-only field. site.js adds the Copy link button.
+import type { Post } from "../lib/posts";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const canonical = new URL(post.url, Astro.site).href;
+const u = encodeURIComponent(canonical);
+const t = encodeURIComponent(post.title);
+const links = [
+  ["LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`],
+  ["X", `https://x.com/intent/post?url=${u}&text=${t}`],
+  ["Hacker News", `https://news.ycombinator.com/submitlink?u=${u}&t=${t}`],
+  ["Reddit", `https://www.reddit.com/submit?url=${u}&title=${t}`],
+  ["E-mail", `mailto:?subject=${t}&body=${u}`],
+];
+---
+
+<section class="share" aria-labelledby="share-h" lang="en">
+<h2 id="share-h">Tell a friend about this page</h2>
+<p>{links.map(([name, href], i) => <Fragment>{i > 0 && <span class="sep" aria-hidden="true">|</span>}<a href={href}>{name}</a></Fragment>)}</p>
+<div class="row"><label for="permalink" class="visually-hidden">Address of this page</label><input id="permalink" type="url" value={canonical} readonly><button type="button" class="small copy-link">Copy link</button></div>
+</section>

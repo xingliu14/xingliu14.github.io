@@ -6,8 +6,8 @@ import { normalizeHeadings, postStructure, rougeCode } from "./src/lib/markdown.
 // Project sites without their own domain (e.g. /GameKingdom/) are served under it too.
 export default defineConfig({
   site: "https://xingliu.me",
-  // Keep the whitespace between inline elements (e.g. an icon and its label): it renders as a
-  // space, and the layout was designed with it there, as Jekyll emitted it.
+  // Keep whitespace as written: the single spaces between the navigation's items (src/lib/nav.ts)
+  // and between other inline elements render as spaces, and are where a narrow line may wrap.
   compressHTML: false,
   env: {
     schema: {
@@ -17,14 +17,10 @@ export default defineConfig({
   },
   vite: {
     build: {
-      // Vite's default target lets the minifier rewrite `(max-width: 768px)` as `(width <= 768px)`,
-      // which Safari before 16.4 ignores, dropping the mobile layout. Target older browsers.
+      // public/style.css is served as it is, but any CSS Vite processes must still work in Safari
+      // 14: with Vite's default target the minifier rewrites `(max-width: 40em)` as `(width <= 40em)`,
+      // which Safari before 16.4 ignores.
       cssTarget: ["chrome87", "edge88", "firefox78", "safari14"],
-    },
-    css: {
-      // Primer 11 still carries old IE hacks (`@media (min-width: 0\0)`) that browsers ignore;
-      // let the minifier drop them instead of failing.
-      lightningcss: { errorRecovery: true },
     },
   },
   markdown: {

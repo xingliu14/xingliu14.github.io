@@ -1,0 +1,14 @@
+---
+// "[ Home | Writing | Projects | About | Search ]" (src/lib/nav.ts), in the masthead and the footer.
+import { navHtml, type Current } from "../lib/nav";
+
+interface Props {
+  current: Current;
+  section?: "writing";
+  label: "Main" | "Footer";
+}
+
+const { current, section, label } = Astro.props;
+---
+
+<Fragment set:html={navHtml(current, section, label)} />

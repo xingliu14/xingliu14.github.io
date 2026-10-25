@@ -1,0 +1,23 @@
+---
+// A search form in one of three variants. Without JavaScript each one submits to DuckDuckGo, limited
+// to this site. With site.js, the main form on /writing/ searches the posts in place, and the
+// other two (data-go) take the query there.
+interface Props {
+  /** "main": /writing/, with the results block; "404": the Not Found page; "mini": the footer. */
+  variant: "main" | "404" | "mini";
+}
+
+const FORMS = {
+  main: { cls: "search", id: "search", input: "q", label: "Search all posts", name: undefined, go: undefined },
+  "404": { cls: "search", id: "search-404", input: "q404", label: "Search all posts", name: "Search the posts", go: "/writing/" },
+  mini: { cls: "search mini", id: "site-search", input: "site-q", label: "Search this site", name: "Search this site", go: "/writing/" },
+};
+
+const { variant } = Astro.props;
+const form = FORMS[variant];
+---
+
+<form class={form.cls} id={form.id} role="search" aria-label={form.name} action="https://duckduckgo.com/" method="get" data-go={form.go}>
+<label for={form.input}>{form.label}</label>
+<div class="row"><input id={form.input} name="q" type="search" placeholder="KV cache, Bitcoin, 侦探…" autocomplete="off"><input type="hidden" name="sites" value="xingliu.me"><button type="submit">Search</button></div>{variant === "main" && <Fragment>{"\n"}<p class="hint">Searches titles and full text, in English or <span lang="zh-CN" class="nowrap">中文</span>.</p></Fragment>}
+</form>{variant === "main" && <Fragment>{"\n"}<div class="results" id="results"><p class="count" id="search-status" role="status"></p></div></Fragment>}

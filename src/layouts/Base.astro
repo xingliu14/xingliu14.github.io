@@ -1,40 +1,102 @@
 ---
-import "primer/build/build.css";
-import "../styles/global.scss";
-import { getOwner } from "../lib/github";
+// Every page's frame: the head's metadata, the masthead, <main> and the footer. The page is plain
+// HTML: public/style.css and public/site.js are served as they are, and every <script> here is
+// is:inline, so Astro neither bundles nor moves one. Nothing else reaches the browser.
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import Footer from "../components/Footer.astro";
+import NavBar from "../components/NavBar.astro";
+import SocialMeta from "../components/SocialMeta.astro";
+import type { Dated } from "../lib/dates";
+import type { Current } from "../lib/nav";
+import { jsonLdText } from "../lib/seo";
 
 interface Props {
-  /** Defaults to the owner's name. */
-  title?: string;
-  /** Defaults to the owner's GitHub bio. */
-  description?: string;
-  lang?: string;
+  title: string;
+  description: string;
+  /** The page's own path, e.g. "/writing/"; the canonical URL is the site plus this. */
+  path: string;
+  lang?: "en" | "zh-CN";
+  current: Current;
+  section?: "writing";
+  ogType?: "website" | "article" | "profile";
+  /** The page's card, /og/<key>.png. */
+  ogKey?: string;
+  /** The shared title, when it differs from <title>. */
+  ogTitle?: string;
+  jsonld?: object;
+  /** The Not Found page: no canonical, no Open Graph, no JSON-LD, and kept out of search engines. */
+  noindex?: boolean;
+  footerSearch?: boolean;
+  lastModified: Dated;
+  article?: { published: string; modified: string | null; section: string };
 }
 
-const owner = await getOwner();
-const name = owner.name || owner.login;
-const { title = name, description = (owner.bio ?? "").replace(/\s+/g, " ").trim(), lang = "en" } = Astro.props;
+const {
+  title,
+  description,
+  path,
+  lang = "en",
+  current,
+  section,
+  ogType = "website",
+  ogKey,
+  ogTitle = title,
+  jsonld,
+  noindex = false,
+  footerSearch = true,
+  lastModified,
+  article,
+} = Astro.props;
+
+const canonical = new URL(path, Astro.site).href;
+
+// View Source was how everyone learned HTML, so the source says hello.
+const GREETING = `<!--
+  xingliu.me, set like a 1997 home page: no framework on the page, no web fonts, and no tracking
+  except the visitor map on the home page.
+  View Source was how everyone learned HTML. It still works here.
+-->`;
+
+// Before first paint: mark <html class="js">, so CSS can reserve room for what site.js adds, and
+// apply a stored colour choice, so the page never flashes the wrong colours.
+const HEAD_SCRIPT = `(function(d){var r=d.documentElement;r.classList.add("js");try{var c=localStorage.getItem("colours");if(c!=="grey"&&c!=="white"&&c!=="night")return;r.setAttribute("data-theme",c);var t={grey:"#c0c0c0",white:"#ffffff",night:"#333333"}[c],m=d.querySelectorAll('meta[name="theme-color"]'),i;for(i=0;i<m.length;i++)m[i].setAttribute("content",t);d.querySelector('meta[name="color-scheme"]').setAttribute("content",c==="night"?"dark":"light")}catch(e){}})(document)`;
+
+// Cache-busters: the first 8 hex digits of each file's SHA-256, so a changed file gets a new URL.
+const version = (file: string) => createHash("sha256").update(readFileSync(`public${file}`)).digest("hex").slice(0, 8);
 ---
 
-<!doctype html>
-<html lang={lang} class="min-height-full">
-  <head>
-    <meta charset="utf-8" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <meta property="og:title" content={name} />
-    <meta property="og:image" content={owner.avatar_url} />
-    <meta property="og:description" content={description} />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  </head>
-  <body class="bg-white min-height-full">
-    <slot />
-    <footer class="site-footer" lang="en">
-      <p>&copy; {new Date().getFullYear()} {name}. Built with Astro.</p>
-    </footer>
-  </body>
+<!DOCTYPE html>
+<Fragment set:html={GREETING} />
+<html lang={lang}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+{noindex ? <meta name="robots" content="noindex"> : <link rel="canonical" href={canonical}>}
+<meta name="author" content="Xing Liu">
+<meta name="generator" content={Astro.generator}>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#c0c0c0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#333333" media="(prefers-color-scheme: dark)">
+<script is:inline set:html={HEAD_SCRIPT}></script>
+<link rel="stylesheet" href={`/style.css?v=${version("/style.css")}`}>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="alternate" type="application/rss+xml" title="Xing Liu’s Home Page" href="https://xingliu.me/feed.xml">
+{!noindex && ogKey && <Fragment><SocialMeta ogType={ogType} ogKey={ogKey} title={ogTitle} description={description} canonical={canonical} lang={lang} article={article} />{"\n"}</Fragment>}{!noindex && jsonld && <Fragment><script is:inline type="application/ld+json" set:html={jsonLdText(jsonld)}></script>{"\n"}</Fragment>}<script is:inline src={`/site.js?v=${version("/site.js")}`} defer></script>
+</head>
+<body>
+<div class="page">
+<a class="skip" href="#main" lang="en">Skip to content</a>
+<header class="masthead" lang="en">
+<NavBar current={current} section={section} label="Main" />
+<hr>
+</header>
+<main id="main" tabindex="-1"><slot /></main>
+<Footer current={current} section={section} footerSearch={footerSearch} lastModified={lastModified} />
+</div>
+</body>
 </html>

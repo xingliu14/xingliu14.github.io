@@ -1,0 +1,29 @@
+---
+// Every page's footer: the navigation again, a small search form, the four buttons, the address, the
+// page's true "Last modified" date (src/lib/last-modified.mjs) and the colour menu.
+import Badges from "./Badges.astro";
+import ColoursSelect from "./ColoursSelect.astro";
+import NavBar from "./NavBar.astro";
+import SearchForm from "./SearchForm.astro";
+import { longDate, type Dated } from "../lib/dates";
+import type { Current } from "../lib/nav";
+
+interface Props {
+  current: Current;
+  section?: "writing";
+  /** False on /writing/ and the Not Found page, which carry the full search form themselves. */
+  footerSearch: boolean;
+  lastModified: Dated;
+}
+
+const { current, section, footerSearch, lastModified } = Astro.props;
+---
+
+<footer class="foot" lang="en">
+<hr>
+<NavBar current={current} section={section} label="Footer" />
+{footerSearch && <Fragment><SearchForm variant="mini" />{"\n"}</Fragment>}<Badges />
+<address>Xing Liu (<span lang="zh-CN" class="nowrap">刘星</span>) · <a href="/">xingliu.me</a></address>
+<p>Last modified: <time datetime={lastModified.date}>{longDate(lastModified.date)}</time></p>
+<p class="prefs"><label for="colours">Page colours:</label> <ColoursSelect id="colours" /></p>
+</footer>
