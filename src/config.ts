@@ -4,24 +4,24 @@ export const GITHUB_USER = "xingliu14";
 
 export const RESUME_URL = "/resume/Xing_Liu_Resume_20250924.pdf";
 
-// Accounts shown in the sidebar, in this order. Keys are services in src/data/social-media.json;
-// services with a share_url_prefix also appear in each post's Share box.
-export const SOCIAL_MEDIA: Record<string, string> = {
-  instagram: "fancybaseball",
-  linkedin: "xingliu14",
-};
+// The owner's accounts on other sites, in the order the pages list them.
+export const ELSEWHERE = [
+  { name: "GitHub", url: "https://github.com/xingliu14" },
+  { name: "LinkedIn", url: "https://www.linkedin.com/in/xingliu14" },
+  { name: "Instagram", url: "https://www.instagram.com/fancybaseball" },
+];
 
+// Which public repositories the Projects page leaves out. It lists the rest, most recently pushed
+// first (src/lib/github.ts).
 export const PROJECTS = {
-  sortBy: "pushed" as "pushed" | "stars",
-  limit: 3,
   exclude: {
-    archived: false,
     forks: true,
     // Repository names to hide.
     projects: [] as string[],
   },
 };
 
-// mapmyvisitors.com widget at the bottom of the home page.
+// The mapmyvisitors.com widget on the home page, recoloured to match the page: `co` is the band
+// and ocean (navy), `cl` the land (silver), `ct` the count text (white), and `w` the width.
 export const VISITOR_MAP_SRC =
-  "//mapmyvisitors.com/map.js?d=nY-hLRI3Ho-Kv8Mx6Mj1mhV0QxgQGbD7bEJBmraNSIU&cl=ffffff&w=300";
+  "https://mapmyvisitors.com/map.js?d=nY-hLRI3Ho-Kv8Mx6Mj1mhV0QxgQGbD7bEJBmraNSIU&cl=c0c0c0&w=300&co=000080&ct=ffffff";

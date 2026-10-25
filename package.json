@@ -13,14 +13,25 @@
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "0.4.5",
+    "@astrojs/rss": "4.0.19",
+    "@astrojs/sitemap": "3.7.4",
     "astro": "7.4.2",
+    "github-slugger": "2.0.0",
     "primer": "11.0.0",
     "prismjs": "1.30.0"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@expo-google-fonts/gelasio": "0.4.1",
+    "@expo-google-fonts/noto-serif-sc": "0.4.4",
+    "@expo-google-fonts/tinos": "0.4.2",
+    "@resvg/resvg-js": "2.6.2",
     "@types/prismjs": "1.26.6",
+    "dejavu-fonts-ttf": "2.37.3",
+    "html-validate": "11.17.0",
     "sass": "1.106.1",
+    "satori": "0.63.2",
+    "subset-font": "2.9.0",
     "typescript": "6.0.3"
   }
 }

@@ -1,0 +1,8 @@
+# Commits that changed files without changing what they say. src/lib/last-modified.mjs skips them
+# when it dates a post's last edit, and GitHub's blame view skips them too. A commit that touches
+# posts for any reason other than their words (a move, a reformat, a retyped quote) goes here,
+# by its full hash.
+
+# Migrate the site from Jekyll to Astro: moved every post to src/content/posts/ and retyped the
+# quotes in two of them.
+f5ee7d63827994d20c4079b0f45b63be51f7a7c1

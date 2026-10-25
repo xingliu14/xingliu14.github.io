@@ -1,4 +1,4 @@
-import { SOCIAL_MEDIA } from "../config";
+import { ELSEWHERE } from "../config";
 import services from "../data/social-media.json";
 
 interface Service {
@@ -16,11 +16,14 @@ export interface SocialAccount {
 
 const SERVICES: Record<string, Service> = services;
 
-/** Configured accounts in config order; throws on a service missing from social-media.json. */
+/**
+ * The ELSEWHERE accounts that social-media.json has an icon for, in config order. (The old sidebar
+ * shows GitHub on its own line.)
+ */
 export function getSocialAccounts(): SocialAccount[] {
-  return Object.entries(SOCIAL_MEDIA).map(([key, username]) => {
-    const service = SERVICES[key];
-    if (!service) throw new Error(`Unknown social media service "${key}" in src/config.ts`);
-    return { service, username };
+  return ELSEWHERE.flatMap(({ name, url }) => {
+    const service = SERVICES[name.toLowerCase()];
+    const prefix = service?.profile_url_prefix;
+    return prefix && url.startsWith(prefix) ? [{ service, username: url.slice(prefix.length) }] : [];
   });
 }

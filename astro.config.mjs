@@ -1,6 +1,6 @@
 import { defineConfig, envField } from "astro/config";
 import { satteri } from "@astrojs/markdown-satteri";
-import { rougeCode } from "./src/lib/markdown.mjs";
+import { normalizeHeadings, postStructure, rougeCode } from "./src/lib/markdown.mjs";
 
 // Served at the custom domain set in Settings → Pages (Actions deployments ignore a CNAME file).
 // Project sites without their own domain (e.g. /GameKingdom/) are served under it too.
@@ -28,8 +28,9 @@ export default defineConfig({
     },
   },
   markdown: {
-    // rougeCode does the highlighting so code keeps Jekyll's markup and colours.
+    // rougeCode does the highlighting so code keeps Jekyll's markup and colours; the other two
+    // plugins shape the post body (src/lib/markdown.mjs).
     syntaxHighlight: false,
-    processor: satteri({ hastPlugins: [rougeCode] }),
+    processor: satteri({ mdastPlugins: [normalizeHeadings], hastPlugins: [rougeCode, postStructure] }),
   },
 });

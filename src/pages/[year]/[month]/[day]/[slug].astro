@@ -3,7 +3,7 @@ import { render } from "astro:content";
 import Base from "../../../../layouts/Base.astro";
 import Masthead from "../../../../components/Masthead.astro";
 import Octicon from "../../../../components/Octicon.astro";
-import { formatDate, getPosts, summarize, type Post } from "../../../../lib/posts";
+import { formatDate, getPosts, type Post } from "../../../../lib/posts";
 import { getSocialAccounts } from "../../../../lib/social";
 
 export async function getStaticPaths() {
@@ -27,7 +27,7 @@ const shareServices = getSocialAccounts()
   .filter((service) => service.share_url_prefix);
 ---
 
-<Base title={title} description={summarize(post.entry.rendered?.html ?? "")} lang={lang}>
+<Base title={title} description={post.description} lang={lang}>
   <div class="post-container" data-layout="sidebar">
     <div class="split-layout">
       <aside class="sidebar bg-gray-dark" lang="en">
