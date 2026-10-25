@@ -247,11 +247,12 @@ b, strong { font-weight: bold; }
 sup, sub { line-height: 0; font-size: 0.75em; }
 img { max-width: 100%; height: auto; border: 0; }
 
-/* Footnotes (no post has any yet): bracketed reference marks, notes under a shaded rule. */
+/* Footnotes (no post has any yet): bracketed marks that a word joiner (U+2060) holds to the word
+   before, and notes under a shaded rule. */
 .footnotes { font-size: 0.9em; margin-top: 2em; border-top: 1px solid var(--lo); box-shadow: inset 0 1px 0 var(--hi); padding-top: 0.6em; }
 .footnotes ol { padding-left: 1.6em; }
 a[data-footnote-ref], a.footnote-ref { text-decoration: none; }
-a[data-footnote-ref]::before, a.footnote-ref::before { content: "["; }
+a[data-footnote-ref]::before, a.footnote-ref::before { content: "\2060["; }
 a[data-footnote-ref]::after, a.footnote-ref::after { content: "]"; }
 
 /* The heading a contents link jumped to sits in a white band, like a selected list item. */
@@ -331,7 +332,6 @@ th, td {
 td { background: var(--well); color: var(--well-ink); }
 th { background: var(--head); font-weight: bold; }
 /* GFM column alignment, turned into classes by the Markdown pipeline (no inline styles). */
-th.al-left, td.al-left { text-align: left; }
 th.al-center, td.al-center { text-align: center; }
 th.al-right, td.al-right { text-align: right; }
 table code { font-size: 0.92em; }
@@ -560,7 +560,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .end { margin: 2em 0 0; text-align: center; font: 0.875rem var(--small); letter-spacing: 0.3em; }
 
 .share { margin: 0 0 1.2em; }
-.share h2, .pager h2 { margin: 0 0 0.35em; font-size: 1.12em; }
+.share h2 { margin: 0 0 0.35em; font-size: 1.12em; }
 .share p { margin: 0 0 0.5em; font: 0.875rem/1.9 var(--small); }
 .share .sep { margin: 0 0.3em; }
 .share .row { display: flex; align-items: center; }
@@ -593,7 +593,6 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .toc summary {
   display: block;
   width: -webkit-fit-content;
-  width: -moz-fit-content;
   width: fit-content;
   margin: -0.72em 0 0.35em -0.4em;
   padding: 0 0.4em;
@@ -644,14 +643,12 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   }
   /* Sticky box; only the list scrolls, so the title lifted onto the top rule is never clipped. */
   .toc details {
-    position: -webkit-sticky;
     position: sticky;
     top: 1.6rem;
     padding: 0 0.8em 0.6em;
   }
-  .toc details > ol, .toc details > ul { max-height: calc(100vh - 6rem); overflow-y: auto; overflow-x: hidden; }
-  /* Room for the focus ring and the mark inside the clipping list. */
-  .toc details > ol, .toc details > ul { padding-top: 4px; }
+  /* Room at the top for the focus ring and the mark inside the clipping list. */
+  .toc details > ol, .toc details > ul { max-height: calc(100vh - 6rem); overflow-y: auto; overflow-x: hidden; padding-top: 4px; }
   .toc ol { padding-left: 1.5em; }
   .toc ul { padding-left: 4px; }
   .toc li { margin-bottom: 0.4em; }
@@ -721,7 +718,6 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .hits .t { font-size: 1.05em; }
 .hits .snip { margin: 0.15em 0 0.1em; font-size: 0.9em; line-height: 1.5; }
 .hits .snip:lang(zh) { font-family: var(--cjk); }
-.hits .snip b { font-weight: bold; }
 .hits .where { margin: 0; font: 0.8125rem/1.5 var(--small); }
 .hits .where .u { color: var(--ink); }
 .results .other { font: 0.8125rem/1.6 var(--small); }
@@ -744,7 +740,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .foot address { margin: 0 0 0.2em; font: italic 0.9375rem/1.6 var(--text); }
 .foot p { margin: 0 0 0.2em; font: 0.8125rem/1.7 var(--small); }
 .prefs { margin-top: 0.6em !important; }
-/* "Search this site": every footer but those of /writing/ and Not Found, which have the full form. */
+/* The footer's search form; /writing/ and Not Found have the full one instead. */
 .foot .search.mini { max-width: 24em; margin: 1.1em auto 0; text-align: left; }
 .foot .search.mini label { font-weight: normal; font-size: 0.8125rem; }
 
@@ -822,6 +818,9 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   .navbar { font-size: 0.9375rem; }
   h1 { font-size: 1.85em; }
   .portrait { width: 88px; height: 88px; } /* leaves the About text a usable measure beside it */
+  /* So the 16px search field shows its placeholder whole. */
+  .search button { padding: 6px 8px; }
+  .search input[type="search"] { margin-right: 4px; padding: 5px 4px; }
 }
 
 /* ---------------------------------------- 19. Print */

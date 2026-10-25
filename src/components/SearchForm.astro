@@ -1,7 +1,8 @@
 ---
 // A search form in one of three variants. Without JavaScript each one submits to DuckDuckGo, limited
 // to this site. With site.js, the main form on /writing/ searches the posts in place, and the
-// other two (data-go) take the query there.
+// other two (data-go) take the query there. So every label says "posts": /search.json holds
+// nothing else.
 interface Props {
   /** "main": /writing/, with the results block; "404": the Not Found page; "mini": the footer. */
   variant: "main" | "404" | "mini";
@@ -10,7 +11,7 @@ interface Props {
 const FORMS = {
   main: { cls: "search", id: "search", input: "q", label: "Search all posts", name: undefined, go: undefined },
   "404": { cls: "search", id: "search-404", input: "q404", label: "Search all posts", name: "Search the posts", go: "/writing/" },
-  mini: { cls: "search mini", id: "site-search", input: "site-q", label: "Search this site", name: "Search this site", go: "/writing/" },
+  mini: { cls: "search mini", id: "site-search", input: "site-q", label: "Search all posts", name: "Search the posts", go: "/writing/" },
 };
 
 const { variant } = Astro.props;

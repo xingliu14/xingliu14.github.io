@@ -1,7 +1,7 @@
 # Commits that changed files without changing what they say. src/lib/last-modified.mjs skips them
-# when it dates a post's last edit, and GitHub's blame view skips them too. A commit that touches
-# posts for any reason other than their words (a move, a reformat, a retyped quote) goes here,
-# by its full hash.
+# when it dates a post's last edit, and GitHub's blame view skips them too. A commit that changes
+# posts' text without changing their words (a reformat, a retyped quote) goes here, by its full
+# hash. Renames need no entry: the text reads the same before and after.
 
 # Migrate the site from Jekyll to Astro: moved every post to src/content/posts/ and retyped the
 # quotes in two of them.

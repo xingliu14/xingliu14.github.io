@@ -4,9 +4,9 @@
 import ArchiveList from "../../components/ArchiveList.astro";
 import SearchForm from "../../components/SearchForm.astro";
 import Base from "../../layouts/Base.astro";
-import { buildDate, later } from "../../lib/dates";
+import { buildDate } from "../../lib/dates";
 import { archiveSince, WRITING_SUMMARY, writingDescription } from "../../lib/descriptions";
-import { pathsLastModified } from "../../lib/last-modified.mjs";
+import { writingLastModified } from "../../lib/last-modified.mjs";
 import { topics } from "../../lib/post-meta.mjs";
 import { getPosts } from "../../lib/posts";
 import { writingJsonLd } from "../../lib/seo";
@@ -17,11 +17,9 @@ const years = [...new Set(posts.map((post) => post.year))];
 const byTopic = topics
   .map((topic) => ({ topic, posts: posts.filter((post) => post.topic.id === topic.id) }))
   .filter((group) => group.posts.length > 0);
-// The page changes when its own files do, and whenever a post is published or edited.
-const lastModified = later(
-  pathsLastModified(["src/pages/writing/index.astro", "src/data/posts.json"]) ?? { date: buildDate(), iso: null },
-  posts.map((post) => post.lastModified).reduce(later),
-);
+// The page changes when its own files do, and whenever a post is published or edited. The sitemap
+// gives the same date.
+const lastModified = writingLastModified() ?? { date: buildDate(), iso: null };
 
 // In the run-in topic lists a title can start anywhere on a line, so a short title is kept whole
 // and lines break after a separator dot (<wbr>) instead. A longer title may wrap, but keeps its

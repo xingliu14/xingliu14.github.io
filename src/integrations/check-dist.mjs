@@ -203,14 +203,13 @@ async function sitemap({ files, read }) {
 }
 
 /**
- * 8. Valid HTML. JSON has no comments, so here is why .htmlvalidate.json relaxes six rules:
+ * 8. Valid HTML. JSON has no comments, so here is why .htmlvalidate.json relaxes five rules:
  * - valid-id: post headings like id="1" are valid HTML5, and other sites link to them;
  * - prefer-native-element (region): <div role="region" tabindex="0"> is the standard scrollable
  *   table;
  * - no-redundant-role: the projects table's explicit roles keep its semantics on phones;
  * - long-title: several post titles are longer than 70 characters;
- * - void-style: posts keep the <br/> their author typed, as valid as <br>;
- * - doctype-style: cosmetic.
+ * - void-style: posts keep the <br/> their author typed, as valid as <br>.
  * @param {Dist} dist
  */
 async function validHtml({ dir, pages }) {

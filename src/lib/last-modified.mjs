@@ -106,8 +106,8 @@ function show(rev) {
  *
  * Walks the file's history newest first, across renames. Commits in .git-blame-ignore-revs are
  * skipped, and so are commits after which the post's text (title and body) reads the same as
- * before: renames, frontmatter-only edits and headings moved to another level. The commit that added the file is the publication,
- * not an edit, so the walk stops there.
+ * before: renames, edits to frontmatter other than the title, and headings moved to another
+ * level. The commit that added the file is the publication, not an edit, so the walk stops there.
  * @param {string} file  e.g. "src/content/posts/2026-01-23-nano-vllm-notes.md"
  * @param {string} published  "YYYY-MM-DD"
  * @returns {Modified | null}
@@ -160,17 +160,31 @@ export function pathsLastModified(paths) {
 }
 
 /**
- * The sitemap's <lastmod> for a page: a post's "Last modified" date, and for /writing/ the newest
- * of those. Other pages get none rather than an imprecise one. This runs in astro.config.mjs,
- * outside Astro's content layer, so it finds the posts by their file names.
+ * /writing/'s "Last modified", one date for its footer and the sitemap alike: the later of the last
+ * commit to the page's own files (posts.json files each post under a topic) and the newest post's
+ * last change. Without usable history, the newest post's date. It finds the posts by their file
+ * names, so it also works in astro.config.mjs, outside Astro's content layer.
+ * @returns {{ date: string, iso: string | null } | null}  null only when there is nothing to date
+ */
+export function writingLastModified() {
+  const own = pathsLastModified(["src/pages/writing/index.astro", "src/data/posts.json"]);
+  const posts = publishedPostFiles().map(({ file, date }) => postLastModified(file, date) ?? { date, iso: null });
+  // On the same day the commit wins, so it keeps its time.
+  return [own, ...posts].reduce((a, b) => (b && (!a || b.date > a.date) ? b : a), null);
+}
+
+/**
+ * The sitemap's <lastmod> for a page: a post's "Last modified" date, and /writing/'s. Other pages
+ * get none rather than an imprecise one. This runs in astro.config.mjs, outside Astro's content
+ * layer, so it finds the posts by their file names.
  * @param {string} pathname  e.g. "/2026/01/23/nano-vllm-notes/"
  * @returns {string | null}  "YYYY-MM-DD"
  */
 export function sitemapLastmod(pathname) {
   if (!state.lastmods) {
     const lastmods = new Map(publishedPostFiles().map(({ file, url, date }) => [url, postLastModified(file, date)?.date ?? date]));
-    const newest = [...lastmods.values()].sort().at(-1);
-    if (newest) lastmods.set("/writing/", newest);
+    const writing = writingLastModified();
+    if (writing) lastmods.set("/writing/", writing.date);
     state.lastmods = lastmods;
   }
   return state.lastmods.get(decodeURIComponent(pathname)) ?? null;

@@ -8,10 +8,12 @@ interface Props {
 }
 
 const { older, newer } = Astro.props;
+// A title's last two words stay on one line, as in search results (site.js): never "fees" alone.
+const kept = (title: string) => title.replace(/ (?=\S+$)/, "\u00a0");
 ---
 
 <nav class="pager" aria-label="Older and newer posts" lang="en">
-<div class="prev"><span class="label">« Previous (older)</span>{older ? <a href={older.url} rel="prev" lang={older.zh ? "zh-CN" : undefined}>{older.title}</a> : <span class="none">This is the first post.</span>}</div>
-<div class="next"><span class="label">Next (newer) »</span>{newer ? <a href={newer.url} rel="next" lang={newer.zh ? "zh-CN" : undefined}>{newer.title}</a> : <span class="none">This is the newest post.</span>}</div>
+<div class="prev"><span class="label">« Previous (older)</span>{older ? <a href={older.url} rel="prev" lang={older.zh ? "zh-CN" : undefined}>{kept(older.title)}</a> : <span class="none">This is the first post.</span>}</div>
+<div class="next"><span class="label">Next (newer) »</span>{newer ? <a href={newer.url} rel="next" lang={newer.zh ? "zh-CN" : undefined}>{kept(newer.title)}</a> : <span class="none">This is the newest post.</span>}</div>
 </nav>
 <p class="up" lang="en"><span aria-hidden="true">[ </span><a href="/writing/">Up to the Writing archive</a><span aria-hidden="true"> ]</span></p>

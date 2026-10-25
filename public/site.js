@@ -16,7 +16,7 @@
   }
   function el(tag, cls, text) { var e = d.createElement(tag); e.className = cls; if (text) e.textContent = text; return e; }
 
-  // Polite live region for "Copied" (7.2).
+  // Polite live region for "Copied".
   var live = el("p", "visually-hidden");
   live.id = "announce";
   live.setAttribute("aria-live", "polite");
@@ -83,7 +83,7 @@
     return "<a" + (cls ? ' class="' + cls + '"' : "") + ' href="' + esc(doc.u) + '"' + (doc.l === "zh-CN" ? ' lang="zh-CN"' : "") + ">" + esc(doc.t).replace(/ (?=\S+$)/, "\u00a0") + "</a>";
   }
 
-  // 7.9 Colour menus: grey, white or night, remembered; Automatic follows the system.
+  // Colour menus: grey, white or night, remembered; Automatic follows the system.
   try {
     var menus = d.querySelectorAll("select.colours");
     each(menus, function (menu) {
@@ -101,14 +101,14 @@
     });
   } catch (e) { /* colours stay as they are */ }
 
-  // 7.3 Permalink: focus selects it; "Copy link" copies it.
+  // Permalink: focus selects it; "Copy link" copies it.
   try {
     var permalink = $("permalink"), copyLink = d.querySelector(".copy-link");
     permalink.addEventListener("focus", function () { permalink.select(); });
     copyLink.addEventListener("click", function () { copyText(permalink.value, copyLink); });
   } catch (e) { /* not a post */ }
 
-  // 7.4 Code bars: the language and a Copy button above each code well.
+  // Code bars: the language and a Copy button above each code well.
   try {
     var NAMES = { ruby: "Ruby", php: "PHP", java: "Java", html: "HTML", console: "Console", css: "CSS", yaml: "YAML", python: "Python", javascript: "JavaScript", typescript: "TypeScript", bash: "Shell", sh: "Shell", shell: "Shell", zsh: "Shell", json: "JSON", c: "C", cpp: "C++", go: "Go", rust: "Rust", sql: "SQL", scala: "Scala", plaintext: "", text: "" };
     each(d.querySelectorAll("div.highlighter-rouge"), function (box) {
@@ -123,7 +123,7 @@
     });
   } catch (e) { /* code stays plain */ }
 
-  // 7.5 "Scroll sideways" under a table only while it is wider than its box.
+  // "Scroll sideways" under a table only while it is wider than its box.
   try {
     var tables = d.querySelectorAll(".article .table-scroll"), hints = function () {
       each(tables, function (box) {
@@ -135,87 +135,85 @@
     if (tables.length) { hints(); w.addEventListener("resize", onFrame(hints)); }
   } catch (e) { /* tables still scroll */ }
 
-  // 7.6 Search on /writing/: every term must match; titles first, then newest first.
+  // Search on /writing/: every term must match; titles first, then newest first.
   try {
-    var form = $("search"), q = $("q"), status = $("search-status");
-    if (form && q && status) {
-      var docs = null, results = status.parentNode;
-      // Context around the match in the text, else in the description; the match in bold.
-      var snippet = function (doc, query, terms) {
-        var x = doc.x, fx = doc.fx, phrase = "", pass, i, cut;
-        for (pass = 0; pass < 2 && !phrase; pass++) {
-          if (pass) { x = doc.s; fx = fold(x); }
-          phrase = fx.indexOf(query) !== -1 ? query : "";
-          for (i = 0; !phrase && i < terms.length; i++) if (fx.indexOf(terms[i]) !== -1) phrase = terms[i];
-        }
-        if (!phrase) return esc(doc.s);
-        var at = fx.indexOf(phrase), end = at + phrase.length, from = Math.max(0, at - 70), to = Math.min(x.length, end + 90);
-        // Cut at a word boundary when one is close (English); Chinese has none.
-        if (from > 0 && (cut = x.slice(from, at).search(/\s/)) !== -1 && cut < 20) from += cut + 1;
-        if (to < x.length && (cut = x.slice(end, to).lastIndexOf(" ")) !== -1 && to - end - cut < 20) to = end + cut;
-        if (/[\udc00-\udfff]/.test(x.charAt(from))) from++; // never split a surrogate pair
-        if (/[\ud800-\udbff]/.test(x.charAt(to - 1))) to--;
-        return (from ? "\u2026" : "") + esc(x.slice(from, at)) + "<b>" + esc(x.slice(at, end)) + "</b>" + esc(x.slice(end, to)) + (to < x.length ? "\u2026" : "");
-      };
-      var setUrl = function (url) { try { history.replaceState(null, "", url); } catch (e) { /* file:// */ } };
-      // The count is a live region: while typing, it changes once the reader pauses.
-      var timer, say = function (html, typing) {
-        clearTimeout(timer);
-        timer = setTimeout(function () { status.innerHTML = html; }, typing ? 400 : 0);
-      };
-      var run = function (e) {
-        var raw = q.value.trim(), old = results.querySelectorAll(".hits, .other");
-        each(old, function (o) { results.removeChild(o); });
-        if (!raw) { say(""); setUrl(location.pathname + "#search"); return; }
-        if (!docs) {
-          status.textContent = "Loading the search index\u2026";
-          loadIndex().then(function (all) { docs = all; run(); }, function () {
-            status.innerHTML = 'The search index could not be loaded. <a href="' + ddg(raw) + '">Search xingliu.me with DuckDuckGo</a> instead.';
-          });
-          return;
-        }
-        // "kv cache" and Bitcoin? search for kv, cache and bitcoin; punctuation alone finds nothing.
-        var terms = fold(raw).match(TERM) || [], query = terms.join(" "), first = [], rest = [], html = "";
-        each(docs, function (doc) {
-          var all = terms.length > 0, title = true;
-          each(terms, function (t) { all = all && doc.fh.indexOf(t) !== -1; title = title && doc.ft.indexOf(t) !== -1; });
-          if (all) (title ? first : rest).push(doc);
+    var form = $("search"), q = $("q"), status = $("search-status"), docs = null, results = status.parentNode;
+    // Context around the match in the text, else in the description; the match in bold.
+    var snippet = function (doc, query, terms) {
+      var x = doc.x, fx = doc.fx, phrase = "", pass, i, cut;
+      for (pass = 0; pass < 2 && !phrase; pass++) {
+        if (pass) { x = doc.s; fx = fold(x); }
+        phrase = fx.indexOf(query) !== -1 ? query : "";
+        for (i = 0; !phrase && i < terms.length; i++) if (fx.indexOf(terms[i]) !== -1) phrase = terms[i];
+      }
+      if (!phrase) return esc(doc.s);
+      var at = fx.indexOf(phrase), end = at + phrase.length, from = Math.max(0, at - 70), to = Math.min(x.length, end + 90);
+      // Cut at a word boundary when one is close (English); Chinese has none.
+      if (from > 0 && (cut = x.slice(from, at).search(/\s/)) !== -1 && cut < 20) from += cut + 1;
+      if (to < x.length && (cut = x.slice(end, to).lastIndexOf(" ")) !== -1 && to - end - cut < 20) to = end + cut;
+      if (/[\udc00-\udfff]/.test(x.charAt(from))) from++; // never split a surrogate pair
+      if (/[\ud800-\udbff]/.test(x.charAt(to - 1))) to--;
+      return (from ? "\u2026" : "") + esc(x.slice(from, at)) + "<b>" + esc(x.slice(at, end)) + "</b>" + esc(x.slice(end, to)) + (to < x.length ? "\u2026" : "");
+    };
+    var setUrl = function (url) { try { history.replaceState(null, "", url); } catch (e) { /* file:// */ } };
+    // The count is a live region: while typing, it changes once the reader pauses.
+    var timer, say = function (html, typing) {
+      clearTimeout(timer);
+      timer = setTimeout(function () { status.innerHTML = html; }, typing ? 400 : 0);
+    };
+    var run = function (e) {
+      var raw = q.value.trim(), old = results.querySelectorAll(".hits, .other");
+      each(old, function (o) { results.removeChild(o); });
+      if (!raw) { say(""); setUrl(location.pathname + "#search"); return; }
+      if (!docs) {
+        status.textContent = "Loading the search index\u2026";
+        loadIndex().then(function (all) { docs = all; run(); }, function () {
+          status.innerHTML = 'The search index could not be loaded. <a href="' + ddg(raw) + '">Search xingliu.me with DuckDuckGo</a> instead.';
         });
-        // The query as searched, marked when Chinese.
-        var hits = first.concat(rest), n = hits.length, said = esc((raw.match(TERM) || [raw]).join(" "));
-        said = "\u201c" + (/[\u3400-\u9fff]/.test(said) ? '<span lang="zh-CN">' + said + "</span>" : said) + "\u201d";
-        say(n ? "<b>" + n + (n === 1 ? " post</b> matches " : " posts</b> match ") + said + ":" : "No posts match " + said + ".", e && e.type === "input");
-        // \u2060 (word joiner) keeps the chip with the title's last words.
-        each(hits, function (h) {
-          var p = h.d.split("-"), zh = h.l === "zh-CN" ? ' lang="zh-CN"' : "";
-          html += "<li>" + link(h, "t") + (zh ? '\u2060<span class="zh" title="Written in Chinese"><span lang="zh-CN">\u4e2d\u6587</span></span>' : "") +
-            '\n<p class="snip"' + zh + ">" + snippet(h, query, terms) + '</p>\n<p class="where"><span class="u">xingliu.me' + esc(h.u) +
-            "</span>\u00a0\u00b7 " + MONTHS[+p[1] - 1] + " " + +p[2] + ", " + p[0] + "\u00a0\u00b7 " + esc(h.k) + "</p></li>\n";
-        });
-        var other = el("p", "other");
-        other.innerHTML = n ? 'Not what you wanted? <a href="' + ddg(raw) + '">Search xingliu.me with DuckDuckGo</a>.' : 'Try fewer words, or <a href="' + ddg(raw) + '">search xingliu.me with DuckDuckGo</a>.';
-        results.appendChild(other);
-        if (n) { var ol = el("ol", "hits"); ol.innerHTML = html; results.insertBefore(ol, other); }
-        setUrl("?q=" + encodeURIComponent(raw) + "#search");
-      };
-      var MONTHS = "January February March April May June July August September October November December".split(" ");
-      var C = "\"'\u2018-\u201f\u3001\u3002\u300a-\u300f()[\\],.;:!?", TERM = new RegExp("[^\\s" + C + "](?:\\S*[^\\s" + C + "])?", "g");
-      q.addEventListener("focus", function () { loadIndex().then(null, function () {}); });
-      q.addEventListener("input", run);
-      form.addEventListener("submit", function (e) { e.preventDefault(); run(); });
-      // Arrival: a ?q= link, or a value the browser kept.
-      var m = /[?&]q=([^&#]*)/.exec(location.search);
-      if (m) { try { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { q.value = m[1]; } }
-      if (q.value.trim()) run();
-      // Focus for #search, and again after load: Chrome's fragment scroll clears it.
-      var focus = function () { if (location.hash === "#search" && (d.activeElement === d.body || !d.activeElement)) q.focus(); };
-      focus();
-      w.addEventListener("load", function () { setTimeout(focus, 0); });
-      w.addEventListener("hashchange", function () { if (location.hash === "#search") q.focus(); });
-    }
-  } catch (e) { /* the form still goes to DuckDuckGo */ }
+        return;
+      }
+      // "kv cache" and Bitcoin? search for kv, cache and bitcoin; punctuation alone finds nothing.
+      var terms = fold(raw).match(TERM) || [], query = terms.join(" "), first = [], rest = [], html = "";
+      each(docs, function (doc) {
+        var all = terms.length > 0, title = true;
+        each(terms, function (t) { all = all && doc.fh.indexOf(t) !== -1; title = title && doc.ft.indexOf(t) !== -1; });
+        if (all) (title ? first : rest).push(doc);
+      });
+      // The query as searched, marked when Chinese.
+      var hits = first.concat(rest), n = hits.length, said = esc((raw.match(TERM) || [raw]).join(" "));
+      said = "\u201c" + (/[\u3400-\u9fff]/.test(said) ? '<span lang="zh-CN">' + said + "</span>" : said) + "\u201d";
+      say(n ? "<b>" + n + (n === 1 ? " post</b> matches " : " posts</b> match ") + said + ":" : "No posts match " + said + ".", e && e.type === "input");
+      // \u2060 (word joiner) keeps the chip with the title's last words.
+      each(hits, function (h) {
+        var p = h.d.split("-"), zh = h.l === "zh-CN" ? ' lang="zh-CN"' : "";
+        html += "<li>" + link(h, "t") + (zh ? '\u2060<span class="zh" title="Written in Chinese"><span lang="zh-CN">\u4e2d\u6587</span></span>' : "") +
+          '\n<p class="snip"' + zh + ">" + snippet(h, query, terms) + '</p>\n<p class="where"><span class="u">xingliu.me' + esc(h.u) +
+          "</span>\u00a0\u00b7 " + MONTHS[+p[1] - 1] + " " + +p[2] + ", " + p[0] + "\u00a0\u00b7 " + esc(h.k) + "</p></li>\n";
+      });
+      var other = el("p", "other");
+      other.innerHTML = n ? 'Not what you wanted? <a href="' + ddg(raw) + '">Search xingliu.me with DuckDuckGo</a>.' : 'Try fewer words, or <a href="' + ddg(raw) + '">search xingliu.me with DuckDuckGo</a>.';
+      results.appendChild(other);
+      if (n) { var ol = el("ol", "hits"); ol.innerHTML = html; results.insertBefore(ol, other); }
+      setUrl("?q=" + encodeURIComponent(raw) + "#search");
+    };
+    var MONTHS = "January February March April May June July August September October November December".split(" ");
+    var C = "\"'\u2018-\u201f\u3001\u3002\u300a-\u300f()[\\],.;:!?", TERM = new RegExp("[^\\s" + C + "](?:\\S*[^\\s" + C + "])?", "g");
+    q.addEventListener("focus", function () { loadIndex().then(null, function () {}); });
+    q.addEventListener("input", run);
+    form.addEventListener("submit", function (e) { e.preventDefault(); run(); });
+    // Arrival: a ?q= link, or a value the browser kept.
+    var m = /[?&]q=([^&#]*)/.exec(location.search);
+    if (m) { try { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { q.value = m[1]; } }
+    if (q.value.trim()) run();
+    // Focus for #search, and again after load: Chrome's fragment scroll clears it.
+    var focus = function (e) { if (location.hash === "#search" && (e || d.activeElement === d.body || !d.activeElement)) q.focus(); };
+    focus();
+    w.addEventListener("load", function () { setTimeout(focus, 0); });
+    w.addEventListener("hashchange", focus);
+    d.addEventListener("click", function (e) { if (e.target.href === location.href && !(e.metaKey || e.ctrlKey || e.shiftKey)) setTimeout(focus, 0, e); }); // the same address: no hashchange
+  } catch (e) { /* not /writing/, or the form still goes to DuckDuckGo */ }
 
-  // 7.7 The footer and Not Found forms search on /writing/.
+  // The footer and Not Found forms search on /writing/.
   try {
     each(d.querySelectorAll("form[data-go]"), function (f) {
       f.addEventListener("submit", function (e) {
@@ -226,37 +224,35 @@
     });
   } catch (e) { /* they go to DuckDuckGo */ }
 
-  // 7.8 Not Found: name the path, pre-fill the search, suggest the likely post.
+  // Not Found: name the path, pre-fill the search, suggest the likely post.
   try {
     var missing = $("missing"), path = location.pathname;
-    if (missing) {
-      try { path = decodeURI(path); } catch (e) { /* keep it raw */ }
-      missing.textContent = "The requested URL ";
-      missing.appendChild(el("code", "", path));
-      missing.appendChild(d.createTextNode(" was not found on this server."));
-      var segs = path.split("/"), last = "", words = [], i;
-      for (i = segs.length - 1; i >= 0 && !last; i--) if (segs[i] !== "index.html") last = segs[i];
-      each(last.replace(/\.html?$/i, "").split(/[-_.\s]+/), function (word) { if (word && !/^\d+$/.test(word)) words.push(word); });
-      if (!$("q404").value) $("q404").value = words.join(" ");
-      if (last) loadIndex().then(function (all) {
-        var want = path.toLowerCase(), seg = last.toLowerCase(), hit = null, why;
-        if (!/\.[a-z0-9]+$/.test(seg) && !/\/$/.test(want)) want += "/";
-        each(all, function (doc) { if (!hit && doc.u.toLowerCase() === want) { hit = doc; why = "Addresses on this server are case-sensitive."; } });
-        each(all, function (doc) { if (!hit && doc.u.toLowerCase().split("/").slice(-2)[0] === seg) { hit = doc; why = "It lives at a dated address."; } });
-        if (!hit) return;
-        $("didyoumean").innerHTML = "Did you mean " + link(hit) + '? <span class="why">' + why + "</span>";
-        $("didyoumean").hidden = false;
-      }, function () { /* no suggestion */ });
-    }
-  } catch (e) { /* the generic sentence stays */ }
+    missing.textContent = "The requested URL ";
+    try { path = decodeURI(path); } catch (e) { /* keep it raw */ }
+    missing.appendChild(el("code", "", path));
+    missing.appendChild(d.createTextNode(" was not found on this server."));
+    var segs = path.split("/"), last = "", words = [], i;
+    for (i = segs.length - 1; i >= 0 && !last; i--) if (segs[i] !== "index.html") last = segs[i];
+    each(last.replace(/\.html?$/i, "").split(/[-_.\s]+/), function (word) { if (word && !/^\d+$/.test(word)) words.push(word); });
+    if (!$("q404").value) $("q404").value = words.join(" ");
+    if (last) loadIndex().then(function (all) {
+      var want = path.toLowerCase(), seg = last.toLowerCase(), hit = null, why;
+      if (!/\.[a-z0-9]+$/.test(seg) && !/\/$/.test(want)) want += "/";
+      each(all, function (doc) { if (!hit && doc.u.toLowerCase() === want) { hit = doc; why = "Addresses on this server are case-sensitive."; } });
+      each(all, function (doc) { if (!hit && doc.u.toLowerCase().split("/").slice(-2)[0] === seg) { hit = doc; why = "It lives at a dated address."; } });
+      if (!hit) return;
+      $("didyoumean").innerHTML = "Did you mean " + link(hit) + '? <span class="why">' + why + "</span>";
+      $("didyoumean").hidden = false;
+    }, function () { /* no suggestion */ });
+  } catch (e) { /* another page, or the generic sentence stays */ }
 
-  // 7.10 NEW! expires on the reader's clock.
+  // NEW! expires on the reader's clock.
   try {
     var now = new Date(), today = now.getFullYear() + "-" + ("0" + (now.getMonth() + 1)).slice(-2) + "-" + ("0" + now.getDate()).slice(-2);
     each(d.querySelectorAll(".new[data-until]"), function (tag) { if (tag.getAttribute("data-until") <= today) tag.parentNode.removeChild(tag); });
   } catch (e) { /* the tag stays as built */ }
 
-  // 7.11 Contents: links to it open the box; wide screens mark the section in view.
+  // Contents: links to it open the box; wide screens mark the section in view.
   try {
     var toc = $("toc"), box = toc.querySelector("details"), marks = [], here = null;
     var rail = w.matchMedia && w.matchMedia("(min-width: 77.5em)");
@@ -288,29 +284,27 @@
     w.addEventListener("afterprint", function () { box.open = was; });
   } catch (e) { /* the box still opens and closes */ }
 
-  // 7.12 Visitor map, as wide as the well: after load, when idle or the well is near.
+  // Visitor map, as wide as the well: after load, when idle or the well is near.
   try {
-    var well = $("visitor-map"), wait = well.querySelector(".mm-wait");
-    if (wait && /^https?:$/.test(location.protocol)) {
-      var start = function () {
-        var loaded = false, io = null, load = function () {
-          if (loaded) return;
-          loaded = true;
-          if (io) io.disconnect();
-          var s = d.createElement("script");
-          s.id = "mapmyvisitors";
-          s.async = true;
-          s.src = well.getAttribute("data-src").replace(/([?&]w=)\d+/, "$1" + well.clientWidth);
-          // The widget goes right after its script, so before the link, which style.css then hides.
-          well.insertBefore(s, wait);
-        };
-        if (w.IntersectionObserver) {
-          io = new IntersectionObserver(function (seen) { each(seen, function (s) { if (s.isIntersecting) load(); }); }, { rootMargin: "400px 0px" });
-          io.observe(well);
-        }
-        if (w.requestIdleCallback) w.requestIdleCallback(load, { timeout: 2000 }); else setTimeout(load, 1500);
-      };
-      if (d.readyState === "complete") start(); else w.addEventListener("load", start);
-    }
+    var well = $("visitor-map"), wait = well.querySelector(".mm-wait"), io = null;
+    var load = function () {
+      if ($("mapmyvisitors")) return; // once
+      if (io) io.disconnect();
+      var s = d.createElement("script"); // async by default
+      s.id = "mapmyvisitors";
+      s.src = well.getAttribute("data-src").replace(/([?&]w=)\d+/, "$1" + well.clientWidth);
+      // The widget lands after its script, before the link, which style.css then hides; a reader on
+      // the link moves to the widget's link first.
+      well.insertBefore(s, wait);
+      new MutationObserver(function () { var a = $("mapmyvisitors-widget"); if (a && wait.contains(d.activeElement)) a.focus(); }).observe(well, { childList: true });
+    };
+    var start = function () {
+      if (w.IntersectionObserver) {
+        io = new IntersectionObserver(function (seen) { each(seen, function (s) { if (s.isIntersecting) load(); }); }, { rootMargin: "400px 0px" });
+        io.observe(well);
+      }
+      if (w.requestIdleCallback) w.requestIdleCallback(load, { timeout: 2000 }); else setTimeout(load, 1500);
+    };
+    if (wait && /^https?:$/.test(location.protocol)) { if (d.readyState === "complete") start(); else w.addEventListener("load", start); }
   } catch (e) { /* the link stays */ }
 })();
