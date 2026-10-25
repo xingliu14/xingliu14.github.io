@@ -33,7 +33,7 @@
       clearTimeout(btn.copyTimer);
       btn.copyTimer = setTimeout(function () { btn.textContent = btn.getAttribute("data-label"); }, 2000);
     }
-    function fallback() { // a hidden textarea and execCommand, for file:// and older browsers
+    function fallback() { // a hidden textarea and execCommand: file:// and older browsers
       var back = d.activeElement, ta = d.createElement("textarea"), ok = false;
       ta.value = text;
       ta.setAttribute("readonly", "");
@@ -49,7 +49,7 @@
     else fallback();
   }
 
-  // Case and width folding that keeps the length, so offsets in the folded text fit the original.
+  // Case and width folding that keeps the length, so folded offsets fit the original.
   function fold(s) {
     var out = "", i, c, f;
     for (i = 0; i < s.length; i++) {
@@ -61,7 +61,7 @@
     return out;
   }
 
-  // Search documents: inline in the mockups (file:// cannot fetch), else /search.json, once.
+  // Search index: inline in the mockups (file:// cannot fetch), else /search.json, once.
   var index = null;
   function loadIndex() {
     if (!index) {
@@ -83,8 +83,9 @@
     return index;
   }
   function ddg(raw) { return esc("https://duckduckgo.com/?q=" + encodeURIComponent(raw) + "%20site%3Axingliu.me"); }
-  function link(doc, cls) { // doc.h: the mockups' own file for a post
-    return "<a" + (cls ? ' class="' + cls + '"' : "") + ' href="' + esc(doc.h || doc.u) + '"' + (doc.l === "zh-CN" ? ' lang="zh-CN"' : "") + ">" + esc(doc.t) + "</a>";
+  // doc.h: a mockup's own file. A title's last two words stay on one line.
+  function link(doc, cls) {
+    return "<a" + (cls ? ' class="' + cls + '"' : "") + ' href="' + esc(doc.h || doc.u) + '"' + (doc.l === "zh-CN" ? ' lang="zh-CN"' : "") + ">" + esc(doc.t).replace(/ (?=\S+$)/, "\u00a0") + "</a>";
   }
 
   // 7.9 Colour menus: grey, white or night, remembered; Automatic follows the system.
@@ -144,7 +145,7 @@
     var form = $("search"), q = $("q"), status = $("search-status");
     if (form && q && status && !form.hasAttribute("data-go")) {
       var docs = null, results = status.parentNode;
-      // A line of context around the match in the text, else in the description, the match in bold.
+      // Context around the match in the text, else in the description; the match in bold.
       var snippet = function (doc, query, terms) {
         var x = doc.x, fx = doc.fx, phrase = "", pass, i, cut;
         for (pass = 0; pass < 2 && !phrase; pass++) {
@@ -186,9 +187,10 @@
         });
         var hits = first.concat(rest), n = hits.length, said = "\u201c" + esc(raw) + "\u201d";
         say(n ? "<b>" + n + (n === 1 ? " post</b> matches " : " posts</b> match ") + said + ":" : "No posts match " + said + ".", e && e.type === "input");
+        // \u2060 (word joiner) keeps the chip with the title's last words.
         each(hits, function (h) {
           var p = h.d.split("-"), zh = h.l === "zh-CN" ? ' lang="zh-CN"' : "";
-          html += "<li>" + link(h, "t") + (zh ? '<span class="zh" lang="zh-CN" title="Written in Chinese">\u4e2d\u6587</span>' : "") +
+          html += "<li>" + link(h, "t") + (zh ? '\u2060<span class="zh" lang="zh-CN" title="Written in Chinese">\u4e2d\u6587</span>' : "") +
             '\n<p class="snip"' + zh + ">" + snippet(h, query, terms) + '</p>\n<p class="where"><span class="u">xingliu.me' + esc(h.u) +
             "</span>\u00a0\u00b7 " + MONTHS[+p[1] - 1] + " " + +p[2] + ", " + p[0] + "\u00a0\u00b7 " + esc(h.k) + "</p></li>\n";
         });
@@ -202,11 +204,11 @@
       q.addEventListener("focus", function () { loadIndex().then(null, function () {}); });
       q.addEventListener("input", run);
       form.addEventListener("submit", function (e) { e.preventDefault(); run(); });
-      // Arrival: a ?q= deep link (the footer forms send one), or a value the browser kept.
+      // Arrival: a ?q= link (footer forms send one), or a value the browser kept.
       var m = /[?&]q=([^&#]*)/.exec(location.search);
       if (m) { try { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { q.value = m[1]; } }
       if (trim(q.value)) run();
-      // Focus the field for #search links, and again after load: Chrome's fragment scroll clears it.
+      // Focus for #search, and again after load: Chrome's fragment scroll clears it.
       var focus = function () { if (location.hash === "#search" && (d.activeElement === d.body || !d.activeElement)) q.focus(); };
       focus();
       w.addEventListener("load", function () { setTimeout(focus, 0); });
@@ -225,7 +227,7 @@
     });
   } catch (e) { /* they go to DuckDuckGo */ }
 
-  // 7.8 Not Found: name the path, pre-fill the search, suggest the post it probably meant.
+  // 7.8 Not Found: name the path, pre-fill the search, suggest the likely post.
   try {
     var missing = $("missing"), path = /^https?:$/.test(location.protocol) ? location.pathname : d.body.getAttribute("data-demo-path");
     if (missing && path) {
@@ -255,7 +257,7 @@
     each(d.querySelectorAll(".new[data-until]"), function (tag) { if (tag.getAttribute("data-until") <= today) tag.parentNode.removeChild(tag); });
   } catch (e) { /* the tag stays as built */ }
 
-  // 7.11 Contents: "Contents" links open the box; on wide screens it marks the section in view.
+  // 7.11 Contents: links to it open the box; wide screens mark the section in view.
   try {
     var toc = $("toc"), box = toc.querySelector("details"), marks = [], here = null;
     var rail = w.matchMedia && w.matchMedia("(min-width: 77.5em)");
@@ -273,7 +275,7 @@
       here = cur;
       if (!cur) return;
       cur.a.setAttribute("aria-current", "location");
-      // When the list scrolls (long contents, short window), keep the marked line in view.
+      // When the list scrolls, keep the marked line in view.
       var list = cur.a.parentNode.parentNode, top = cur.a.offsetTop - list.offsetTop;
       if (top < list.scrollTop || top > list.scrollTop + list.clientHeight - 30) list.scrollTop = top - list.clientHeight / 2;
     });
@@ -285,10 +287,10 @@
     var was;
     w.addEventListener("beforeprint", function () { was = box.open; box.open = true; });
     w.addEventListener("afterprint", function () { box.open = was; });
-  } catch (e) { /* not a long post; the box still opens and closes */ }
+  } catch (e) { /* the box still opens and closes */ }
 
-  // 7.12 Visitor map: after load, when the page is idle or the well is near. Only over http(s),
-  // and only where the well holds the placeholder (the mockups hold a still).
+  // 7.12 Visitor map: after load, when idle or the well is near. Only over http(s), and only
+  // where the well holds the placeholder (the mockups hold a still).
   try {
     var well = $("visitor-map"), wait = well.querySelector(".mm-wait");
     if (wait && /^https?:$/.test(location.protocol)) {

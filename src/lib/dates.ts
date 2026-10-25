@@ -28,6 +28,12 @@ export function shortDate(date: string): string {
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
 }
 
+/** "March 2026" */
+export function monthYear(date: string): string {
+  const d = noon(date);
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+}
+
 /** "Mar  4": the day is padded with a space, so a column of these lines up in Monaco. */
 export function monthDay(date: string): string {
   const d = noon(date);

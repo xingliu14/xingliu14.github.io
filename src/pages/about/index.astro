@@ -1,14 +1,30 @@
 ---
-// Interim About page, until redesign step 3 builds it in full: the owner's own words, and the
-// colophon's anchor, which the home page links to.
+// About Me: the owner's own words, a short bio for introductions, the résumé, his accounts
+// elsewhere, and the colophon, which says how the site is made and why it looks like 1997. Every
+// sentence in the colophon must stay true of the shipped site.
+//
+// The page-weight sentence at the end is filled in after the build, when the final sizes are known
+// (src/integrations/page-weight.mjs).
+import { statSync } from "node:fs";
 import AboutText from "../../components/AboutText.astro";
 import { ELSEWHERE, RESUME_URL } from "../../config";
 import Base from "../../layouts/Base.astro";
-import { buildDate } from "../../lib/dates";
+import { buildDate, monthYear } from "../../lib/dates";
 import { pathsLastModified } from "../../lib/last-modified.mjs";
+import { aboutJsonLd } from "../../lib/seo";
 
 const lastModified =
   pathsLastModified(["src/pages/about/index.astro", "src/components/AboutText.astro", "public/resume"]) ?? { date: buildDate(), iso: null };
+
+const resumeFile = RESUME_URL.slice(RESUME_URL.lastIndexOf("/") + 1);
+const resumeKb = Math.round(statSync(`public${RESUME_URL}`).size / 1024);
+// The résumé's file name carries the day it was written: Xing_Liu_Resume_20250924.pdf.
+const written = /(\d{4})(\d{2})(\d{2})\.pdf$/.exec(resumeFile);
+if (!written) throw new Error(`RESUME_URL should end in YYYYMMDD.pdf, got "${RESUME_URL}"`);
+const resumeMonth = monthYear(`${written[1]}-${written[2]}-${written[3]}`);
+
+/** A link's text: the address without its scheme, "www." or trailing slash. */
+const shown = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 ---
 
 <Base
@@ -18,14 +34,48 @@ const lastModified =
   current="about"
   ogType="profile"
   ogKey="about"
+  jsonld={aboutJsonLd(lastModified)}
   lastModified={lastModified}
 >
 <p class="crumbs"><a href="/">Xing Liu’s Home Page</a> › About</p>
 <h1>About Me</h1>
+<img class="portrait" src="/avatar-320.jpg" width="160" height="160" alt="Vault Boy badge reading “My mom thinks I’m S.P.E.C.I.A.L.”">
 <AboutText />
+<h2 id="bio">Short bio</h2>
+<p>For introductions:</p>
+<blockquote class="bio"><p>Xing Liu (<span lang="zh-CN" class="nowrap">刘星</span>) is an engineer at Annapurna Labs, part of Amazon Web Services, working on LLM serving. Before that, Xing worked at Google on Gemini serving and quantization, including the StableHLO quantizer, and at Yahoo (Verizon Media) on machine learning for abuse and reputation.</p></blockquote>
+<h2 id="resume">Résumé</h2>
 <ul>
-<li><a href={RESUME_URL}>Résumé</a> (PDF)</li>{ELSEWHERE.map((site) => <Fragment>{"\n"}<li><a href={site.url}>{site.name}</a></li></Fragment>)}
+<li><b>Annapurna Labs, AWS</b>: LLM serving. Now.</li>
+<li><b>Google</b>: Gemini serving and quantization, and the StableHLO quantizer.</li>
+<li><b>Yahoo / Verizon Media</b>: machine learning for abuse and reputation.</li>
 </ul>
+<p>The whole thing, as a PDF: <a href={RESUME_URL}>{resumeFile}</a> ({resumeKb}&nbsp;KB, {resumeMonth}).</p>
+<h2 id="elsewhere">Elsewhere</h2>
+<dl class="elsewhere">{ELSEWHERE.map((site) => <Fragment>{"\n"}<dt>{site.name}</dt><dd><a href={site.url} rel="me">{shown(site.url)}</a>{site.name === "GitHub" && <Fragment>. The bio there reads “A random dude” and “<a href="https://github.com/xingliu-aws" rel="me">@xingliu-aws</a> is also me”.</Fragment>}</dd></Fragment>)}
+<dt>RSS</dt><dd><a href="/feed.xml">xingliu.me/feed.xml</a>, every post in full. Paste the address into any feed reader.</dd>
+</dl>
+<hr>
 <h2 id="colophon">Colophon</h2>
-<p>This site is built with Astro from Markdown posts, and hosted on GitHub Pages.</p>
+<p>I wanted this site to feel like a web page from the late 1990s: plain on the surface, complete underneath, and easy to read. So it is set the way Netscape Navigator 3 showed a page in 1997, then typeset with care. One rule decides everything: only what Navigator could draw, set the way a typographer would.</p>
+<ul class="colophon-list">
+<li><b>Colour.</b> Navigator’s own defaults: a <code>#C0C0C0</code> grey page, <code>#0000EE</code> links, and <code>#551A8B</code> for links you have visited, so the archive remembers what you have read without a single cookie. Rules, tables and fields are shaded the way Navigator shaded them. Night, the dark scheme, follows your system’s setting and takes its link colours from the 216 browser-safe colours. Prefer white paper? Choose <i>Paper white</i> from the <i>Page colours</i> menu at the foot of any page (long posts have it under the title too). Your browser remembers the choice in its own storage, and nothing is sent anywhere.</li>
+<li><b>Type.</b> Georgia for reading: Matthew Carter drew it for screens, and Microsoft gave it away in 1996 as one of its core fonts for the Web. Headings are Times New Roman, every browser’s default. Small print is Verdana, from the same set. Code is Monaco on a Mac and Lucida Console on Windows. Chinese is set in Song (<span lang="zh-CN">宋体</span>) with two-character indents; where your computer has one, its quotation marks come from a font that draws them full width. This site downloads no fonts: it uses the ones already on your computer, with close stand-ins where these are missing.</li>
+<li><b>Machinery.</b> Posts are written in Markdown, built by <a href="https://astro.build/">Astro</a> and served by <a href="https://pages.github.com/">GitHub Pages</a>. Everything works without JavaScript. Scripts only add search as you type, copy buttons, the colour menu, the contents box that follows you through long posts, and the visitor map.</li>
+<li><b>Search.</b> The search box looks through a small index of every post, in your browser, and understands Chinese. Without JavaScript it asks DuckDuckGo to search this site instead.</li>
+<li><b>Dates.</b> “Last modified” at the foot of a post is the last time its words changed, read from the site’s history in git; moving files or changing the design does not count. “NEW!” marks things less than 30 days old, and disappears on its own.</li>
+<li><b>Feeds and addresses.</b> The <a href="/feed.xml">RSS feed</a> carries every post in full; RSS was invented at Netscape in 1999. Every post still lives at the address it was born with, because <a href="https://www.w3.org/Provider/Style/URI">cool URIs don’t change</a>.</li>
+<li><b>Previews.</b> Share a page, and its preview picture shows that page as Navigator would have drawn it.</li>
+<li><b>Privacy.</b> This site sets no cookies of its own and runs no analytics. The only outside code is the visitor map on the <a href="/#visitors">home page</a>: mapmyvisitors.com’s script, which counts pageviews, loads jQuery to draw the map, and sets a session cookie on mapmyvisitors.com. It runs after everything else on the page.</li>
+<li><b>The star.</b> The little icon in your browser tab is a 16-pixel star, because <span lang="zh-CN">星</span> means star.</li>
+</ul>
+<h3 id="buttons">The buttons</h3>
+<p>The four 88×31 buttons at the foot of every page each make a claim, and each claim is true:</p>
+<ul class="claims">
+<li><b>Subscribe: RSS feed.</b> The feed has every post, in full.</li>
+<li><b>Built with Astro.</b> Astro builds every page; the posts are written in Markdown.</li>
+<li><b>Hosted on GitHub Pages.</b> GitHub serves every file you are reading.</li>
+<li><b>Viewable with any browser.</b> Every page reads, navigates and searches without JavaScript, CSS or images, as the 1997 campaign asked.</li>
+</ul>
+<p class="weight">This page, its stylesheet and its script weigh __TEXT_KB__ KB as sent, plus __PIC_KB__ KB for the picture: about __SECONDS__ seconds on a 28.8k modem.</p>
 </Base>

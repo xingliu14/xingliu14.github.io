@@ -1,43 +1,65 @@
 ---
-// Interim archive, until redesign step 3 builds this page in full: the search form, and every post
-// by year and by topic, so the links that point here (#search, #y<year>, #topic-<id>) land.
+// The archive: every post twice, by date and by topic, under the search form (#search). site.js
+// searches /search.json in place as you type; without JavaScript the form asks DuckDuckGo.
 import ArchiveList from "../../components/ArchiveList.astro";
 import SearchForm from "../../components/SearchForm.astro";
 import Base from "../../layouts/Base.astro";
-import { buildDate, later } from "../../lib/dates";
+import { buildDate, later, monthYear } from "../../lib/dates";
 import { pathsLastModified } from "../../lib/last-modified.mjs";
 import { topics } from "../../lib/post-meta.mjs";
 import { getPosts } from "../../lib/posts";
+import { writingJsonLd } from "../../lib/seo";
 
 const posts = await getPosts();
+const since = monthYear(posts[posts.length - 1].date);
 const years = [...new Set(posts.map((post) => post.year))];
+// A topic with no published post yet stays out of the index.
+const byTopic = topics
+  .map((topic) => ({ topic, posts: posts.filter((post) => post.topic.id === topic.id) }))
+  .filter((group) => group.posts.length > 0);
+// The page changes when its own files do, and whenever a post is published or edited.
 const lastModified = later(
   pathsLastModified(["src/pages/writing/index.astro", "src/data/posts.json"]) ?? { date: buildDate(), iso: null },
   posts.map((post) => post.lastModified).reduce(later),
 );
+
+// In the run-in topic lists a title can start anywhere on a line, so a short title is kept whole
+// and lines break after a separator dot (<wbr>) instead. A longer title may wrap, but keeps its
+// last two words together, and a one-letter word ("I Changed Job") never ends a line. Phones list
+// one title per line, and style.css lets the kept-together part wrap there.
+const SHORT_TITLE = 30;
+/** A title for the run-in lists: the part that may wrap, and the part kept on one line. */
+function runIn(title: string): [string, string] {
+  const text = title.replace(/(?<=^|\s)(\p{L})\s/gu, "$1\u00a0");
+  const cut = text.length <= SHORT_TITLE ? 0 : Math.max(text.search(/\S+\s+\S+$/u), 0);
+  return [text.slice(0, cut), text.slice(cut)];
+}
 ---
 
 <Base
   title="Writing — Xing Liu"
   ogTitle="Writing"
-  description={`All ${posts.length} posts by Xing Liu, by date and by topic: notes on LLM inference, books, crypto and life, and a detective story in Chinese.`}
+  description={`All ${posts.length} posts by Xing Liu since ${since}, by date and by topic: notes on LLM inference, books, crypto and life, and a detective story in Chinese.`}
   path="/writing/"
   current="writing"
   ogKey="writing"
+  jsonld={writingJsonLd(posts)}
   footerSearch={false}
   lastModified={lastModified}
 >
 <p class="crumbs"><a href="/">Xing Liu’s Home Page</a> › Writing</p>
 <h1>Writing</h1>
+<p class="lede">{posts.length} posts since {since}: notes on LLM inference, books, crypto and life, and a detective story in Chinese. Newest first. Links you have already visited turn <span class="visited-demo">purple</span>, so the list remembers what you have read.</p>
 <SearchForm variant="main" />
+<p class="views">Index: <a href="#by-date">by date</a>&nbsp;· <a href="#by-topic">by topic</a>&nbsp;· <a href="/feed.xml">RSS feed</a> (full text)</p>
 <h2 id="by-date">By date</h2>
 {years.map((year) => {
   const inYear = posts.filter((post) => post.year === year);
   return <Fragment><h3 class="year" id={`y${year}`}>{year} <span class="count">({inYear.length})</span></h3>{"\n"}<ArchiveList posts={inYear} />{"\n"}</Fragment>;
 })}<hr>
 <h2 id="by-topic">By topic</h2>
-{topics.map((topic) => {
-  const inTopic = posts.filter((post) => post.topic.id === topic.id);
-  return <Fragment><div class="topic"><h3 id={`topic-${topic.id}`}>{topic.name} <span class="count">({inTopic.length})</span></h3><ul class="runin">{inTopic.map((post, i) => <li><a href={post.url} lang={post.zh ? "zh-CN" : undefined}>{post.title}</a>{i < inTopic.length - 1 && <span class="sep" aria-hidden="true">·</span>}</li>)}</ul></div>{"\n"}</Fragment>;
-})}
+{byTopic.map(({ topic, posts: inTopic }) => <Fragment><div class="topic"><h3 id={`topic-${topic.id}`}>{topic.name} <span class="count">({inTopic.length})</span></h3><ul class="runin">{inTopic.map((post, i) => {
+  const [wraps, kept] = runIn(post.title);
+  return <li><a href={post.url} lang={post.zh ? "zh-CN" : undefined}>{wraps}<span class="nowrap">{kept}</span></a>{i < inTopic.length - 1 && <Fragment><span class="sep" aria-hidden="true">·</span><wbr></Fragment>}</li>;
+})}</ul></div>{"\n"}</Fragment>)}
 </Base>
