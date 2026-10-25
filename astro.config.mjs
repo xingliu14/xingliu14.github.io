@@ -1,5 +1,10 @@
 import { defineConfig, envField } from "astro/config";
 import { satteri } from "@astrojs/markdown-satteri";
+import sitemap from "@astrojs/sitemap";
+import checkDist from "./src/integrations/check-dist.mjs";
+import ogCards from "./src/integrations/og-cards.mjs";
+import pageWeight from "./src/integrations/page-weight.mjs";
+import { sitemapLastmod } from "./src/lib/last-modified.mjs";
 import { normalizeHeadings, postStructure, rougeCode } from "./src/lib/markdown.mjs";
 
 // Served at the custom domain set in Settings → Pages (Actions deployments ignore a CNAME file).
@@ -9,6 +14,22 @@ export default defineConfig({
   // Keep whitespace as written: the single spaces between the navigation's items (src/lib/nav.ts)
   // and between other inline elements render as spaces, and are where a narrow line may wrap.
   compressHTML: false,
+  // Each one runs when the build is done, in this order, so check-dist sees the finished site.
+  integrations: [
+    sitemap({
+      // Every page but Not Found. Posts and /writing/ say when they last changed; other pages give
+      // no date rather than an imprecise one.
+      filter: (page) => !/\/404(\.html)?\/?$/.test(new URL(page).pathname),
+      serialize: (item) => {
+        const lastmod = sitemapLastmod(new URL(item.url).pathname);
+        if (lastmod) item.lastmod = lastmod;
+        return item;
+      },
+    }),
+    ogCards(), // dist/og/cards.json → dist/og/*.png, then deletes cards.json
+    pageWeight(), // fills in the weight sentence in dist/about/index.html
+    checkDist(), // last: fails the build if anything in dist/ is wrong
+  ],
   env: {
     schema: {
       // Optional; CI sets it so the build's GitHub API calls aren't rate limited.

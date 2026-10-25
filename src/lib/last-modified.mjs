@@ -3,10 +3,12 @@
 // .git-blame-ignore-revs (the file GitHub's blame view also reads).
 //
 // Paths are relative to the repository root, which is where Astro runs. Without usable history
-// (not a repository, or a shallow clone) every function returns null after one warning, and
-// callers fall back to publication or build dates. CI checks out with fetch-depth: 0.
+// (not a repository, or a shallow clone) postLastModified and pathsLastModified return null after
+// one warning, and callers fall back to publication or build dates. CI checks out with
+// fetch-depth: 0.
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { publishedPostFiles } from "./post-files.mjs";
 
 /**
  * A commit's author date: `date` is the calendar date where the author was, `iso` the full time.
@@ -145,4 +147,23 @@ export function pathsLastModified(paths) {
     pathsCache.set(key, iso ? { date: iso.slice(0, 10), iso } : null);
   }
   return pathsCache.get(key) ?? null;
+}
+
+/** @type {Map<string, string> | undefined} */
+let lastmods;
+
+/**
+ * The sitemap's <lastmod> for a page: a post's "Last modified" date, and for /writing/ the newest
+ * of those. Other pages get none rather than an imprecise one. This runs in astro.config.mjs,
+ * outside Astro's content layer, so it finds the posts by their file names.
+ * @param {string} pathname  e.g. "/2026/01/23/nano-vllm-notes/"
+ * @returns {string | null}  "YYYY-MM-DD"
+ */
+export function sitemapLastmod(pathname) {
+  if (!lastmods) {
+    lastmods = new Map(publishedPostFiles().map(({ file, url, date }) => [url, postLastModified(file, date)?.date ?? date]));
+    const newest = [...lastmods.values()].sort().at(-1);
+    if (newest) lastmods.set("/writing/", newest);
+  }
+  return lastmods.get(decodeURIComponent(pathname)) ?? null;
 }
