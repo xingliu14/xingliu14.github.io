@@ -72,6 +72,9 @@ a:hover {
 
 // ── Article Content ────────────────────────────────────────
 .article {
+  // Long unbroken words (file paths in headings) wrap instead of widening the page on phones.
+  overflow-wrap: break-word;
+
   h1, h2, h3, h4,
   .highlight {
     margin-bottom: 16px;
@@ -93,6 +96,13 @@ a:hover {
   li ul, li ol {
     padding-left: 16px;
     margin-bottom: 0px;
+  }
+
+  // Wide tables scroll inside the article instead of widening the whole page on phones.
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
   }
 }
 
