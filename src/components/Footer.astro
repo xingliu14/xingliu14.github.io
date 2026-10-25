@@ -25,5 +25,5 @@ const { current, section, footerSearch, lastModified } = Astro.props;
 {footerSearch && <Fragment><SearchForm variant="mini" />{"\n"}</Fragment>}<Badges />
 <address>Xing Liu (<span lang="zh-CN" class="nowrap">刘星</span>) · <a href="/">xingliu.me</a></address>
 <p>Last modified: <time datetime={lastModified.date}>{longDate(lastModified.date)}</time></p>
-<p class="prefs"><label for="colours">Page colours:</label> <ColoursSelect id="colours" /></p>
+<p class="prefs"><label for="colours">Page colors:</label> <ColoursSelect id="colours" /></p>
 </footer>

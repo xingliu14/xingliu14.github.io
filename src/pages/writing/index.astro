@@ -5,6 +5,7 @@ import ArchiveList from "../../components/ArchiveList.astro";
 import SearchForm from "../../components/SearchForm.astro";
 import Base from "../../layouts/Base.astro";
 import { buildDate, later, monthYear } from "../../lib/dates";
+import { writingDescription } from "../../lib/descriptions";
 import { pathsLastModified } from "../../lib/last-modified.mjs";
 import { topics } from "../../lib/post-meta.mjs";
 import { getPosts } from "../../lib/posts";
@@ -39,7 +40,7 @@ function runIn(title: string): [string, string] {
 <Base
   title="Writing — Xing Liu"
   ogTitle="Writing"
-  description={`All ${posts.length} posts by Xing Liu since ${since}, by date and by topic: notes on LLM inference, books, crypto and life, and a detective story in Chinese.`}
+  description={writingDescription(posts)}
   path="/writing/"
   current="writing"
   ogKey="writing"

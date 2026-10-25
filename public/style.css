@@ -18,8 +18,8 @@
 /* ------------------------------------------------------------------ 0. Faces */
 
 /* Chinese punctuation, from local fonts only (nothing is downloaded). Times and Song draw “ ” at
-   0.4-0.44 em, so Chinese double quotes come from a face that draws them a full em wide (measured in
-   Chrome on macOS: Hiragino Sans GB W3 and Heiti SC 1.00 em; SimSun on Windows). Song supplies the
+   0.4-0.44 em, so Chinese double quotes come from a face that draws them a full em wide (Hiragino
+   Sans GB or Heiti SC on macOS, SimSun on Windows). Song supplies the
    centred dash and ellipsis. ‘ ’ stay with Times because ’ is also the English apostrophe, and the
    interpunct · stays narrow (Times), close to the half-width 间隔号. Where none of these faces is
    installed the rule is skipped and the quotes fall back to Times: narrow, but correct. */
@@ -158,8 +158,8 @@ body {
 ::selection { background: var(--mark); color: var(--mark-ink); }
 
 [hidden] { display: none !important; }
-/* Controls that only work with site.js are shown only when scripts run ("js" on <html>, set by the
-   head script before first paint), so they take their room from the start. */
+/* Controls that need site.js show only when scripts run ("js" on <html>, set before first paint),
+   so they take their room from the start. */
 .prefs, .colours-line, .copy-link { display: none; }
 .js .prefs, .js .colours-line { display: block; }
 .js .copy-link { display: inline-block; }
@@ -284,8 +284,8 @@ pre {
 }
 div.highlighter-rouge pre { margin: 0; }
 pre code { font-size: 1em; }
-/* site.js adds the language and a Copy button above each well. The inline head script puts class
-   "js" on <html> before first paint, so the bar's room is reserved and nothing moves when it lands. */
+/* site.js adds the language and a Copy button above each well; "js" on <html> (set before first
+   paint) reserves the bar's room, so nothing moves when it lands. */
 .js div.highlighter-rouge { position: relative; padding-top: 30px; }
 .code-bar {
   position: absolute;
@@ -431,8 +431,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   font: 0.875rem/1.95 var(--mono);
   white-space: nowrap;
 }
-/* NEW! is followed by a real space in the markup, so removing it (site.js, after 30 days) leaves
-   no gap. */
+/* NEW! is followed by a real space, so removing it (site.js, after 30 days) leaves no gap. */
 .new {
   display: inline-block;
   padding: 2px 4px 1px;
@@ -462,6 +461,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   background: #000080;
   color: #ffffff;
   line-height: 0;
+  overflow: hidden; /* the widget stays 300px wide on 320px phones */
 }
 .map-well img { display: block; width: 100%; height: auto; }
 .map-well .mm-count, .map-well .mm-wait {
@@ -492,7 +492,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 
 .year { margin-bottom: 0.3em; }
 .year .count, .topic .count { font: normal 0.875rem var(--small); }
-.archive { list-style: none; padding: 0; margin: 0 0 1em; }
+.archive { list-style: none; padding: 0; margin: 0 0 1em; overflow-wrap: break-word; }
 .archive li {
   display: grid;
   grid-template-columns: 4.6em 1fr;
@@ -523,6 +523,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 /* ------------------------------------------------------------------ 10. Post */
 
 .post-head h1 { margin-bottom: 0.25em; }
+.post-head h1 .nowrap { display: inline-block; white-space: normal; } /* whole unless wider than a line */
 .byline { margin: 0 0 1.1em; font: 0.875rem/1.75 var(--small); } /* 24.5px lines: links 24px apart */
 .byline .sep { margin: 0 0.1em; }
 /* Long reads (10 minutes or more) repeat the footer's colour menu under the byline. */
@@ -535,8 +536,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .article h2 { font-size: 1.5em; }
 /* The pipeline renumbers in-body headings so every post's outline starts at h2 under the title,
    and tags a heading with the size its Markdown level implies when the two differ: a post written
-   with ## and ### gets <h2 class="s3"> and <h3 class="s4">; a book list written with #### gets
-   <h2 class="s5">. */
+   with ## and ### gets <h2 class="s3"> and <h3 class="s4">. */
 .article .s2 { font-size: 1.5em; font-style: normal; }
 .article .s3 { font-size: 1.32em; font-style: normal; }
 .article .s4 { font-size: 1.14em; font-style: normal; }
@@ -574,8 +574,8 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 
 /* ------------------------------------------------------------------ 11. Contents box */
 
-/* A Navigator group box: an etched frame with its title sitting on the top line. It is a
-   <details>, so it folds without JavaScript; an inline script closes it on phones before paint. */
+/* A Navigator group box: an etched frame with its title on the top line. A <details>, so it
+   folds without JavaScript; an inline script closes it on phones before paint. */
 .toc { margin: 1.9em 0 1.7em; font-size: 0.9em; }
 .toc details {
   padding: 0 1.1em 0.75em;
@@ -586,8 +586,8 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
    section break with a label, rather than an empty frame. */
 .toc details:not([open]) { padding: 0; border-width: 1px 0 0; box-shadow: inset 0 1px 0 var(--hi); }
 .toc details:not([open]) summary { margin-bottom: 0; }
-/* The title sits on the top rule, like a <legend>. It is block-level and shrink-wrapped, because
-   a negative top margin does not lift an inline-block out of its line box. */
+/* The title sits on the top rule, like a <legend>: block-level and shrink-wrapped, because a
+   negative top margin cannot lift an inline-block out of its line box. */
 .toc summary {
   display: block;
   width: -webkit-fit-content;
@@ -628,8 +628,8 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 @media (min-width: 43.75em) and (max-width: 77.4375em) {
   .toc ol, .toc ul { columns: 2; column-gap: 2.2em; }
 }
-/* Wide screens: the Contents frame of a framed site, without the frameset. The box leaves the
-   column for the empty grey margin and stays in view while the post scrolls. */
+/* Wide screens: a framed site's Contents frame, without the frameset. The box leaves the column
+   for the grey margin and stays in view as the post scrolls. */
 @media (min-width: 77.5em) {
   .toc {
     position: absolute;
@@ -663,7 +663,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 /* ------------------------------------------------------------------ 12. Chinese posts */
 
 /* Song for Han characters, Times for Latin and figures, full-width punctuation from ZH Punct,
-   two-character indents, justified where lines are long enough to justify well. */
+   two-character indents, justified where lines are long enough. */
 .post-head h1:lang(zh), .article:lang(zh), .toc:lang(zh), .hello .sub { font-family: var(--cjk); }
 .post-head h1:lang(zh) { font-feature-settings: "palt"; }
 .article:lang(zh) { font-size: 1.04em; line-height: 1.85; text-autospace: normal; }
@@ -709,8 +709,8 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 
 /* ------------------------------------------------------------------ 15. Search */
 
-/* Results the AltaVista way: a count, then numbered hits with a line of context, the match in
-   bold, and the address in small print. */
+/* Results the AltaVista way: a count, numbered hits with context, the match in bold, the address
+   in small print. */
 .results { margin: 0 0 1.4em; }
 .results .count { font: 0.875rem/1.6 var(--small); }
 .results .count:empty { margin: 0; } /* there from the start, so it is announced */
@@ -766,8 +766,8 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   .pager .next { margin-top: 0.8em; text-align: left; }
   .log li { grid-template-columns: 1fr; }
   .log time { line-height: 1.5; }
-  /* A narrow date gutter, so titles keep most of the line. */
-  .archive li { grid-template-columns: 3.6em 1fr; grid-column-gap: 0.55em; }
+  /* A narrow date gutter, so titles keep most of the line; a word too long for it breaks. */
+  .archive li { grid-template-columns: 3.6em minmax(0, 1fr); grid-column-gap: 0.55em; }
   .archive .date { font-size: 0.8125rem; line-height: 2.1; }
   .topic h3 { display: block; margin: 0 0 0.15em; }
   .topic h3::after { content: none; }

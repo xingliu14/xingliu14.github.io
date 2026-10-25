@@ -7,6 +7,7 @@
 import { GITHUB_USER } from "../../config";
 import Base from "../../layouts/Base.astro";
 import { buildDate, laDate, later, longDate } from "../../lib/dates";
+import { projectsDescription } from "../../lib/descriptions";
 import { getGitHubData, getProjects } from "../../lib/github";
 import { pathsLastModified } from "../../lib/last-modified.mjs";
 import { projectsJsonLd } from "../../lib/seo";
@@ -28,7 +29,7 @@ const shown = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, ""
 <Base
   title="Projects — Xing Liu"
   ogTitle="Projects"
-  description={`The ${projects.length} public repositories Xing Liu has started on GitHub (forks left out): what each one is, its language, its stars and when it last changed.`}
+  description={projectsDescription(projects)}
   path="/projects/"
   current="projects"
   ogKey="projects"

@@ -52,7 +52,7 @@ const subtitle = /^(.+：)([^\p{Script=Han}：]{1,24})$/u.exec(post.title);
 <p class="crumbs" lang="en"><a href="/">Xing Liu’s Home Page</a> › <a href="/writing/">Writing</a> › <a href={`/writing/#y${post.year}`}>{post.year}</a></p>
 <h1>{subtitle ? <Fragment>{subtitle[1]}<wbr><span class="nowrap">{subtitle[2]}</span></Fragment> : post.title}</h1>
 <Byline post={post} />
-{post.minutes >= 10 && <Fragment><p class="colours-line" lang="en"><label for="colours-top">Page colours:</label> <ColoursSelect id="colours-top" /></p>{"\n"}</Fragment>}</header>
+{post.minutes >= 10 && <Fragment><p class="colours-line" lang="en"><label for="colours-top">Page colors:</label> <ColoursSelect id="colours-top" /></p>{"\n"}</Fragment>}</header>
 <div class={post.topic.id === "fiction" ? "article fiction" : "article"}>
 <Content />
 </div>
