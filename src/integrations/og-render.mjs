@@ -12,6 +12,7 @@ import { Resvg } from "@resvg/resvg-js";
 import satori from "satori";
 import subsetFont from "subset-font";
 import { badgeSvg } from "../../scripts/pixels.mjs";
+import { splitSubtitle } from "../lib/title-parts.mjs";
 
 /**
  * One entry of /og/cards.json. A "home" card (Home and About) shows the avatar beside `title`,
@@ -21,7 +22,6 @@ import { badgeSvg } from "../../scripts/pixels.mjs";
  *   file: string,
  *   kind: "home" | "section" | "post",
  *   current: "Home" | "Writing" | "Projects" | "About",
- *   lang?: "en" | "zh-CN",
  *   title: string,
  *   sub?: string,
  *   text?: string,
@@ -37,7 +37,7 @@ const font = (file) => readFileSync(require.resolve(file));
 
 /** @type {Record<string, Buffer> | undefined} */
 let fonts;
-// Loaded on the first card, not on import: astro.config.mjs imports this for every command.
+// Read once, when the first card is drawn.
 function loadFonts() {
   fonts ??= {
     tinosBold: font("@expo-google-fonts/tinos/700Bold/Tinos_700Bold.ttf"),
@@ -130,28 +130,28 @@ function titleSize(title) {
 
 /**
  * A short Latin subtitle after a full-width colon stays on one line, as in the post's own h1
- * (src/pages/[year]/[month]/[day]/[slug].astro): "侦探小说：" may end a line, "He’s Replaceable"
- * never breaks.
+ * (src/lib/title-parts.mjs): "侦探小说：" may end a line, "He’s Replaceable" never breaks.
  * @param {string} title
  */
 function titleParts(title) {
-  const subtitle = /^(.+：)([^\p{Script=Han}：]{1,24})$/u.exec(title);
-  return subtitle ? [subtitle[1], h("span", { whiteSpace: "nowrap" }, subtitle[2])] : [title];
+  const subtitle = splitSubtitle(title);
+  return subtitle ? [subtitle[0], h("span", { whiteSpace: "nowrap" }, subtitle[1])] : [title];
 }
 
 /**
- * "post" and "section" cards: crumbs, title, the byline (posts only) and the description. A
- * Chinese description is balanced across its lines, so its last line never holds a lone character.
+ * "post" and "section" cards: crumbs, title, the byline (posts only) and the description. The
+ * description is balanced across its lines, so its last line never holds a lone word, or a lone
+ * Chinese character.
  * @param {Card} card
  */
-function textCard({ current, lang, crumbs = [], title, byline, description }) {
+function textCard({ current, crumbs = [], title, byline, description }) {
   return frame([
     navRow(current),
     rule(),
     crumbRow(crumbs),
     h("div", { display: "flex", flexWrap: "wrap", marginTop: 10, fontFamily: SERIF, fontWeight: 700, fontSize: titleSize(title), lineHeight: 1.08, letterSpacing: -0.5 }, titleParts(title)),
     byline ? h("div", { display: "flex", flexWrap: "wrap", marginTop: 16, fontFamily: SANS, fontSize: 26 }, run(byline)) : null,
-    description ? h("div", { display: "flex", marginTop: 18, fontFamily: TEXT, fontSize: 33, lineHeight: 1.4, maxWidth: 1040, ...(lang === "zh-CN" && { textWrap: "balance" }) }, description) : null,
+    description ? h("div", { display: "flex", marginTop: 18, fontFamily: TEXT, fontSize: 33, lineHeight: 1.4, maxWidth: 1040, textWrap: "balance" }, description) : null,
   ]);
 }
 

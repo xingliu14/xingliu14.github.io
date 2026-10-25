@@ -1,19 +1,9 @@
-// Profile and repositories from the GitHub API at build time. Falls back to
+// The public repositories, from the GitHub API at build time. Falls back to
 // src/data/github-snapshot.json if the API can't be reached, and says so (`live`).
 import { GITHUB_TOKEN } from "astro:env/server";
 import { GITHUB_USER, PROJECTS } from "../config";
 import snapshot from "../data/github-snapshot.json";
 import repoNotes from "../data/repo-notes.json";
-
-export interface Owner {
-  login: string;
-  name: string | null;
-  bio: string | null;
-  avatar_url: string;
-  email: string | null;
-  location: string | null;
-  hireable: boolean | null;
-}
 
 export interface Repo {
   name: string;
@@ -33,7 +23,6 @@ export interface Repo {
 }
 
 interface GitHubData {
-  owner: Owner;
   repos: Repo[];
   /** When the data was fetched: during this build, or when the snapshot was saved. */
   fetchedAt: string;
@@ -45,13 +34,14 @@ interface GitHubData {
 export interface Project extends Repo {
   /** GitHub's description, else the note in src/data/repo-notes.json; null when there is neither. */
   about: string | null;
-  /** The site to link to: the repository's website, else the note's, else its Pages site. */
+  /** The site to link to: the note's, else the repository's website, else its Pages site. */
   homepage: string | null;
 }
 
 interface RepoNote {
   note?: string;
-  homepage?: string;
+  /** Replaces the website set on GitHub; null shows none (a site that is gone, say). */
+  homepage?: string | null;
 }
 
 const NOTES: Record<string, RepoNote> = repoNotes;
@@ -70,15 +60,12 @@ async function get<T>(path: string): Promise<T> {
 
 async function load(): Promise<GitHubData> {
   try {
-    const [owner, repos] = await Promise.all([
-      get<Owner>(`/users/${GITHUB_USER}`),
-      get<Repo[]>(`/users/${GITHUB_USER}/repos?per_page=100&type=owner`),
-    ]);
-    if (typeof owner?.login !== "string" || !Array.isArray(repos)) throw new Error("unexpected API response shape");
-    return { owner, repos, fetchedAt: new Date().toISOString(), live: true };
+    const repos = await get<Repo[]>(`/users/${GITHUB_USER}/repos?per_page=100&type=owner`);
+    if (!Array.isArray(repos)) throw new Error("unexpected API response shape");
+    return { repos, fetchedAt: new Date().toISOString(), live: true };
   } catch (err) {
     console.warn(`[github] ${(err as Error).message}; using src/data/github-snapshot.json`);
-    return { owner: snapshot.owner, repos: snapshot.repos as Repo[], fetchedAt: snapshot.fetched_at, live: false };
+    return { repos: snapshot.repos as Repo[], fetchedAt: snapshot.fetched_at, live: false };
   }
 }
 
@@ -100,6 +87,7 @@ export async function getProjects(): Promise<Project[]> {
       const note = NOTES[r.name];
       // A project's own Pages site lives under this site's domain, e.g. /GameKingdom/.
       const pages = r.has_pages ? new URL(`/${r.name}/`, import.meta.env.SITE).href : null;
-      return { ...r, about: r.description || note?.note || null, homepage: r.homepage || note?.homepage || pages };
+      const homepage = note && "homepage" in note ? (note.homepage ?? null) : r.homepage || pages;
+      return { ...r, about: r.description || note?.note || null, homepage };
     });
 }

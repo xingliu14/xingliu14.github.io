@@ -42,7 +42,6 @@ export async function GET(): Promise<Response> {
       file: `${post.id}.png`,
       kind: "post",
       current: "Writing",
-      lang: post.lang,
       crumbs: [HOME, "Writing", post.year],
       title: post.title,
       byline: byline(post),

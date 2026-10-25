@@ -1,28 +1,22 @@
-/* xingliu.me: "Navigator Grey"
-   Xing Liu's Home Page as Netscape Navigator 3 drew a page in 1997 (grey page, Times headings,
-   blue underlined links that turn purple once read, shaded rules, bevelled tables), then typeset
-   with care. The rule that governs every choice below:
+/* xingliu.me: "Navigator Grey". Xing Liu's Home Page as Netscape Navigator 3 drew a page in 1997
+   (grey page, Times headings, blue links that turn purple once read, shaded rules, bevelled
+   tables), then typeset with care. The rule behind every choice below:
        only what Navigator could draw, set the way a typographer would.
    System fonts only; nothing is downloaded. Everything works without JavaScript.
    Safari 14 safe: no flex `gap`, :has(), container queries, aspect-ratio or overflow-wrap:anywhere.
-   Sizes are in rem/em so the reader's own default font size is honoured; breakpoints too, so a
-   larger default never pushes the layout off screen.
+   Sizes and breakpoints are in rem/em, so a reader's larger default font size is honoured and
+   never pushes the layout off screen.
+   Sections: 0 Faces, 1 Tokens, 2 Page, 3 Text, 4 Code, 5 Tables, 6 Forms, 7 Masthead, 8 Home,
+   9 Writing, 10 Post, 11 Contents box, 12 Chinese posts, 13 Projects, 14 About, 15 Search,
+   16 Not Found, 17 Footer, 18 Small screens, 19 Print. */
 
-   Contents
-     0. Faces          5. Tables         10. Post            15. Search
-     1. Tokens         6. Forms          11. Contents box    16. Not Found
-     2. Page           7. Masthead/nav   12. Chinese posts   17. Footer
-     3. Text           8. Home           13. Projects        18. Small screens
-     4. Code           9. Writing        14. About           19. Print            */
+/* ---------------------------------------- 0. Faces */
 
-/* ------------------------------------------------------------------ 0. Faces */
-
-/* Chinese punctuation, from local fonts only (nothing is downloaded). Times and Song draw “ ” at
-   0.4-0.44 em, so Chinese double quotes come from a face that draws them a full em wide (Hiragino
-   Sans GB or Heiti SC on macOS, SimSun on Windows). Song supplies the
-   centred dash and ellipsis. ‘ ’ stay with Times because ’ is also the English apostrophe, and the
-   interpunct · stays narrow (Times), close to the half-width 间隔号. Where none of these faces is
-   installed the rule is skipped and the quotes fall back to Times: narrow, but correct. */
+/* Chinese punctuation, from local fonts only. Times and Song draw “ ” 0.4 em wide, so Chinese
+   double quotes come from a face that draws them a full em (Hiragino Sans GB or Heiti SC on macOS,
+   SimSun on Windows); Song supplies the centred dash and ellipsis. ‘ ’ stay with Times, since ’ is
+   also the English apostrophe, and the interpunct · stays narrow, close to the half-width 间隔号.
+   Without these faces the rule is skipped, and the quotes stay narrow but correct. */
 @font-face {
   font-family: "ZH Punct";
   src: local("Hiragino Sans GB W3"), local("HiraginoSansGB-W3"), local("Heiti SC Light"),
@@ -36,7 +30,7 @@
   unicode-range: U+2014, U+2026;
 }
 
-/* ------------------------------------------------------------------ 1. Tokens */
+/* ---------------------------------------- 1. Tokens */
 
 :root {
   color-scheme: light;
@@ -55,7 +49,7 @@
   --well-ink: #000000;
   --head: #c0c0c0;
   --hint: #595959;
-  /* Fixed accents. */
+  /* Accents. Night lightens the selection, which navy would hide. */
   --mark: #000080;
   --mark-ink: #ffffff;
   --new: #cc0000;
@@ -101,6 +95,8 @@
     --well-ink: #e6e6e6;
     --head: #333333;
     --hint: #999999;
+    --mark: #e6e6e6;
+    --mark-ink: #000000;
     --kw: #6699ff;
     --cm: #66cc66;
     --st: #ff9966;
@@ -124,6 +120,8 @@
     --well-ink: #e6e6e6;
     --head: #333333;
     --hint: #999999;
+    --mark: #e6e6e6;
+    --mark-ink: #000000;
     --kw: #6699ff;
     --cm: #66cc66;
     --st: #ff9966;
@@ -133,7 +131,7 @@
   }
 }
 
-/* ------------------------------------------------------------------ 2. Page */
+/* ---------------------------------------- 2. Page */
 
 html {
   font-size: 100%;
@@ -164,7 +162,7 @@ body {
 .js .prefs, .js .colours-line { display: block; }
 .js .copy-link { display: inline-block; }
 .nowrap { white-space: nowrap; }
-.visually-hidden {
+.visually-hidden, .sr-only {
   position: absolute !important;
   width: 1px;
   height: 1px;
@@ -189,7 +187,7 @@ body {
 .skip:focus { top: 8px; }
 main:focus { outline: none; }
 
-/* ------------------------------------------------------------------ 3. Text */
+/* ---------------------------------------- 3. Text */
 
 p { margin: 0 0 0.85em; }
 h1, h2, h3, h4, h5, h6 {
@@ -259,7 +257,7 @@ a[data-footnote-ref]::after, a.footnote-ref::after { content: "]"; }
 /* The heading a contents link jumped to sits in a white band, like a selected list item. */
 .article :target { background: var(--well); color: var(--well-ink); box-shadow: 0 0 0 0.25em var(--well); scroll-margin-top: 1em; }
 
-/* ------------------------------------------------------------------ 4. Code */
+/* ---------------------------------------- 4. Code */
 
 code, kbd, samp, tt, pre { font-family: var(--mono); }
 :not(pre) > code, kbd, samp, tt { font-size: 0.8em; }
@@ -310,7 +308,7 @@ pre code { font-size: 1em; }
 .token.deleted { color: var(--st); }
 .token.output { font-style: italic; }
 
-/* ------------------------------------------------------------------ 5. Tables */
+/* ---------------------------------------- 5. Tables */
 
 /* HTML 3.2's <table border=1 cellspacing=2>: a raised outline round sunken cells. */
 .table-scroll { margin: 1.2em 0 1.4em; overflow-x: auto; }
@@ -331,7 +329,7 @@ th, td {
   border-color: var(--lo) var(--hi) var(--hi) var(--lo);
 }
 td { background: var(--well); color: var(--well-ink); }
-th { background: var(--head); font-weight: bold; white-space: nowrap; }
+th { background: var(--head); font-weight: bold; }
 /* GFM column alignment, turned into classes by the Markdown pipeline (no inline styles). */
 th.al-left, td.al-left { text-align: left; }
 th.al-center, td.al-center { text-align: center; }
@@ -340,7 +338,7 @@ table code { font-size: 0.92em; }
 /* Added by site.js only while a table is wider than its box. */
 .scroll-hint { margin: -0.9em 0 1.3em; font: 0.8125rem/1.5 var(--small); text-align: right; }
 
-/* ------------------------------------------------------------------ 6. Forms */
+/* ---------------------------------------- 6. Forms */
 
 input[type="search"], input[type="text"], input[type="url"], select {
   font: 0.9375rem/1.3 var(--small);
@@ -385,7 +383,7 @@ button:active, button[aria-pressed="true"] {
 }
 button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 
-/* ------------------------------------------------------------------ 7. Masthead and navigation */
+/* ---------------------------------------- 7. Masthead and navigation */
 
 /* [ Home | Writing | Projects | About | Search ]: real brackets and pipes (Lynx shows them),
    hidden from screen readers. Each item is an unbreakable group carrying its own separator. */
@@ -405,7 +403,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 
 .crumbs { margin: 1.4em 0 0; font: 0.8125rem/1.5 var(--small); }
 
-/* ------------------------------------------------------------------ 8. Home */
+/* ---------------------------------------- 8. Home */
 
 .hello { text-align: center; margin: 1.6em 0 1.3em; }
 .avatar {
@@ -445,38 +443,40 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 
 .columns { display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 2em; }
 .columns h2 { margin-top: 1.1em; }
-.columns .note { font-size: 0.8125rem; font-family: var(--small); }
 
-/* The visitor map: the real mapmyvisitors widget in a sunken navy well, loaded last. The well
-   reserves the widget's height so nothing moves when it arrives. */
+/* The visitor map: the real mapmyvisitors widget in a sunken navy well, loaded last, as wide as
+   the well (300px; less on the narrowest phones). The well reserves its height: nothing moves. */
 .visitor-map { margin: 0 0 1em; }
 .map-well {
   position: relative;
-  width: 300px;
+  box-sizing: border-box;
+  width: 304px;
   max-width: 100%;
-  min-height: 185px;
+  min-height: 189px;
   border: 2px solid;
   border-color: var(--lo) var(--hi) var(--hi) var(--lo);
   box-shadow: inset 1px 1px 0 var(--edge);
   background: #000080;
   color: #ffffff;
   line-height: 0;
-  overflow: hidden; /* the widget stays 300px wide on 320px phones */
+  overflow: hidden;
 }
-.map-well img { display: block; width: 100%; height: auto; }
-.map-well .mm-count, .map-well .mm-wait {
-  display: block;
-  padding: 5px 0 3px;
+/* A link to the map until the widget is in, or for good. The widget inserts itself right after
+   its script, which site.js puts before the link, and the link then hides. */
+.map-well .mm-wait {
+  margin: 0;
+  padding: 80px 8px 0;
   text-align: center;
   font: 0.75rem/1rem Arial, Helvetica, sans-serif;
-  color: #ffffff;
 }
-/* Placeholder until the widget arrives (site.js), or the <noscript> link without JavaScript. */
-.map-well .mm-wait { margin: 0; padding: 80px 8px 0; }
+#mapmyvisitors + * ~ .mm-wait { display: none; }
 .map-well a, .map-well a:visited { color: #ffffff; }
+/* The well clips its links, and black on navy can't be seen: the ring goes round the well. */
+.map-well:focus-within { outline: 2px dotted var(--ink); outline-offset: 2px; }
+.map-well a:focus { outline: none; }
 .visitor-map figcaption { font: 0.8125rem/1.5 var(--small); margin-top: 0.5em; max-width: 34em; }
 
-/* ------------------------------------------------------------------ 9. Writing */
+/* ---------------------------------------- 9. Writing */
 
 .lede { font-size: 1.04em; }
 .visited-demo { color: var(--visited); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.13em; }
@@ -520,7 +520,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .runin li { display: inline; margin: 0; }
 .runin .sep { margin: 0 0.3em; }
 
-/* ------------------------------------------------------------------ 10. Post */
+/* ---------------------------------------- 10. Post */
 
 .post-head h1 { margin-bottom: 0.25em; }
 .post-head h1 .nowrap { display: inline-block; white-space: normal; } /* whole unless wider than a line */
@@ -544,10 +544,12 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .article .s6 { font-size: 1em; font-style: italic; }
 .secno { margin-right: 0.15em; }
 
-/* Wide figures (code wells, tables) may leave the text measure on big screens. */
+/* Wide figures (code wells, tables) may leave the text measure on big screens. Cells are a little
+   tighter, so an eight-column table fits. The hint's offset is 3em of the article's 19px. */
 @media (min-width: 56.25em) {
   .article div.highlighter-rouge, .article .table-scroll { margin-left: -3em; margin-right: -3em; }
-  .article .table-scroll + .scroll-hint { margin-right: -3em; }
+  .article th, .article td { padding: 0.4em 0.55em; }
+  .article .table-scroll + .scroll-hint { margin-right: -3.5625rem; }
   .projects-wrap { margin-left: -4.6em; margin-right: -4.6em; }
 }
 
@@ -572,7 +574,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .pager .none { font-style: italic; line-height: 1.35; }
 .up { margin: 0.4em 0 0; text-align: center; font: 0.875rem/1.6 var(--small); }
 
-/* ------------------------------------------------------------------ 11. Contents box */
+/* ---------------------------------------- 11. Contents box */
 
 /* A Navigator group box: an etched frame with its title on the top line. A <details>, so it
    folds without JavaScript; an inline script closes it on phones before paint. */
@@ -657,10 +659,10 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   /* The rail holds the left margin, so wide figures after it reach 6em to the right instead of
      3em each side: the same width, clear of the rail. (A sibling selector, so no :has().) */
   .article .toc ~ div.highlighter-rouge, .article .toc ~ .table-scroll { margin-left: 0; margin-right: -6em; }
-  .article .toc ~ .table-scroll + .scroll-hint { margin-right: -6em; }
+  .article .toc ~ .table-scroll + .scroll-hint { margin-right: -7.125rem; }
 }
 
-/* ------------------------------------------------------------------ 12. Chinese posts */
+/* ---------------------------------------- 12. Chinese posts */
 
 /* Song for Han characters, Times for Latin and figures, full-width punctuation from ZH Punct,
    two-character indents, justified where lines are long enough. */
@@ -680,7 +682,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .fiction h5 { margin: 1.8em 0 0.8em; text-align: center; font: bold 1em/1.4 var(--display); letter-spacing: 0.2em; }
 .fiction h5::before, .fiction h5::after { content: " \2014  "; content: " \2014  " / ""; font-weight: normal; }
 
-/* ------------------------------------------------------------------ 13. Projects */
+/* ---------------------------------------- 13. Projects */
 
 .projects { width: 100%; }
 .projects td.name, .projects td.upd { white-space: nowrap; }
@@ -689,7 +691,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .projects .none { font-style: italic; }
 .projects .home { display: block; margin-top: 2px; }
 
-/* ------------------------------------------------------------------ 14. About */
+/* ---------------------------------------- 14. About */
 
 .portrait {
   float: right;
@@ -707,7 +709,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .claims li { margin: 0.1em 0; }
 .weight { font: 0.8125rem/1.6 var(--small); }
 
-/* ------------------------------------------------------------------ 15. Search */
+/* ---------------------------------------- 15. Search */
 
 /* Results the AltaVista way: a count, numbered hits with context, the match in bold, the address
    in small print. */
@@ -724,13 +726,13 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .hits .where .u { color: var(--ink); }
 .results .other { font: 0.8125rem/1.6 var(--small); }
 
-/* ------------------------------------------------------------------ 16. Not Found */
+/* ---------------------------------------- 16. Not Found */
 
 .server { margin: 0; font-size: 1em; }
 .didyoumean { font-weight: bold; }
 .didyoumean .why { font: normal 0.8125rem/1.6 var(--small); }
 
-/* ------------------------------------------------------------------ 17. Footer */
+/* ---------------------------------------- 17. Footer */
 
 .foot { padding: 0 0 2.2em; text-align: center; }
 .foot .navbar { padding-top: 0.6em; }
@@ -746,7 +748,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
 .foot .search.mini { max-width: 24em; margin: 1.1em auto 0; text-align: left; }
 .foot .search.mini label { font-weight: normal; font-size: 0.8125rem; }
 
-/* ------------------------------------------------------------------ 18. Small screens */
+/* ---------------------------------------- 18. Small screens */
 
 @media (max-width: 40em) {
   body { font-size: 1.125rem; line-height: 1.58; } /* 18px */
@@ -785,13 +787,16 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   pre { padding: 0.6em 0.7em; font-size: 0.76em; }
   table { font-size: 0.8125rem; }
   /* Scrolling tables keep readable columns instead of one word per line. */
+  th { white-space: nowrap; }
   .table-scroll th, .table-scroll td { min-width: 6.5em; }
   .elsewhere dt { float: none; width: auto; }
   .elsewhere dd { margin: 0 0 0.5em; }
   .foot .badges { max-width: 196px; margin-left: auto; margin-right: auto; }
-
-  /* Projects: each row becomes a sunken well. The markup carries explicit table roles, so
-     screen readers keep the table even though the display changes. */
+}
+/* Projects below 900px, where the table no longer fits: each row becomes a sunken well. The
+   markup carries explicit table roles, so screen readers keep the table though the display
+   changes. After the phone rules, so its cells drop their minimum width. */
+@media screen and (max-width: 56.1875em) {
   .projects-wrap { overflow: visible; }
   .projects, .projects tbody, .projects tr, .projects td { display: block; width: auto; }
   .projects { border: 0; border-spacing: 0; font-size: 0.875rem; }
@@ -819,7 +824,7 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   .portrait { width: 88px; height: 88px; } /* leaves the About text a usable measure beside it */
 }
 
-/* ------------------------------------------------------------------ 19. Print */
+/* ---------------------------------------- 19. Print */
 
 /* Posts print like a typed manuscript: black on white, no navigation, URLs after links. */
 @page { margin: 2cm 2.2cm; }
@@ -843,7 +848,9 @@ button.small { font-size: 0.75rem; padding: 3px 9px; min-height: 26px; }
   .article a[href^="http"]::after { content: " <" attr(href) ">"; font: 8pt var(--mono); word-break: break-all; }
   pre { white-space: pre-wrap; border: 1px solid #999999; box-shadow: none; font-size: 8.5pt; }
   div.highlighter-rouge { padding-top: 0 !important; }
+  /* Tables fit the measure, or the browser would shrink the whole page to fit them. */
   .table-scroll { overflow: visible; }
+  table { font-size: 8pt; }
   td { background: #ffffff; }
   h1, h2, h3, h4, h5 { break-after: avoid; page-break-after: avoid; }
   pre, blockquote, tr, .toc { break-inside: avoid; page-break-inside: avoid; }

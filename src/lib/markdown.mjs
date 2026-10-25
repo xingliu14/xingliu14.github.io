@@ -2,7 +2,8 @@
 //   mdast: normalizeHeadings   the post's outline starts at h2, under the page's own h1;
 //   hast:  rougeCode           code keeps the markup kramdown and Rouge emitted, highlighted by Prism;
 //          postStructure       heading ids and sizes, table regions, the contents box, section
-//                              numbers, back links and the reading time.
+//                              numbers, back links, the reading time, rel="sponsored" on
+//                              referral links, and break points in long dotted names.
 // Templates never split post HTML: everything a post needs inside its body is written here.
 //
 // Astro's content cache does not notice changes to this file or to src/data/posts.json (which
@@ -117,6 +118,17 @@ export const normalizeHeadings = {
 
 const isHeading = (node) => node.type === "element" && /^h[2-6]$/.test(node.tagName);
 
+// Referral links: the author is rewarded for sign-ups through them, so they carry rel="sponsored",
+// as Google asks of affiliate links. A new one goes here; the post itself stays as written.
+const SPONSORED = new Set(["https://www.coinbase.com/join/liu_p8", "https://accounts.binance.us/en/register?ref=53283116"]);
+
+// A dotted name in running text longer than this (nki.tile_size.gemm_stationary_fmax) may break
+// before its dots, rather than inside a word on a narrow phone: the next line starts with the dot,
+// as the Chicago Manual breaks URLs, so no line ends as if a sentence did. Code is left alone.
+const LONG_NAME = 24;
+const DOTTED_NAME = /[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+/g;
+const VERBATIM = new Set(["code", "kbd", "samp", "pre", "script", "style"]);
+
 const HAN = /\p{Script=Han}/gu;
 // A Latin word inside Chinese text: "Slack", "PoC", "North", "it's", "v1.0", "e-mail".
 const LATIN_WORD = /[A-Za-z0-9]+(?:['’.\-][A-Za-z0-9]+)*/g;
@@ -182,13 +194,35 @@ export function postStructure(fctx) {
           // to them too. A heading that already has one still counts, keeping duplicates in step.
           if (typeof node.properties?.id === "string") slugger.slug(node.properties.id);
           else ctx.setProperty(node, "id", slugger.slug(ctx.textContent(node)));
-          // A renumbered heading keeps the size its Markdown level implies.
+          // A renumbered heading keeps the size its Markdown level implies. A heading that arrives
+          // with a class is not one the post wrote: the footnotes' label, "sr-only" (visually
+          // hidden), keeps it.
           const level = Number(node.tagName[1]);
           const size = clamp(level - (ctx.data.headingShift ?? 1) + 1, 2, 6);
-          if (size !== level) ctx.setProperty(node, "className", ["s" + size]);
+          if (size !== level && !node.properties?.className?.length) ctx.setProperty(node, "className", ["s" + size]);
+        },
+      },
+      {
+        filter: ["a"],
+        visit(node, ctx) {
+          if (SPONSORED.has(String(node.properties?.href))) ctx.setProperty(node, "rel", ["sponsored"]);
         },
       },
     ],
+    text(node, ctx) {
+      if (node.value.length <= LONG_NAME) return;
+      const parent = ctx.parent(node);
+      if (parent?.type === "element" && VERBATIM.has(parent.tagName)) return;
+      const marked = node.value.replace(DOTTED_NAME, (name) => (name.length > LONG_NAME ? name.replace(/\./g, "\0.") : name));
+      if (marked === node.value) return;
+      ctx.replaceNode(
+        node,
+        marked.split("\0").flatMap((value, i) => [
+          ...(i ? [{ type: "element", tagName: "wbr", properties: {}, children: [] }] : []),
+          { type: "text", value },
+        ]),
+      );
+    },
     after(root, ctx) {
       const blocks = root.children.filter((c) => c.type === "element" || c.type === "raw");
       const headings = blocks.filter(isHeading);

@@ -1,14 +1,5 @@
 {
   "fetched_at": "2026-10-25T17:57:32Z",
-  "owner": {
-    "login": "xingliu14",
-    "name": "Xing Liu",
-    "bio": "A random dude   \r\n\r\n@xingliu-aws is also me",
-    "avatar_url": "https://avatars.githubusercontent.com/u/93360308?v=4",
-    "email": null,
-    "location": null,
-    "hireable": null
-  },
   "repos": [
     {
       "name": "ClaudeXingCode",

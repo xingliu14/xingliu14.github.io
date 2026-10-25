@@ -24,7 +24,7 @@ Post body in Markdown.
 - Optional: `published: false` keeps a draft out of the build, and `lang: zh-CN` marks a post written in Chinese.
 - The newest posts show up in What's New on the home page by themselves.
 
-A post's "Updated" date comes from git: the last commit that changed its title or text. If you ever change post files without changing what they say (reformatting, say), add that commit's full hash to `.git-blame-ignore-revs`, so the posts keep their dates.
+A post's "Updated" date comes from git: the last commit that changed its title or text. Moving a heading to another level doesn't count. If you ever change post files without changing what they say (reformatting, say), add that commit's full hash to `.git-blame-ignore-revs`, so the posts keep their dates.
 
 ## Site news
 
@@ -34,7 +34,7 @@ To announce something about the site itself in What's New, add an entry at the t
 { "date": "2026-10-25", "html": "What changed, with <a href=\"/about/\">links</a> if useful." }
 ```
 
-What's New shows the five newest items among posts, new GitHub repositories and these entries, and marks anything under 30 days old NEW!.
+What's New shows the three newest posts and the two newest other events (new GitHub repositories and these entries), newest first, and marks anything under 30 days old NEW!.
 
 ## Running it locally
 
@@ -51,7 +51,9 @@ npm run preview   # serve dist/
 
 ## Deploying
 
-Every push to `master` builds the site with GitHub Actions and publishes it to GitHub Pages (Settings → Pages → Source: GitHub Actions). It also rebuilds once a day, so Projects and What's New stay current with no commit. GitHub pauses scheduled runs after 60 days without a commit; a push or a manual run (Actions → Deploy to GitHub Pages → Run workflow) starts them again.
+Every push to `master` builds the site with GitHub Actions and publishes it to GitHub Pages (Settings → Pages → Source: GitHub Actions), with `.github/workflows/deploy.yml`. A second workflow, Daily rebuild (`.github/workflows/daily.yml`), runs that deploy every day at 09:17 UTC, so Projects and What's New stay current with no commit.
+
+GitHub disables the daily rebuild after 60 days without a commit; pushes still deploy. To turn it back on, open Actions → Daily rebuild → Enable workflow, or run `gh workflow enable daily.yml`.
 
 ## Reserved names
 
@@ -61,8 +63,13 @@ GitHub serves each of my repositories' Pages sites under this domain, at `xingli
 
 - `src/config.ts`: the résumé link, the Elsewhere links, which GitHub repositories Projects leaves out, and the visitor map.
 - `src/components/AboutText.astro`: the About text, shown on the home page and the About page.
-- `src/data/repo-notes.json`: a one-line note for a repository with no description on GitHub, or a different homepage for it.
-- `public/resume/`: the résumé PDF and its LaTeX source. Point `RESUME_URL` in `src/config.ts` at a new PDF when you add one.
+- The job (Annapurna Labs of AWS, before that Google and Yahoo) is also written into these, which a new job means updating too:
+  - the meta descriptions of the home page (`src/pages/index.astro`) and About (`src/pages/about/index.astro`);
+  - About's short bio and résumé list (`src/pages/about/index.astro`);
+  - `worksFor` in the structured data search engines read (`src/lib/seo.ts`);
+  - the text on the home and About social cards (`src/pages/og/cards.json.ts`).
+- `src/data/repo-notes.json`: a one-line note for a repository with no description on GitHub, or a homepage to show instead of the one set on GitHub (`null` shows none, for a site that is gone).
+- `public/resume/`: the résumé PDF and its LaTeX source. Add a new résumé as `public/resume/Xing_Liu_Resume_YYYYMMDD.pdf` (About reads the month from the name) and point `RESUME_URL` in `src/config.ts` at it. Keep the old PDF: its address must keep working, and the build checks that it does.
 - `resume/` (at the repo root) only keeps the 2025 PDF where the old site's GitHub link expects it; the build doesn't use it.
 
 The Projects page and the new-repository lines in What's New are read from GitHub when the site builds.

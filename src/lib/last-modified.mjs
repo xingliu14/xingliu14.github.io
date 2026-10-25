@@ -11,6 +11,21 @@ import { readFileSync } from "node:fs";
 import { publishedPostFiles } from "./post-files.mjs";
 
 /**
+ * What this module has found out. Astro loads the module twice, once for the pages and once for
+ * astro.config.mjs (the sitemap), so the state lives on globalThis: each post's history is walked
+ * once per build, and the warning is printed once.
+ * @type {{
+ *   usable?: boolean,
+ *   ignored?: Set<string>,
+ *   posts: Map<string, Modified | null>,
+ *   paths: Map<string, Modified | null>,
+ *   lastmods?: Map<string, string>,
+ * }}
+ */
+// @ts-ignore: a property of our own on globalThis
+const state = (globalThis[Symbol.for("xingliu.me/last-modified")] ??= { posts: new Map(), paths: new Map() });
+
+/**
  * A commit's author date: `date` is the calendar date where the author was, `iso` the full time.
  * @typedef {{ date: string, iso: string }} Modified
  */
@@ -24,44 +39,38 @@ function git(args) {
   });
 }
 
-/** @type {boolean | undefined} */
-let usable;
-
 /** Whether the full git history is available. */
 export function gitUsable() {
-  if (usable === undefined) {
+  if (state.usable === undefined) {
     try {
-      usable = git(["rev-parse", "--is-shallow-repository"]).trim() === "false";
+      state.usable = git(["rev-parse", "--is-shallow-repository"]).trim() === "false";
     } catch {
-      usable = false;
+      state.usable = false;
     }
-    if (!usable) {
+    if (!state.usable) {
       console.warn("[last-modified] no full git history here (not a repository, or a shallow clone); using publication and build dates instead");
     }
   }
-  return usable;
+  return state.usable;
 }
-
-/** @type {Set<string> | undefined} */
-let ignored;
 
 /** Full hashes of commits that changed files without changing what they say. */
 function ignoredCommits() {
-  if (!ignored) {
+  if (!state.ignored) {
     let text = "";
     try {
       text = readFileSync(".git-blame-ignore-revs", "utf8");
     } catch {
       // No ignore file: every commit counts.
     }
-    ignored = new Set(text.split("\n").map((line) => line.replace(/#.*/, "").trim()).filter(Boolean));
+    state.ignored = new Set(text.split("\n").map((line) => line.replace(/#.*/, "").trim()).filter(Boolean));
   }
-  return ignored;
+  return state.ignored;
 }
 
 /**
- * What a post says: its title and its body, ignoring line endings, trailing spaces and the rest of
- * the frontmatter.
+ * What a post says: its title and its body, ignoring line endings, trailing spaces, the rest of
+ * the frontmatter, and the level of its headings.
  * @param {string | null} source
  */
 function postText(source) {
@@ -72,7 +81,14 @@ function postText(source) {
   const body = frontmatter ? text.slice(frontmatter[0].length) : text;
   // A title retyped from 'quoted' to "quoted" or bare still says the same thing.
   const unquoted = title.trim().replace(/^(["'])(.*)\1$/, "$2");
-  return `${unquoted}\n${body}`.replace(/[ \t]+$/gm, "").trim();
+  // So does a heading moved to another level: "### Title" and "#### Title" are the same words.
+  // Inside fenced code a leading # is text (a comment, a shell prompt), so it stays.
+  let fenced = false;
+  const lines = body.split("\n").map((line) => {
+    if (/^ {0,3}(```|~~~)/.test(line)) fenced = !fenced;
+    return fenced ? line : line.replace(/^ {0,3}#{1,6}(?=[ \t]|$)/, "#");
+  });
+  return `${unquoted}\n${lines.join("\n")}`.replace(/[ \t]+$/gm, "").trim();
 }
 
 /** @param {string} rev  e.g. "<hash>:<path>"; null when the file does not exist there. */
@@ -84,16 +100,13 @@ function show(rev) {
   }
 }
 
-/** @type {Map<string, Modified | null>} */
-const postCache = new Map();
-
 /**
  * When a post's words last changed, if that is later than its publication date; otherwise null,
  * and the post's last modification is its publication.
  *
  * Walks the file's history newest first, across renames. Commits in .git-blame-ignore-revs are
  * skipped, and so are commits after which the post's text (title and body) reads the same as
- * before: renames and frontmatter-only edits. The commit that added the file is the publication,
+ * before: renames, frontmatter-only edits and headings moved to another level. The commit that added the file is the publication,
  * not an edit, so the walk stops there.
  * @param {string} file  e.g. "src/content/posts/2026-01-23-nano-vllm-notes.md"
  * @param {string} published  "YYYY-MM-DD"
@@ -102,8 +115,8 @@ const postCache = new Map();
 export function postLastModified(file, published) {
   if (!gitUsable()) return null;
   const key = `${file}\n${published}`;
-  if (!postCache.has(key)) postCache.set(key, lastTextChange(file, published));
-  return postCache.get(key) ?? null;
+  if (!state.posts.has(key)) state.posts.set(key, lastTextChange(file, published));
+  return state.posts.get(key) ?? null;
 }
 
 /**
@@ -128,9 +141,6 @@ function lastTextChange(file, published) {
   return null;
 }
 
-/** @type {Map<string, Modified | null>} */
-const pathsCache = new Map();
-
 /**
  * The newest commit that touches any of these files or folders, leaving out
  * .git-blame-ignore-revs. Pages take the later of this and their own content dates.
@@ -140,17 +150,14 @@ const pathsCache = new Map();
 export function pathsLastModified(paths) {
   if (!gitUsable()) return null;
   const key = paths.join("\n");
-  if (!pathsCache.has(key)) {
+  if (!state.paths.has(key)) {
     const log = git(["log", "--format=%H %aI", "--", ...paths]);
     const line = log.split("\n").find((l) => l && !ignoredCommits().has(l.split(" ")[0]));
     const iso = line?.split(" ")[1];
-    pathsCache.set(key, iso ? { date: iso.slice(0, 10), iso } : null);
+    state.paths.set(key, iso ? { date: iso.slice(0, 10), iso } : null);
   }
-  return pathsCache.get(key) ?? null;
+  return state.paths.get(key) ?? null;
 }
-
-/** @type {Map<string, string> | undefined} */
-let lastmods;
 
 /**
  * The sitemap's <lastmod> for a page: a post's "Last modified" date, and for /writing/ the newest
@@ -160,10 +167,11 @@ let lastmods;
  * @returns {string | null}  "YYYY-MM-DD"
  */
 export function sitemapLastmod(pathname) {
-  if (!lastmods) {
-    lastmods = new Map(publishedPostFiles().map(({ file, url, date }) => [url, postLastModified(file, date)?.date ?? date]));
+  if (!state.lastmods) {
+    const lastmods = new Map(publishedPostFiles().map(({ file, url, date }) => [url, postLastModified(file, date)?.date ?? date]));
     const newest = [...lastmods.values()].sort().at(-1);
     if (newest) lastmods.set("/writing/", newest);
+    state.lastmods = lastmods;
   }
-  return lastmods.get(decodeURIComponent(pathname)) ?? null;
+  return state.lastmods.get(decodeURIComponent(pathname)) ?? null;
 }

@@ -11,6 +11,7 @@ import { projectsDescription } from "../../lib/descriptions";
 import { getGitHubData, getProjects } from "../../lib/github";
 import { pathsLastModified } from "../../lib/last-modified.mjs";
 import { projectsJsonLd } from "../../lib/seo";
+import { shownUrl } from "../../lib/shown-url";
 
 const projects = await getProjects();
 const { fetchedAt, live } = await getGitHubData();
@@ -21,9 +22,6 @@ const lastModified = later(
   pathsLastModified(["src/pages/projects/index.astro", "src/data/repo-notes.json"]) ?? { date: buildDate(), iso: null },
   { date: newestPush ? laDate(newestPush) : "", iso: null },
 );
-
-/** A link's text: the address without its scheme or trailing slash. */
-const shown = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 ---
 
 <Base
@@ -42,7 +40,7 @@ const shown = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, ""
 <div class="table-scroll projects-wrap" role="region" tabindex="0" aria-label="Projects">
 <table class="projects" role="table">
 <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Repository</th><th scope="col" role="columnheader">About</th><th scope="col" role="columnheader">Language</th><th scope="col" role="columnheader">Stars</th><th scope="col" role="columnheader">Updated</th></tr></thead>
-<tbody role="rowgroup">{projects.map((project) => <Fragment>{"\n"}<tr role="row"><td class="name" role="cell"><a href={project.html_url}><b>{project.name}</b></a></td><td class="about" role="cell"><span class="desc">{project.about ?? <span class="none">No description on GitHub.</span>}</span>{project.homepage && <a class="home" href={project.homepage}>{shown(project.homepage)}</a>}</td><td class="lang" role="cell">{project.language ?? "—"}</td><td class="num" role="cell">{project.stargazers_count}</td><td class="upd" role="cell">{project.pushed_at ? <time datetime={project.pushed_at}>{laDate(project.pushed_at)}</time> : "—"}</td></tr></Fragment>)}
+<tbody role="rowgroup">{projects.map((project) => <Fragment>{"\n"}<tr role="row"><td class="name" role="cell"><a href={project.html_url}><b>{project.name}</b></a></td><td class="about" role="cell"><span class="desc">{project.about ?? <span class="none">No description on GitHub.</span>}</span>{project.homepage && <a class="home" href={project.homepage}>{shownUrl(project.homepage)}</a>}</td><td class="lang" role="cell">{project.language ?? "—"}</td><td class="num" role="cell">{project.stargazers_count}</td><td class="upd" role="cell">{project.pushed_at ? <time datetime={project.pushed_at}>{laDate(project.pushed_at)}</time> : "—"}</td></tr></Fragment>)}
 </tbody></table></div>
-<p class="small">{live ? `Fetched from api.github.com on ${longDate(laDate(fetchedAt))}.` : `GitHub could not be reached when the site was built, so this list comes from a saved copy made on ${longDate(laDate(fetchedAt))}.`} Forks and everything else are at <a href={profile}>{shown(profile)}</a>.</p>
+<p class="small">{live ? `Fetched from api.github.com on ${longDate(laDate(fetchedAt))}.` : `GitHub could not be reached when the site was built, so this list comes from a saved copy made on ${longDate(laDate(fetchedAt))}.`} Forks and everything else are at <a href={profile}>{shownUrl(profile)}</a>.</p>
 </Base>

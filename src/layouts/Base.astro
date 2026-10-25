@@ -49,6 +49,8 @@ const {
   article,
 } = Astro.props;
 
+// Pages other than Not Found name their canonical address, and let search engines show their
+// 1200px card as a large preview (max-image-preview:large); otherwise Discover shows a thumbnail.
 const canonical = new URL(path, Astro.site).href;
 
 // View Source was how everyone learned HTML, so the source says hello.
@@ -74,7 +76,7 @@ const version = (file: string) => createHash("sha256").update(readFileSync(`publ
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content={description}>
-{noindex ? <meta name="robots" content="noindex"> : <link rel="canonical" href={canonical}>}
+{noindex ? <meta name="robots" content="noindex"> : <Fragment><link rel="canonical" href={canonical}>{"\n"}<meta name="robots" content="max-image-preview:large"></Fragment>}
 <meta name="author" content="Xing Liu">
 <meta name="generator" content={Astro.generator}>
 <meta name="color-scheme" content="light dark">

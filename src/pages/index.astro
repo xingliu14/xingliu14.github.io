@@ -1,16 +1,16 @@
 ---
 // The front door: who this is, what's new, and where to go from here. The archive lives on /writing/.
-import { statSync } from "node:fs";
 import AboutText from "../components/AboutText.astro";
 import VisitorMap from "../components/VisitorMap.astro";
 import WhatsNew from "../components/WhatsNew.astro";
-import { ELSEWHERE, RESUME_URL } from "../config";
+import { ELSEWHERE } from "../config";
 import siteLog from "../data/site-log.json";
 import Base from "../layouts/Base.astro";
 import { buildDate, later } from "../lib/dates";
 import { getProjects } from "../lib/github";
 import { pathsLastModified } from "../lib/last-modified.mjs";
 import { getPosts } from "../lib/posts";
+import { RESUME } from "../lib/resume";
 import { homeJsonLd } from "../lib/seo";
 import { getWhatsNew } from "../lib/whats-new";
 
@@ -23,7 +23,6 @@ const lastModified = later(
   pathsLastModified(["src/pages/index.astro", "src/components/AboutText.astro", "src/data/site-log.json"]) ?? { date: today, iso: null },
   { date: whatsNew[0]?.date ?? "", iso: null },
 );
-const resumeKb = Math.round(statSync(`public${RESUME_URL}`).size / 1024);
 ---
 
 <Base
@@ -51,7 +50,7 @@ const resumeKb = Math.round(statSync(`public${RESUME_URL}`).size / 1024);
 <li><a href="/writing/">Writing</a> ({posts.length} posts)</li>
 <li><a href="/projects/">Projects</a> ({projects.length} repositories)</li>
 <li><a href="/about/">About me</a></li>
-<li><a href={RESUME_URL}>Résumé</a> (PDF, {resumeKb}&nbsp;KB)</li>
+<li><a href={RESUME.url}>Résumé</a> (PDF, {RESUME.kb}&nbsp;KB)</li>
 <li><a href="/writing/#search">Search</a> (English or <span lang="zh-CN" class="nowrap">中文</span>)</li>
 </ul>
 </section>

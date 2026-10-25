@@ -1,15 +1,15 @@
 ---
 // The real visitor map: mapmyvisitors.com's widget, which counts pageviews and draws where readers
 // come from. site.js loads it after the page has finished loading, into a well that already has the
-// widget's height, so nothing moves when it arrives. Without JavaScript the well holds a link.
+// widget's height, so nothing moves when it arrives. Until then, and for good when it can't come
+// (no JavaScript, a blocker, the service down), the well holds a link to the map instead.
 import { VISITOR_MAP_SRC } from "../config";
 ---
 
 <h2 id="visitors">Visitors</h2>
 <figure class="visitor-map">
 <div class="map-well" id="visitor-map" data-src={VISITOR_MAP_SRC}>
-<p class="mm-wait" hidden>[ Visitor map ]</p>
-<noscript><p class="mm-wait"><a href="https://mapmyvisitors.com/">[ Visitor map at mapmyvisitors.com ]</a></p></noscript>
+<p class="mm-wait"><a href="https://mapmyvisitors.com/">[ Visitor map at mapmyvisitors.com ]</a></p>
 </div>
-<figcaption>Where readers come from, counted by <a href="https://mapmyvisitors.com/">mapmyvisitors.com</a>. The map loads after everything else on the page.</figcaption>
+<figcaption>Where readers come from, counted by <a href="https://mapmyvisitors.com/">mapmyvisitors.com</a>.</figcaption>
 </figure>

@@ -3,10 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
-  schedule:
-    # Daily at 09:17 UTC: refreshes the projects list and What's New, and retires NEW! tags,
-    # with no commit needed.
-    - cron: "17 9 * * *"
+  # Also started every day by daily.yml, and by hand from the Actions tab. The schedule lives there
+  # because GitHub disables a scheduled workflow after 60 days without a commit, and a disabled
+  # workflow ignores pushes too.
   workflow_dispatch:
 
 permissions:

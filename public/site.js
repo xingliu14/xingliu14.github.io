@@ -1,12 +1,10 @@
-/* xingliu.me: small additions to pages that already work without scripts (search then goes to
-   DuckDuckGo). ES5, no build step; each feature sits in its own try, so one failure never stops
-   the rest. The contract is spec section 7. */
+/* xingliu.me: extras for pages that work without scripts. ES5, no build step; each feature has
+   its own try, so one failure never stops the rest. */
 (function () {
   "use strict";
   var d = document, w = window, root = d.documentElement;
   function $(id) { return d.getElementById(id); }
   function each(list, fn) { for (var i = 0; i < list.length; i++) fn(list[i], i); }
-  function trim(s) { return s.replace(/^\s+|\s+$/g, ""); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return "&#" + c.charCodeAt(0) + ";"; }); }
   function onFrame(fn) { // at most once per frame
     var queued = false;
@@ -33,7 +31,7 @@
       clearTimeout(btn.copyTimer);
       btn.copyTimer = setTimeout(function () { btn.textContent = btn.getAttribute("data-label"); }, 2000);
     }
-    function fallback() { // a hidden textarea and execCommand: file:// and older browsers
+    function fallback() { // textarea and execCommand: older browsers, http
       var back = d.activeElement, ta = d.createElement("textarea"), ok = false;
       ta.value = text;
       ta.setAttribute("readonly", "");
@@ -61,17 +59,14 @@
     return out;
   }
 
-  // Search index: inline in the mockups (file:// cannot fetch), else /search.json, once.
+  // /search.json, fetched once.
   var index = null;
   function loadIndex() {
     if (!index) {
       index = new Promise(function (ok, no) {
-        var inline = $("search-index");
-        if (inline) ok(JSON.parse(inline.textContent));
-        else fetch("/search.json", { credentials: "omit" }).then(function (r) { if (!r.ok) throw r.status; return r.json(); }).then(ok, no);
+        fetch("/search.json", { credentials: "omit" }).then(function (r) { if (!r.ok) throw r.status; return r.json(); }).then(ok, no);
       }).then(function (docs) {
         each(docs, function (doc) {
-          doc.x = doc.x || "";
           doc.ft = fold(doc.t);
           doc.fx = fold(doc.x);
           doc.fh = fold(doc.t + "\n" + doc.s + "\n" + doc.k + "\n" + doc.x);
@@ -83,9 +78,9 @@
     return index;
   }
   function ddg(raw) { return esc("https://duckduckgo.com/?q=" + encodeURIComponent(raw) + "%20site%3Axingliu.me"); }
-  // doc.h: a mockup's own file. A title's last two words stay on one line.
+  // A title's last two words stay on one line.
   function link(doc, cls) {
-    return "<a" + (cls ? ' class="' + cls + '"' : "") + ' href="' + esc(doc.h || doc.u) + '"' + (doc.l === "zh-CN" ? ' lang="zh-CN"' : "") + ">" + esc(doc.t).replace(/ (?=\S+$)/, "\u00a0") + "</a>";
+    return "<a" + (cls ? ' class="' + cls + '"' : "") + ' href="' + esc(doc.u) + '"' + (doc.l === "zh-CN" ? ' lang="zh-CN"' : "") + ">" + esc(doc.t).replace(/ (?=\S+$)/, "\u00a0") + "</a>";
   }
 
   // 7.9 Colour menus: grey, white or night, remembered; Automatic follows the system.
@@ -113,7 +108,7 @@
     copyLink.addEventListener("click", function () { copyText(permalink.value, copyLink); });
   } catch (e) { /* not a post */ }
 
-  // 7.4 Code bars: the language and a Copy button above each code well (room reserved by CSS).
+  // 7.4 Code bars: the language and a Copy button above each code well.
   try {
     var NAMES = { ruby: "Ruby", php: "PHP", java: "Java", html: "HTML", console: "Console", css: "CSS", yaml: "YAML", python: "Python", javascript: "JavaScript", typescript: "TypeScript", bash: "Shell", sh: "Shell", shell: "Shell", zsh: "Shell", json: "JSON", c: "C", cpp: "C++", go: "Go", rust: "Rust", sql: "SQL", scala: "Scala", plaintext: "", text: "" };
     each(d.querySelectorAll("div.highlighter-rouge"), function (box) {
@@ -143,7 +138,7 @@
   // 7.6 Search on /writing/: every term must match; titles first, then newest first.
   try {
     var form = $("search"), q = $("q"), status = $("search-status");
-    if (form && q && status && !form.hasAttribute("data-go")) {
+    if (form && q && status) {
       var docs = null, results = status.parentNode;
       // Context around the match in the text, else in the description; the match in bold.
       var snippet = function (doc, query, terms) {
@@ -169,7 +164,7 @@
         timer = setTimeout(function () { status.innerHTML = html; }, typing ? 400 : 0);
       };
       var run = function (e) {
-        var raw = trim(q.value), old = results.querySelectorAll(".hits, .other");
+        var raw = q.value.trim(), old = results.querySelectorAll(".hits, .other");
         each(old, function (o) { results.removeChild(o); });
         if (!raw) { say(""); setUrl(location.pathname + "#search"); return; }
         if (!docs) {
@@ -179,18 +174,21 @@
           });
           return;
         }
-        var query = fold(raw), terms = query.split(/\s+/), first = [], rest = [], html = "";
+        // "kv cache" and Bitcoin? search for kv, cache and bitcoin; punctuation alone finds nothing.
+        var terms = fold(raw).match(TERM) || [], query = terms.join(" "), first = [], rest = [], html = "";
         each(docs, function (doc) {
-          var all = true, title = true;
+          var all = terms.length > 0, title = true;
           each(terms, function (t) { all = all && doc.fh.indexOf(t) !== -1; title = title && doc.ft.indexOf(t) !== -1; });
           if (all) (title ? first : rest).push(doc);
         });
-        var hits = first.concat(rest), n = hits.length, said = "\u201c" + esc(raw) + "\u201d";
+        // The query as searched, marked when Chinese.
+        var hits = first.concat(rest), n = hits.length, said = esc((raw.match(TERM) || [raw]).join(" "));
+        said = "\u201c" + (/[\u3400-\u9fff]/.test(said) ? '<span lang="zh-CN">' + said + "</span>" : said) + "\u201d";
         say(n ? "<b>" + n + (n === 1 ? " post</b> matches " : " posts</b> match ") + said + ":" : "No posts match " + said + ".", e && e.type === "input");
         // \u2060 (word joiner) keeps the chip with the title's last words.
         each(hits, function (h) {
           var p = h.d.split("-"), zh = h.l === "zh-CN" ? ' lang="zh-CN"' : "";
-          html += "<li>" + link(h, "t") + (zh ? '\u2060<span class="zh" lang="zh-CN" title="Written in Chinese">\u4e2d\u6587</span>' : "") +
+          html += "<li>" + link(h, "t") + (zh ? '\u2060<span class="zh" title="Written in Chinese"><span lang="zh-CN">\u4e2d\u6587</span></span>' : "") +
             '\n<p class="snip"' + zh + ">" + snippet(h, query, terms) + '</p>\n<p class="where"><span class="u">xingliu.me' + esc(h.u) +
             "</span>\u00a0\u00b7 " + MONTHS[+p[1] - 1] + " " + +p[2] + ", " + p[0] + "\u00a0\u00b7 " + esc(h.k) + "</p></li>\n";
         });
@@ -201,18 +199,19 @@
         setUrl("?q=" + encodeURIComponent(raw) + "#search");
       };
       var MONTHS = "January February March April May June July August September October November December".split(" ");
+      var C = "\"'\u2018-\u201f\u3001\u3002\u300a-\u300f()[\\],.;:!?", TERM = new RegExp("[^\\s" + C + "](?:\\S*[^\\s" + C + "])?", "g");
       q.addEventListener("focus", function () { loadIndex().then(null, function () {}); });
       q.addEventListener("input", run);
       form.addEventListener("submit", function (e) { e.preventDefault(); run(); });
-      // Arrival: a ?q= link (footer forms send one), or a value the browser kept.
+      // Arrival: a ?q= link, or a value the browser kept.
       var m = /[?&]q=([^&#]*)/.exec(location.search);
       if (m) { try { q.value = decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { q.value = m[1]; } }
-      if (trim(q.value)) run();
+      if (q.value.trim()) run();
       // Focus for #search, and again after load: Chrome's fragment scroll clears it.
       var focus = function () { if (location.hash === "#search" && (d.activeElement === d.body || !d.activeElement)) q.focus(); };
       focus();
       w.addEventListener("load", function () { setTimeout(focus, 0); });
-      w.addEventListener("hashchange", function () { q.focus(); });
+      w.addEventListener("hashchange", function () { if (location.hash === "#search") q.focus(); });
     }
   } catch (e) { /* the form still goes to DuckDuckGo */ }
 
@@ -220,7 +219,7 @@
   try {
     each(d.querySelectorAll("form[data-go]"), function (f) {
       f.addEventListener("submit", function (e) {
-        var v = trim(f.querySelector('input[name="q"]').value);
+        var v = f.querySelector('input[name="q"]').value.trim();
         e.preventDefault();
         location.href = f.getAttribute("data-go") + (v ? "?q=" + encodeURIComponent(v) : "") + "#search";
       });
@@ -229,8 +228,8 @@
 
   // 7.8 Not Found: name the path, pre-fill the search, suggest the likely post.
   try {
-    var missing = $("missing"), path = /^https?:$/.test(location.protocol) ? location.pathname : d.body.getAttribute("data-demo-path");
-    if (missing && path) {
+    var missing = $("missing"), path = location.pathname;
+    if (missing) {
       try { path = decodeURI(path); } catch (e) { /* keep it raw */ }
       missing.textContent = "The requested URL ";
       missing.appendChild(el("code", "", path));
@@ -289,8 +288,7 @@
     w.addEventListener("afterprint", function () { box.open = was; });
   } catch (e) { /* the box still opens and closes */ }
 
-  // 7.12 Visitor map: after load, when idle or the well is near. Only over http(s), and only
-  // where the well holds the placeholder (the mockups hold a still).
+  // 7.12 Visitor map, as wide as the well: after load, when idle or the well is near.
   try {
     var well = $("visitor-map"), wait = well.querySelector(".mm-wait");
     if (wait && /^https?:$/.test(location.protocol)) {
@@ -299,14 +297,13 @@
           if (loaded) return;
           loaded = true;
           if (io) io.disconnect();
-          well.removeChild(wait);
           var s = d.createElement("script");
           s.id = "mapmyvisitors";
           s.async = true;
-          s.src = well.getAttribute("data-src");
-          well.appendChild(s);
+          s.src = well.getAttribute("data-src").replace(/([?&]w=)\d+/, "$1" + well.clientWidth);
+          // The widget goes right after its script, so before the link, which style.css then hides.
+          well.insertBefore(s, wait);
         };
-        wait.hidden = false;
         if (w.IntersectionObserver) {
           io = new IntersectionObserver(function (seen) { each(seen, function (s) { if (s.isIntersecting) load(); }); }, { rootMargin: "400px 0px" });
           io.observe(well);
@@ -315,5 +312,5 @@
       };
       if (d.readyState === "complete") start(); else w.addEventListener("load", start);
     }
-  } catch (e) { /* the placeholder stays */ }
+  } catch (e) { /* the link stays */ }
 })();

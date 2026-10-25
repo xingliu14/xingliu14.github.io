@@ -4,15 +4,14 @@
 import ArchiveList from "../../components/ArchiveList.astro";
 import SearchForm from "../../components/SearchForm.astro";
 import Base from "../../layouts/Base.astro";
-import { buildDate, later, monthYear } from "../../lib/dates";
-import { writingDescription } from "../../lib/descriptions";
+import { buildDate, later } from "../../lib/dates";
+import { archiveSince, WRITING_SUMMARY, writingDescription } from "../../lib/descriptions";
 import { pathsLastModified } from "../../lib/last-modified.mjs";
 import { topics } from "../../lib/post-meta.mjs";
 import { getPosts } from "../../lib/posts";
 import { writingJsonLd } from "../../lib/seo";
 
 const posts = await getPosts();
-const since = monthYear(posts[posts.length - 1].date);
 const years = [...new Set(posts.map((post) => post.year))];
 // A topic with no published post yet stays out of the index.
 const byTopic = topics
@@ -50,7 +49,7 @@ function runIn(title: string): [string, string] {
 >
 <p class="crumbs"><a href="/">Xing Liu’s Home Page</a> › Writing</p>
 <h1>Writing</h1>
-<p class="lede">{posts.length} posts since {since}: notes on LLM inference, books, crypto and life, and a detective story in Chinese. Newest first. Links you have already visited turn <span class="visited-demo">purple</span>, so the list remembers what you have read.</p>
+<p class="lede">{posts.length} posts since {archiveSince(posts)}: {WRITING_SUMMARY}. Newest first. Links you have already visited turn <span class="visited-demo">purple</span>, so the list remembers what you have read.</p>
 <SearchForm variant="main" />
 <p class="views">Index: <a href="#by-date">by date</a>&nbsp;· <a href="#by-topic">by topic</a>&nbsp;· <a href="/feed.xml">RSS feed</a> (full text)</p>
 <h2 id="by-date">By date</h2>

@@ -1,9 +1,11 @@
 // The build's last step: checks what is about to be deployed, and fails the build with a list of
 // every problem it finds. It keeps the site's promises: old URLs and heading anchors keep working, no
 // path takes a name a repository's own Pages site may use (they share xingliu.me), every page
-// carries its metadata and its card, nothing unfinished ships, and the HTML is valid.
+// carries its metadata and its card, nothing unfinished ships, the HTML is valid, and the
+// stylesheet and script stay within their byte budgets.
 import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
 import { HtmlValidate } from "html-validate";
 import htmlValidateConfig from "../../.htmlvalidate.json" with { type: "json" };
 import headingIds from "../../scripts/heading-ids.json" with { type: "json" };
@@ -25,6 +27,7 @@ const YEAR = /^20\d\d$/;
 const REQUIRED = [
   "index.html", "writing/index.html", "projects/index.html", "about/index.html", "404.html",
   "feed.xml", "search.json", "sitemap-index.xml", "robots.txt", "resume/Xing_Liu_Resume_20250924.pdf",
+  "style.css", "site.js",
 ];
 
 // Fields of each search.json entry: URL, title, date, language, topic, summary and text.
@@ -33,6 +36,10 @@ const SEARCH_FIELDS = ["u", "t", "d", "l", "k", "s", "x"];
 // Page chrome that must not reach feed readers: the contents box, back links, section numbers,
 // table scrollers, tab stops and scripts (src/lib/feed-html.mjs removes them).
 const FEED_CHROME = /<script\b|<[a-z][^>]*\stabindex=|<[a-z][^>]*\sclass="(?:[^"]*\s)?(?:toc|top|secno|table-scroll)(?:\s[^"]*)?"/i;
+
+// The two files every page loads, served as written with their comments, and their budgets in
+// bytes: raw, and gzipped at level 9 (CLAUDE.md).
+const BUDGETS = { "style.css": [36_000, 11_000], "site.js": [18_000, 7_000] };
 
 // An unfilled placeholder such as __TEXT_KB__ (src/integrations/page-weight.mjs), or filler text.
 const UNFINISHED = /__[A-Z][A-Z0-9_]*__|\b[Ll]orem [Ii]psum\b/;
@@ -176,12 +183,20 @@ async function search({ posts, read }) {
   return problems;
 }
 
-/** 7. The sitemap leaves the Not Found page out. @param {Dist} dist */
+/**
+ * 7. The sitemap leaves the Not Found page out, and dates pages by the day: a time would be made
+ * up (src/integrations/sitemap-dates.mjs).
+ * @param {Dist} dist
+ */
 async function sitemap({ files, read }) {
   const problems = [];
   for (const path of [...files].filter((file) => /^sitemap-.*\.xml$/.test(file))) {
-    for (const [, loc] of ((await read(path)) ?? "").matchAll(/<loc>([^<]*)<\/loc>/g)) {
+    const xml = (await read(path)) ?? "";
+    for (const [, loc] of xml.matchAll(/<loc>([^<]*)<\/loc>/g)) {
       if (/\/404(\.html)?\/?$/.test(new URL(loc).pathname)) problems.push(`${path} lists ${loc}`);
+    }
+    for (const [, lastmod] of xml.matchAll(/<lastmod>([^<]*)<\/lastmod>/g)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(lastmod)) problems.push(`${path} has a <lastmod> that is not a plain date: ${lastmod}`);
     }
   }
   return problems;
@@ -207,7 +222,21 @@ async function validHtml({ dir, pages }) {
       .map(({ line, column, message, ruleId }) => `${filePath.slice(root.length)}:${line}:${column} ${message} (${ruleId})`));
 }
 
-const CHECKS = [topLevel, required, anchors, eachPage, feed, search, sitemap, validHtml];
+/** 9. The stylesheet and the script stay within their budgets. @param {Dist} dist */
+async function budgets({ read }) {
+  const problems = [];
+  for (const [name, [raw, gzipped]] of Object.entries(BUDGETS)) {
+    const text = await read(name);
+    if (text === null) continue; // required() reports a missing file
+    const bytes = Buffer.byteLength(text);
+    const packed = gzipSync(text, { level: 9 }).length;
+    if (bytes > raw) problems.push(`${name} is ${bytes} bytes, over its budget of ${raw}`);
+    if (packed > gzipped) problems.push(`${name} is ${packed} bytes gzipped, over its budget of ${gzipped}`);
+  }
+  return problems;
+}
+
+const CHECKS = [topLevel, required, anchors, eachPage, feed, search, sitemap, validHtml, budgets];
 
 /** @returns {import("astro").AstroIntegration} */
 export default function checkDist() {

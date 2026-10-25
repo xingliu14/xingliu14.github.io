@@ -5,11 +5,17 @@ import { monthYear } from "./dates";
 import type { Project } from "./github";
 import type { Post } from "./posts";
 
+/** What the archive holds, in the Writing page's lede and in its description. */
+export const WRITING_SUMMARY = "notes on LLM inference, books, crypto and life, and a detective story in Chinese";
+
+/** The month the archive starts, "December 2020": posts are newest first, so the last one. */
+export function archiveSince(posts: Post[]): string {
+  return monthYear(posts[posts.length - 1].date);
+}
+
 /** "All 13 posts by Xing Liu since December 2020, by date and by topic: …" */
 export function writingDescription(posts: Post[]): string {
-  // Posts are newest first, so the last one is where the archive starts.
-  const since = monthYear(posts[posts.length - 1].date);
-  return `All ${posts.length} posts by Xing Liu since ${since}, by date and by topic: notes on LLM inference, books, crypto and life, and a detective story in Chinese.`;
+  return `All ${posts.length} posts by Xing Liu since ${archiveSince(posts)}, by date and by topic: ${WRITING_SUMMARY}.`;
 }
 
 /**

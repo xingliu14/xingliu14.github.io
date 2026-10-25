@@ -4,6 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import checkDist from "./src/integrations/check-dist.mjs";
 import ogCards from "./src/integrations/og-cards.mjs";
 import pageWeight from "./src/integrations/page-weight.mjs";
+import sitemapDates from "./src/integrations/sitemap-dates.mjs";
 import { sitemapLastmod } from "./src/lib/last-modified.mjs";
 import { normalizeHeadings, postStructure, rougeCode } from "./src/lib/markdown.mjs";
 
@@ -26,6 +27,7 @@ export default defineConfig({
         return item;
       },
     }),
+    sitemapDates(), // the sitemap's <lastmod> as plain dates, not midnight UTC
     ogCards(), // dist/og/cards.json → dist/og/*.png, then deletes cards.json
     pageWeight(), // fills in the weight sentence in dist/about/index.html
     checkDist(), // last: fails the build if anything in dist/ is wrong

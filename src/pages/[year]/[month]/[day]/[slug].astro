@@ -10,6 +10,7 @@ import Share from "../../../../components/Share.astro";
 import Base from "../../../../layouts/Base.astro";
 import { getPosts, type Post } from "../../../../lib/posts";
 import { postJsonLd } from "../../../../lib/seo";
+import { splitSubtitle } from "../../../../lib/title-parts.mjs";
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -28,9 +29,8 @@ interface Props {
 
 const { post, newer, older } = Astro.props;
 const { Content } = await render(post.entry);
-// WebKit breaks "侦探小说：He’s Replaceable" inside the English words. A short Latin subtitle after a
-// full-width colon is kept on one line, and the title may break after the colon instead.
-const subtitle = /^(.+：)([^\p{Script=Han}：]{1,24})$/u.exec(post.title);
+// A short Latin subtitle after a full-width colon stays on one line (src/lib/title-parts.mjs).
+const subtitle = splitSubtitle(post.title);
 ---
 
 <Base
@@ -50,7 +50,7 @@ const subtitle = /^(.+：)([^\p{Script=Han}：]{1,24})$/u.exec(post.title);
 <article class="post" lang={post.zh ? "zh-CN" : undefined}>
 <header class="post-head">
 <p class="crumbs" lang="en"><a href="/">Xing Liu’s Home Page</a> › <a href="/writing/">Writing</a> › <a href={`/writing/#y${post.year}`}>{post.year}</a></p>
-<h1>{subtitle ? <Fragment>{subtitle[1]}<wbr><span class="nowrap">{subtitle[2]}</span></Fragment> : post.title}</h1>
+<h1>{subtitle ? <Fragment>{subtitle[0]}<wbr><span class="nowrap">{subtitle[1]}</span></Fragment> : post.title}</h1>
 <Byline post={post} />
 {post.minutes >= 10 && <Fragment><p class="colours-line" lang="en"><label for="colours-top">Page colors:</label> <ColoursSelect id="colours-top" /></p>{"\n"}</Fragment>}</header>
 <div class={post.topic.id === "fiction" ? "article fiction" : "article"}>

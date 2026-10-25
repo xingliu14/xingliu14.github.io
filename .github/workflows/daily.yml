@@ -1,0 +1,25 @@
+name: Daily rebuild
+
+# Every day at 09:17 UTC, runs "Deploy to GitHub Pages" (deploy.yml) on master with no commit
+# needed: Projects and What's New pick up new repositories, and NEW! tags retire.
+#
+# GitHub disables a scheduled workflow after 60 days without a commit. Only this one is scheduled,
+# so that pauses the daily rebuild alone, and pushes still deploy. Turn it back on at Actions →
+# Daily rebuild → Enable workflow, or with `gh workflow enable daily.yml`.
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      # GITHUB_TOKEN can start a workflow_dispatch run (most events it causes start nothing).
+      - run: gh workflow run deploy.yml --ref master
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
