@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Personal site and blog for Xing Liu, built with Astro and deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to `master`. It was migrated from a Jekyll site (GitHub's personal-website template) in October 2026, keeping the same look and URLs.
+Personal site and blog for Xing Liu at https://xingliu.me, built with Astro and deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to `master`. It was migrated from a Jekyll site (GitHub's personal-website template) in October 2026, keeping the same look and URLs.
 
 `npm run build` type-checks (`astro check`) and then builds into `dist/` with `--force`: Astro's content cache does not notice changes to `src/lib/markdown.mjs`, so a cached build would keep post HTML from the old plugin. Run `astro dev --force` after editing that file too.
 

@@ -1,6 +1,6 @@
-# xingliu14.github.io
+# xingliu.me
 
-My personal website and blog: https://xingliu14.github.io
+My personal website and blog: https://xingliu.me (repo `xingliu14.github.io`)
 
 Built with [Astro](https://astro.build). It started from GitHub's [personal-website](https://github.com/github/personal-website) Jekyll template; in October 2026 it moved to Astro with the same design and the same post URLs.
 

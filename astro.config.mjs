@@ -2,11 +2,10 @@ import { defineConfig, envField } from "astro/config";
 import { satteri } from "@astrojs/markdown-satteri";
 import { rougeCode } from "./src/lib/markdown.mjs";
 
-// Switching to a custom domain: set `site` to it, then add the domain under
-// Settings → Pages → Custom domain (Actions deployments need no CNAME file). A domain on this
-// user site also moves every project site without its own domain (e.g. /GameKingdom/) onto it.
+// Served at the custom domain set in Settings → Pages (Actions deployments ignore a CNAME file).
+// Project sites without their own domain (e.g. /GameKingdom/) are served under it too.
 export default defineConfig({
-  site: "https://xingliu14.github.io",
+  site: "https://xingliu.me",
   // Keep the whitespace between inline elements (e.g. an icon and its label): it renders as a
   // space, and the layout was designed with it there, as Jekyll emitted it.
   compressHTML: false,
