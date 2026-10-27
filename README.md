@@ -65,7 +65,7 @@ GitHub serves each of my repositories' Pages sites under this domain, at `xingli
 
 - `src/config.ts`: the résumé link, the Elsewhere links, which GitHub repositories Projects leaves out, and the visitor map.
 - `src/components/AboutText.astro`: the About text, shown on the home page and the About page.
-- The job (Annapurna Labs of AWS, before that Google and Yahoo) is also written into these, which a new job means updating too:
+- The job (Nebius; before that Annapurna Labs of AWS, Google and Yahoo) is also written into these, which a new job means updating too:
   - the meta descriptions of the home page (`src/pages/index.astro`) and About (`src/pages/about/index.astro`);
   - About's short bio and résumé list (`src/pages/about/index.astro`);
   - `worksFor` in the structured data search engines read (`src/lib/seo.ts`);

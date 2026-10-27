@@ -26,7 +26,7 @@ export async function GET(): Promise<Response> {
       current: "Home",
       title: "Xing Liu’s Home Page",
       sub: "刘星的个人主页",
-      text: "Welcome to my cyber home! I’m an engineer interested in LLM Serving Efficiency, currently at Annapurna Labs of AWS.",
+      text: "Welcome to my cyber home! I’m an engineer interested in LLM Serving Efficiency, now at Nebius.",
     },
     {
       file: "about.png",
@@ -34,7 +34,7 @@ export async function GET(): Promise<Response> {
       current: "About",
       title: "About Xing Liu",
       sub: "刘星",
-      text: "Engineer at Annapurna Labs of AWS, working on LLM serving. Before that: Google (Gemini serving and quantization) and Yahoo.",
+      text: "Principal ML Solution Architect at Nebius. Before that: Annapurna Labs of AWS (LLM serving), Google and Yahoo.",
     },
     { file: "writing.png", kind: "section", current: "Writing", crumbs: [HOME, "Writing"], title: "Writing", description: writingDescription(posts) },
     { file: "projects.png", kind: "section", current: "Projects", crumbs: [HOME, "Projects"], title: "Projects", description: projectsDescription(projects) },

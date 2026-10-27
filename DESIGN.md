@@ -72,10 +72,10 @@ The owner's hard constraints are held the same way: old URLs and anchors by chec
 | Place | URL | Answers |
 |---|---|---|
 | Home | `/` | Who is this, what's new, and where can I go? A 1997 home page answered exactly these |
-| Writing | `/writing/` | What has he written? Every post, by date and by topic, with search |
+| Writing | `/writing/` | What has Xing written? Every post, by date and by topic, with search |
 | Post | `/YYYY/MM/DD/slug/` | The text itself, and where to go next |
-| Projects | `/projects/` | What has he built? Every non-fork public repository |
-| About Me | `/about/` | Who is he, in full, and how is this site made (the colophon)? |
+| Projects | `/projects/` | What has Xing built? Every non-fork public repository |
+| About Me | `/about/` | Who is Xing, in full, and how is this site made (the colophon)? |
 | Not Found | `/404.html`, served at any missing path | What happened, and how do I get back? |
 
 Post URLs are flat and dated, but a post belongs to Writing: its crumbs read `Xing Liu’s Home Page › Writing › {YYYY}`, with the year linking to `/writing/#y{YYYY}`; the nav marks Writing; and its pager ends with "[ Up to the Writing archive ]".
@@ -513,7 +513,7 @@ CLAUDE.md states the rule. The mechanism:
 - **Self-dating:** "Last modified", "Fetched from api.github.com on {date}." (or the snapshot sentence), and NEW!, which expires by itself.
 - **No date the site states depends on the daily schedule.** The feed has no `lastBuildDate`, "Last modified" is never the build time, and the schedule is never announced, because GitHub can pause it. NEW! depends on it only for readers without JavaScript (§6.5).
 - **Change these in the same commit as the behavior they describe:** the greeting comment; the four buttons' alt texts and `ul.claims`; and the colophon's items. Those are Color (the menu and `localStorage`), Type, Machinery ("Scripts only add extras, such as …"), Search, Dates ("moving files or changing the design does not count"; NEW! "disappears on its own"), Feeds and addresses ("Neither the move to Astro nor this redesign changed any post’s address"), Privacy (no cookies or analytics of the site's own; the map's session cookie), Previews and The star.
-- **The owner's voice.** Copy is written only from facts about the owner. His own words appear verbatim: the About text, repository descriptions, and post titles, of which only the quotes are curled. The site speaks in the first person (the Projects intro, the colophon), except the short bio, which is third person and pronoun-free, for introductions. The site's own copy (pages, feed, search index, cards and metadata) never shows his phone number or Gmail address. The résumé PDF is his own document, served as it is, and it does show both.
+- **The owner's voice.** Copy is written only from facts about the owner. The owner's own words appear verbatim: the About text, repository descriptions, and post titles, of which only the quotes are curled. The site speaks in the first person (the Projects intro, the colophon), except the short bio, which is third person and pronoun-free, for introductions. The site's own copy (pages, feed, search index, cards and metadata) never shows his phone number or Gmail address. The résumé PDF is his own document, served as it is, and it does show both.
 - **Spelling** follows CLAUDE.md. **Typography:** curly quotes and apostrophes, `›` in crumbs, a spaced em dash in titles ("Writing — Xing Liu"), `…` for ellipses, "Résumé" with its accents, and middle dots written `&nbsp;· `.
 
 ## 8. Search engines, feeds and cards
@@ -538,7 +538,7 @@ Base prints one `<script type="application/ld+json">` per page through `jsonLdTe
 | Projects | `CollectionPage` (`/projects/#page`) holding an `ItemList` of `SoftwareSourceCode`: name, repository, and language, description and URL when the row has them |
 | Post | `BlogPosting` (`{canonical}#post`) and a `BreadcrumbList` (Home › Writing › the post) |
 
-- `Person` has `worksFor` Annapurna Labs, Amazon Web Services, and its `sameAs` is `ELSEWHERE` plus `https://github.com/xingliu-aws`, because his GitHub bio says that account is also him.
+- `Person` has `jobTitle` Principal ML Solution Architect and `worksFor` Nebius, and its `sameAs` is `ELSEWHERE` plus `https://github.com/xingliu-aws`, because the GitHub bio says that account is the same person.
 - `BlogPosting` carries the display title as `headline`, `datePublished` (the date), `dateModified` (the ISO time of the last edit, else the date), `inLanguage`, the card as `image` (1200×630), `wordCount` on English posts only ("A word count means nothing for Chinese"), `timeRequired` `PT{n}M`, `articleSection`, and `author` and `publisher` as a reference to the person that carries its own name.
 - The JSON-LD breadcrumb ends at the post, while the visible crumbs end at the year.
 

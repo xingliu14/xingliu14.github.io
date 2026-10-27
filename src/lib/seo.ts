@@ -24,10 +24,10 @@ const PERSON = {
   alternateName: "刘星",
   url: url("/about/"),
   image: url("/avatar-320.jpg"),
-  jobTitle: "Engineer",
-  worksFor: { "@type": "Organization", name: "Annapurna Labs, Amazon Web Services" },
+  jobTitle: "Principal ML Solution Architect",
+  worksFor: { "@type": "Organization", name: "Nebius", url: "https://nebius.com/" },
   knowsAbout: ["LLM serving", "LLM inference efficiency", "Quantization"],
-  // His GitHub bio says @xingliu-aws is also him.
+  // The GitHub bio says @xingliu-aws is the same person.
   sameAs: ELSEWHERE.flatMap((site) => (site.name === "GitHub" ? [site.url, "https://github.com/xingliu-aws"] : [site.url])),
 };
 
@@ -53,7 +53,7 @@ export function homeJsonLd(lastModified: Dated) {
   };
 }
 
-/** The site, its owner, and About as his profile page. */
+/** The site, its owner, and About as the owner's profile page. */
 export function aboutJsonLd(lastModified: Dated) {
   return {
     "@context": "https://schema.org",
