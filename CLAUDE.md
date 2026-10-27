@@ -2,6 +2,8 @@
 
 Personal site and blog for Xing Liu at https://xingliu.me, built with Astro and deployed to GitHub Pages by `.github/workflows/deploy.yml` on every push to `master`. `.github/workflows/daily.yml` starts that deploy daily at 09:17 UTC (refreshing Projects and What's New, and retiring NEW! tags); it holds the schedule on its own because GitHub disables a scheduled workflow after 60 days without a commit, and that must never stop pushes from deploying. It moved from Jekyll in October 2026 and was then redesigned; every post kept its URL through both.
 
+Read [DESIGN.md](DESIGN.md) before changing the site's look, structure or behavior: it records the design's rule, the system as built, and why each decision was made. Keep it current: a change that makes it wrong updates it in the same commit.
+
 `npm run build` type-checks (`astro check`) and then builds into `dist/` with `--force`: Astro's content cache does not notice changes to `src/lib/markdown.mjs` or to `src/data/posts.json` (the pipeline reads it), so a cached build would keep stale post HTML. Run `astro dev --force` after editing either. CI builds with `cache: false` for the same reason.
 
 ## Posts
@@ -46,4 +48,4 @@ Personal site and blog for Xing Liu at https://xingliu.me, built with Astro and 
 
 ## Files
 
-- `public/resume/` holds the résumé the site links to (`RESUME_URL` in `src/config.ts`). `resume/` at the repo root only keeps the 2025 PDF at the GitHub path the Jekyll site linked to; the build ignores it.
+- `public/resume/` holds the résumé PDF the site links to (`RESUME_URL` in `src/config.ts`). Its LaTeX source is not published; the last version is in git history (`git show 14153b4:public/resume/main.tex`).

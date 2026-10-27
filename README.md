@@ -4,6 +4,8 @@ My personal website and blog: https://xingliu.me (repo `xingliu14.github.io`)
 
 Built with [Astro](https://astro.build). It started from GitHub's [personal-website](https://github.com/github/personal-website) Jekyll template, moved to Astro in October 2026 with the same post URLs, and then got its 1997 look ("Navigator Grey"). The colophon on the About page explains the design.
 
+[DESIGN.md](DESIGN.md) records the design in full: its rule, how each page and feature is built, and why. Read it before changing how the site looks or works.
+
 ## Writing a post
 
 Add `src/content/posts/YYYY-MM-DD-slug.md`:
@@ -69,7 +71,6 @@ GitHub serves each of my repositories' Pages sites under this domain, at `xingli
   - `worksFor` in the structured data search engines read (`src/lib/seo.ts`);
   - the text on the home and About social cards (`src/pages/og/cards.json.ts`).
 - `src/data/repo-notes.json`: a one-line note for a repository with no description on GitHub, or a homepage to show instead of the one set on GitHub (`null` shows none, for a site that is gone).
-- `public/resume/`: the résumé PDF and its LaTeX source. Add a new résumé as `public/resume/Xing_Liu_Resume_YYYYMMDD.pdf` (About reads the month from the name) and point `RESUME_URL` in `src/config.ts` at it. Keep the old PDF: its address must keep working, and the build checks that it does.
-- `resume/` (at the repo root) only keeps the 2025 PDF where the old site's GitHub link expects it; the build doesn't use it.
+- `public/resume/`: the résumé PDF. Add a new résumé as `public/resume/Xing_Liu_Resume_YYYYMMDD.pdf` (About reads the month from the name) and point `RESUME_URL` in `src/config.ts` at it. Keep the old PDF: its address must keep working, and the build checks that it does.
 
 The Projects page and the new-repository lines in What's New are read from GitHub when the site builds.
