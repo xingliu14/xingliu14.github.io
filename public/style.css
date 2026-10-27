@@ -4,7 +4,7 @@
        only what Navigator could draw, set the way a typographer would.
    System fonts only; nothing is downloaded. Everything works without JavaScript.
    Safari 14 safe: no flex `gap`, :has(), container queries, aspect-ratio or overflow-wrap:anywhere.
-   Sizes and breakpoints are in rem/em, so a reader's larger default font size is honoured and
+   Type sizes and breakpoints are in rem/em, so a larger default font size is honoured and
    never pushes the layout off screen.
    Sections: 0 Faces, 1 Tokens, 2 Page, 3 Text, 4 Code, 5 Tables, 6 Forms, 7 Masthead, 8 Home,
    9 Writing, 10 Post, 11 Contents box, 12 Chinese posts, 13 Projects, 14 About, 15 Search,
@@ -62,7 +62,7 @@
   --ty: #008080;
   --fn: #000080;
 
-  /* Microsoft's Core Fonts for the Web (1996) first, then their metric twins, then CJK. */
+  /* Microsoft's Core Fonts for the Web (1996) first, then look-alikes, then CJK. */
   --text: Georgia, "Gelasio", "Noto Serif", "DejaVu Serif", "Songti SC", STSong, SimSun, serif;
   --display: "Times New Roman", Times, Tinos, "Liberation Serif", "Noto Serif", "Songti SC", STSong, SimSun, serif;
   --small: Verdana, "DejaVu Sans", "Bitstream Vera Sans", Tahoma, Geneva, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
@@ -76,6 +76,7 @@
   --hi: #ffffff;
   --lo: #999999;
   --head: #e0e0e0;
+  --band: #e0e0e0;
 }
 
 /* Night: the same browser with the lights off, in browser-safe colours. Screen only, so a page
@@ -255,8 +256,8 @@ a[data-footnote-ref], a.footnote-ref { text-decoration: none; }
 a[data-footnote-ref]::before, a.footnote-ref::before { content: "\2060["; }
 a[data-footnote-ref]::after, a.footnote-ref::after { content: "]"; }
 
-/* The heading a contents link jumped to sits in a white band, like a selected list item. */
-.article :target { background: var(--well); color: var(--well-ink); box-shadow: 0 0 0 0.25em var(--well); scroll-margin-top: 1em; }
+/* The heading a contents link jumped to sits in a band, like a selected list item. */
+.article :target { background: var(--band, var(--well)); color: var(--well-ink); box-shadow: 0 0 0 0.25em var(--band, var(--well)); scroll-margin-top: 1em; }
 
 /* ---------------------------------------- 4. Code */
 
