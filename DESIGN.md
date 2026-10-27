@@ -6,7 +6,7 @@ Two files own other subjects, and this one links to them instead of repeating th
 
 Update this file whenever a change touches a token, breakpoint, component, page, URL, script behavior, check, budget, or anything the site says about itself. Figures marked *today* describe the build of 2026-10-26 (12 posts) and move with the content. Everything else is a rule in the code.
 
-Contents: 1 The rule · 2 Principles · 3 Information architecture · 4 Pages · 5 Visual system · 6 Behavior · 7 Content model · 8 Search engines, feeds and cards · 9 Build gates, budgets and CI · 10 Decisions · 11 Checklists · Appendix: design record
+Contents: 1 The rule · 2 Principles · 3 Information architecture · 4 Pages · 5 Visual system · 6 Behavior · 7 Content model · 8 Search engines, feeds and cards · 9 Build gates, budgets and CI · 10 Decisions · 11 Checklists
 
 ## 1. The rule
 
@@ -45,7 +45,7 @@ Use these as precedent for new work.
 | Contents | A Navigator group box (an etched frame with its title on the top rule), built on `<details>` | It folds without JavaScript |
 | Contents on wide screens | A framed site's Contents frame, without the frameset | It uses the empty gray margin |
 | Topic index and back links | A run-in index, and "↑ Contents" closing each section | How 1990s FAQs indexed themselves |
-| Where a jump landed | A static band in the well color (white, black in Night), like a selected list item | The Yellow Fade is animation |
+| Where a jump landed | A static band, like a selected list item: white, light gray in Paper white, black in Night | The Yellow Fade is animation |
 | Sharing | "Tell a friend about this page", with plain links | No third-party script or cookie, and it works without JavaScript |
 | A search field | No clear button | Navigator had none |
 | Print | A typed manuscript: black on white, no navigation, URLs after links | A link can't be followed on paper, so its address prints after it |
@@ -608,22 +608,22 @@ It does not check that titles or descriptions are unique or short, page weights,
 
 | Decision | Why |
 |---|---|
-| Navigator 3, 1997, as the only design language | Of five directions drawn up (Navigator, academic, text mode, Windows 98 desktop, weblog), it alone was strong on period recognition, plainness, system and memorability at once, and three judges chose it. Mechanisms from the others were kept only when redrawn in Navigator's vocabulary |
+| Navigator 3, 1997, as the only design language | It reads as the old web within a second while the surface stays plain, and its vocabulary (bevels, group boxes, plain lists) can carry a full reading system. Mechanisms from other eras appear only redrawn in that vocabulary |
 | Breakpoints and script queries in em | With px breakpoints, a 20px default font put the rail 107px off screen at 1280px, and 200% text overflowed the breakouts |
 | Headings renumbered to start at `h2`, with size classes | Demoting by one left skipped levels (`h1` to `h3` in Neuron, `h1` to `h5` in the book lists), breaking the outline and axe's heading-order rule |
 | The contents mark as a selection, not bold | Bold reflowed the rail and pushed `engine/model_runner.py` onto two lines |
 | Figures after the rail extend right only | The 3em breakout ran 13px under the rail and hid the first letter of `MergedColumnParallelLinear` |
 | A closed contents box folds to a shaded rule; it prints open | A closed full frame looked like an empty text field; a post printed from a phone printed a lone "Contents" label |
-| "ZH Punct", from local faces | Narrow Latin quotes in Chinese prose were the art review's first must-fix |
-| Topics and descriptions in `posts.json` | The redesign promised to edit no post file |
+| "ZH Punct", from local faces | Without it, Chinese prose takes narrow Latin quotes from the serif stack |
+| Topics and descriptions in `posts.json` | Post files hold only the owner's writing, so their git dates stay true |
 | "Last modified" from git: the adding commit is publication, and heading-level moves don't count | A 2021 import of the repository must not pass as an edit, and moving a heading from `###` to `####` changes no words (so "My book list of 2021" shows no "Updated") |
 | NEW! expires in the browser as well as at the rebuild | It stays true with JavaScript even when GitHub pauses the schedule, and without JavaScript as long as the daily rebuild runs |
 | A hand-made JSON index matched by substring | Pagefind builds one index per `<html lang>`, which would split the Chinese post off, and forcing one language turns off Chinese segmentation |
-| The search status waits 400ms | Screen readers were announcing "13 posts match 'n'", "4 posts match 'na'"… on every keystroke |
+| The search status waits 400ms | Otherwise screen readers announce a new count ("4 posts match 'na'"…) on every keystroke |
 | Only `#search` takes focus | So "by date", "by topic" and the skip link on `/writing/` reach their targets |
 | Every search form says "Search all posts" | The index holds nothing but posts |
 | The map loads late, into a reserved well, with a link that stays if it fails | It counts nearly every visit without delaying paint or moving the page, and it degrades to a link |
-| The greeting names the map | The shorter "no tracking" was false on the home page |
+| The greeting names the map | "No tracking" alone would be false on the home page |
 | Projects become wells below 900px, with explicit ARIA roles | That is where the table stops fitting, and Safari drops table semantics when `display` changes |
 | 16px fields on phones, and no `maximum-scale` | iOS zooms into smaller fields on focus, and readers must keep the ability to zoom |
 | 24px contents rows on phones; share links that don't wrap | At 320–360px the rows were under 24px, and "E-mail" split into two overlapping targets |
@@ -649,7 +649,6 @@ It does not check that titles or descriptions are unique or short, page weights,
 - **Times or Noto Sans CJK for Chinese quotes, and a full-width interpunct:** narrow or proportional quotes, and names like 约翰 · 勒卡雷 looked loose.
 - **An XSLT stylesheet for the feed:** browsers are removing XSLT; About's RSS entry tells readers to paste the address into any feed reader instead.
 - **Stacked dates in the phone archive:** they double the list's height, while the 3.6em gutter keeps the dates scannable.
-- **Review suggestions not adopted, so the current form stands:** a text button instead of the color menu under the byline, and a raised arrow on the select; one terse line per What's New entry (entries carry the full description); ISO dates in the 404 list (it shows `YYYY-MM`); a shorter Writing lede; rewording the site-log entry; glyphs on the buttons; and the Paper white menu on every post of 3 minutes or more (it stays at 10).
 
 ### 10.3 Known gaps
 
@@ -659,7 +658,7 @@ Facts about the code as it stands, recorded so nobody rediscovers them:
 - `table code` is 11.96px on phones, under the 12px floor.
 - Dead rules: `.views .sep` (the Index line uses `&nbsp;·` text) and `.article .s2` (a post's top level always lands on `h2`). Dormant until content needs them: `.s6`, `al-right`, the footnote rules, `kbd`, every `.token.*` color and most of `NAMES`, since all four code wells *today* are `language-plaintext`.
 - Stale comments: `src/lib/descriptions.ts` gives "All 13 posts" as its example; check-dist's `validHtml` comment says "several" titles pass 70 characters (one does); and `src/lib/post-meta.mjs` says frontmatter edits would move "Last modified", which `postText()` no longer allows. The reason that holds is principle 8.
-- `scripts/heading-ids.json` holds the ids of the posts at the redesign: 136 ids across 12 posts *today*, with empty lists for posts that have none. Nothing adds a new post's ids to it.
+- `scripts/heading-ids.json` holds the ids of the current posts as of when it was made: 136 ids across 12 posts *today*, with empty lists for posts that have none. Nothing adds a new post's ids to it.
 - The snapshot in `src/data/github-snapshot.json` is refreshed by hand.
 - A 404 path ending in `.html` (`/…/nano-vllm-notes.html`) fills in the search but gets no "Did you mean", because the slug match compares the last segment with its extension.
 
@@ -693,66 +692,3 @@ Facts about the code as it stands, recorded so nobody rediscovers them:
 **A job change:** follow README's list.
 
 **Never:** a `lastBuildDate` in the feed, a build-time "Last modified", a time in sitemap dates, a `schedule:` trigger in `deploy.yml`, a web font, an animation, or a top-level name that isn't on `TOP_LEVEL`.
-
-## Appendix: design record
-
-This appendix archives how the design was chosen and built, 2026-10-24 to 2026-10-26. The working files (five sets of mockups, hundreds of screenshots, the 2,500-line spec, the critiques and the agents' logs) were deleted once this file existed. What follows is the part worth keeping. The rest of this file describes the site as it is; this appendix does not change.
-
-**Brief.** The owner's request is quoted in §1.1: make the site feel like the '90s or 2000s at first sight, very plain, fully featured, easy to read, carefully designed, and stop listing every post on the home page.
-
-**Exploration.** Five designers each built one direction as working HTML mockups, using the real posts:
-
-| Direction | Concept |
-|---|---|
-| netscape | "Navigator Grey": Xing Liu's Home Page as Netscape Navigator 3 drew it in 1997, typeset properly |
-| academic | "~xingliu": a researcher's home page, c. 1999 (Knuth, Norvig, paulgraham.com) |
-| weblog | "Movable Type, Remastered": the 2004 weblog, with banner, sidebar and calendar |
-| textmode | "text/plain": the site as an RFC or man page |
-| desktop98 | "Cyber Home 98": a Windows 98 window with a help-viewer contents tree and a status bar |
-
-**Judging.** Three judges with different lenses scored every direction out of 100, after looking at the screenshots and reading the specs:
-
-| Direction | Art director | Reader and accessibility | SEO and engineering | Mean |
-|---|---|---|---|---|
-| netscape | 91 | 87.3 | 88.1 | 88.8 |
-| academic | 77 | 79.3 | 81.8 | 79.4 |
-| textmode | 74 | 75 | 79.1 | 76.0 |
-| desktop98 | 65 | 83 | 75.8 | 74.6 |
-| weblog | 71 | 75.9 | 74.5 | 73.8 |
-
-All three chose netscape. Their shared advice: keep netscape as the only design language, and take mechanisms from the others but never their look. §10 lists what came from where.
-
-**Synthesis and critique.** A lead designer wrote the final spec and built ten mockups. Three critics reviewed them:
-- the art director approved, with 15 minor notes;
-- the owner's proxy found 1 major issue: the View Source greeting claimed "no tracking", although the home page runs the visitor map;
-- the reader-and-accessibility critic found 1 blocker (tap targets at 320–360px) and 2 major issues (breakpoints in px rather than em, and phone form fields under 16px).
-
-These fixes went straight into the build rather than through another round of mockups.
-
-**Build.** Five agents worked in sequence, with step 3 split in two and run in parallel:
-1. the data layer and the Markdown pipeline (f0f1279);
-2. the layout, home and post pages (367e232);
-3. the remaining pages and endpoints (40f7e8f), alongside the cards, check-dist, CI and docs in a separate worktree (83126cd);
-4. the merge and acceptance (ea05352, b4c9fe3).
-
-Throughout, the 13 posts' text stayed identical to the old build, and all 144 heading ids survived.
-
-**Review.** Six specialist reviewers covered visual fidelity and robustness, reading, accessibility, SEO, content truthfulness, and code and CI. A skeptic had to reproduce every finding before it was fixed.
-- Round 1 found 37 issues; 35 were confirmed: 2 blockers, 6 majors, 27 minors (fixed in 50ba2f5).
-- Round 2 found 13 issues; 12 were confirmed, all minor (fixed in 14153b4).
-
-**Launch, 2026-10-25 (master 14153b4).**
-
-| Measure | Before | After (live) |
-|---|---|---|
-| Automated check errors (SEO, links, HTML, axe, overflow) | 190 | 0 |
-| Lighthouse mobile (performance, accessibility, best practices, SEO) | 88 / 96 / 96 / 100 | 100 / 100 / 100 / 100 |
-| Mobile LCP | 3.3 s | 1.2 s |
-
-**Cleanup, 2026-10-26.** At the owner's request (47c634a), the following were removed:
-- GitHub's template sample post "Welcome to Jekyll!", which leaves 12 posts;
-- the résumé's LaTeX source, `public/resume/main.tex`, which had been published at `/resume/main.tex` (recover it with `git show 14153b4:public/resume/main.tex`);
-- the repo-root `resume/` copy;
-- the template's `LICENSE.txt`.
-
-The design's working files were deleted, about 7.6 GB, and this file was written as the record (e287f63).
