@@ -6,7 +6,7 @@ Two files own other subjects, and this one links to them instead of repeating th
 
 Update this file whenever a change touches a token, breakpoint, component, page, URL, script behavior, check, budget, or anything the site says about itself. Figures marked *today* describe the build of 2026-10-26 (12 posts) and move with the content. Everything else is a rule in the code.
 
-Contents: 1 The rule · 2 Principles · 3 Information architecture · 4 Pages · 5 Visual system · 6 Behavior · 7 Content model · 8 Search engines, feeds and cards · 9 Build gates, budgets and CI · 10 Decisions · 11 Checklists
+Contents: 1 The rule · 2 Principles · 3 Information architecture · 4 Pages · 5 Visual system · 6 Behavior · 7 Content model · 8 Search engines, feeds and cards · 9 Build gates, budgets and CI · 10 Decisions · 11 Checklists · Appendix: design record
 
 ## 1. The rule
 
@@ -693,3 +693,66 @@ Facts about the code as it stands, recorded so nobody rediscovers them:
 **A job change:** follow README's list.
 
 **Never:** a `lastBuildDate` in the feed, a build-time "Last modified", a time in sitemap dates, a `schedule:` trigger in `deploy.yml`, a web font, an animation, or a top-level name that isn't on `TOP_LEVEL`.
+
+## Appendix: design record
+
+This appendix archives how the design was chosen and built, 2026-10-24 to 2026-10-26. The working files (five sets of mockups, hundreds of screenshots, the 2,500-line spec, the critiques and the agents' logs) were deleted once this file existed. What follows is the part worth keeping. The rest of this file describes the site as it is; this appendix does not change.
+
+**Brief.** The owner's request is quoted in §1.1: make the site feel like the '90s or 2000s at first sight, very plain, fully featured, easy to read, carefully designed, and stop listing every post on the home page.
+
+**Exploration.** Five designers each built one direction as working HTML mockups, using the real posts:
+
+| Direction | Concept |
+|---|---|
+| netscape | "Navigator Grey": Xing Liu's Home Page as Netscape Navigator 3 drew it in 1997, typeset properly |
+| academic | "~xingliu": a researcher's home page, c. 1999 (Knuth, Norvig, paulgraham.com) |
+| weblog | "Movable Type, Remastered": the 2004 weblog, with banner, sidebar and calendar |
+| textmode | "text/plain": the site as an RFC or man page |
+| desktop98 | "Cyber Home 98": a Windows 98 window with a help-viewer contents tree and a status bar |
+
+**Judging.** Three judges with different lenses scored every direction out of 100, after looking at the screenshots and reading the specs:
+
+| Direction | Art director | Reader and accessibility | SEO and engineering | Mean |
+|---|---|---|---|---|
+| netscape | 91 | 87.3 | 88.1 | 88.8 |
+| academic | 77 | 79.3 | 81.8 | 79.4 |
+| textmode | 74 | 75 | 79.1 | 76.0 |
+| desktop98 | 65 | 83 | 75.8 | 74.6 |
+| weblog | 71 | 75.9 | 74.5 | 73.8 |
+
+All three chose netscape. Their shared advice: keep netscape as the only design language, and take mechanisms from the others but never their look. §10 lists what came from where.
+
+**Synthesis and critique.** A lead designer wrote the final spec and built ten mockups. Three critics reviewed them:
+- the art director approved, with 15 minor notes;
+- the owner's proxy found 1 major issue: the View Source greeting claimed "no tracking", although the home page runs the visitor map;
+- the reader-and-accessibility critic found 1 blocker (tap targets at 320–360px) and 2 major issues (breakpoints in px rather than em, and phone form fields under 16px).
+
+These fixes went straight into the build rather than through another round of mockups.
+
+**Build.** Five agents worked in sequence, with step 3 split in two and run in parallel:
+1. the data layer and the Markdown pipeline (f0f1279);
+2. the layout, home and post pages (367e232);
+3. the remaining pages and endpoints (40f7e8f), alongside the cards, check-dist, CI and docs in a separate worktree (83126cd);
+4. the merge and acceptance (ea05352, b4c9fe3).
+
+Throughout, the 13 posts' text stayed identical to the old build, and all 144 heading ids survived.
+
+**Review.** Six specialist reviewers covered visual fidelity and robustness, reading, accessibility, SEO, content truthfulness, and code and CI. A skeptic had to reproduce every finding before it was fixed.
+- Round 1 found 37 issues; 35 were confirmed: 2 blockers, 6 majors, 27 minors (fixed in 50ba2f5).
+- Round 2 found 13 issues; 12 were confirmed, all minor (fixed in 14153b4).
+
+**Launch, 2026-10-25 (master 14153b4).**
+
+| Measure | Before | After (live) |
+|---|---|---|
+| Automated check errors (SEO, links, HTML, axe, overflow) | 190 | 0 |
+| Lighthouse mobile (performance, accessibility, best practices, SEO) | 88 / 96 / 96 / 100 | 100 / 100 / 100 / 100 |
+| Mobile LCP | 3.3 s | 1.2 s |
+
+**Cleanup, 2026-10-26.** At the owner's request (47c634a), the following were removed:
+- GitHub's template sample post "Welcome to Jekyll!", which leaves 12 posts;
+- the résumé's LaTeX source, `public/resume/main.tex`, which had been published at `/resume/main.tex` (recover it with `git show 14153b4:public/resume/main.tex`);
+- the repo-root `resume/` copy;
+- the template's `LICENSE.txt`.
+
+The design's working files were deleted, about 7.6 GB, and this file was written as the record (e287f63).
