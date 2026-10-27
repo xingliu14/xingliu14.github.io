@@ -19,7 +19,6 @@
     "2021-12-06-Designing-Data-Intensive-Application-Chapter1": { "topic": "books", "description": "Reading notes on chapter 1 of Designing Data-Intensive Applications: reliability, scalability and maintainability." },
     "2021-09-07-i-changed-my-job": { "topic": "life", "description": "Leaving Yahoo for Google in 2021, and how the job search went: offers, rejections and withdrawals at six companies." },
     "2021-02-18-how-to-buy-crypto-with-lower-fees": { "topic": "crypto", "description": "How fees on Coinbase, Coinbase Pro and Binance.US eat into a trade, and a cheaper way to buy." },
-    "2020-12-31-book-film-list-of-2020": { "topic": "books", "description": "Eleven books from 2020, from Le Petit Prince to Born a Crime, most with a one-line verdict." },
-    "2020-12-26-hello-world": { "topic": "meta", "description": "The first post on this blog: the Jekyll template’s sample, with highlighted code in seven languages." }
+    "2020-12-31-book-film-list-of-2020": { "topic": "books", "description": "Eleven books from 2020, from Le Petit Prince to Born a Crime, most with a one-line verdict." }
   }
 }
